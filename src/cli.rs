@@ -1,5 +1,6 @@
 use anyhow::Result;
 use clap::{Parser, Subcommand};
+use flate2::read::GzDecoder;
 use sdcx;
 use std::fs::File;
 use std::io::{BufReader, Read};
@@ -46,7 +47,15 @@ fn format(opt: &Opt) -> Result<()> {
     let f = File::open(file)?;
     let mut reader = BufReader::new(f);
     let mut s = String::new();
-    reader.read_to_string(&mut s)?;
+
+    if file.extension().map(|x| x.to_str()) == Some(Some("gz")) {
+        let mut buf = vec![];
+        reader.read_to_end(&mut buf)?;
+        let mut gz = GzDecoder::new(&*buf);
+        gz.read_to_string(&mut s)?;
+    } else {
+        reader.read_to_string(&mut s)?;
+    }
 
     let mut sdc = sdcx::parser::Parser::parse(&s, &file)?;
     sdc.normalize();

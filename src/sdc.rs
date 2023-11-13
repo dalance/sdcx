@@ -1,5 +1,4 @@
 use crate::parser::sdc_grammar_trait as grammar;
-use parol_runtime::ParolError;
 use std::fmt;
 use thiserror::Error;
 
@@ -34,7 +33,7 @@ pub enum SdcError {
     MissingMandatoryArgument(String),
 
     #[error("ParseError: {0}")]
-    ParseError(#[from] ParolError),
+    ParseError(#[from] anyhow::Error),
 
     #[error("SdcVersionPlacement")]
     SdcVersionPlacement,
