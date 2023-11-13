@@ -1,7 +1,12 @@
+use crate::parser::sdc_grammar::SdcGrammar;
+use crate::parser::sdc_parser::parse;
 use crate::sdc::{Sdc, SdcError};
-use crate::sdc_grammar::SdcGrammar;
-use crate::sdc_parser::parse;
 use std::path::Path;
+
+pub mod generated;
+pub mod sdc_grammar;
+pub mod sdc_grammar_trait;
+pub mod sdc_parser;
 
 #[derive(Debug)]
 pub struct Parser {}

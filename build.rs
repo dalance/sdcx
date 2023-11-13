@@ -15,7 +15,7 @@ fn main() {
     }
 
     let par_file = PathBuf::from("sdc.par");
-    let exp_file = PathBuf::from("src/generated/sdc-exp.par");
+    let exp_file = PathBuf::from("src/parser/generated/sdc-exp.par");
 
     let par_modified = fs::metadata(par_file).unwrap().modified().unwrap();
     let exp_modified = fs::metadata(exp_file).unwrap().modified().unwrap();
@@ -27,14 +27,14 @@ fn main() {
 
         // CLI equivalent is:
         // parol -f ./sdc.par -e ./sdc-exp.par -p ./src/sdc_parser.rs -a ./src/sdc_grammar_trait.rs -t SdcGrammar -m sdc_grammar -g
-        if let Err(err) = Builder::with_explicit_output_dir("src/generated")
+        if let Err(err) = Builder::with_explicit_output_dir("src/parser/generated")
             .grammar_file("sdc.par")
             .expanded_grammar_output_file("sdc-exp.par")
             .parser_output_file("sdc_parser.rs")
             .actions_output_file("sdc_grammar_trait.rs")
             .enable_auto_generation()
             .user_type_name("SdcGrammar")
-            .user_trait_module_name("sdc_grammar")
+            .user_trait_module_name("parser::sdc_grammar")
             .trim_parse_tree()
             .generate_parser()
         {

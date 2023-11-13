@@ -1,5 +1,5 @@
+use crate::parser::sdc_grammar_trait::*;
 use crate::sdc::{Sdc, SdcError};
-use crate::sdc_grammar_trait::*;
 use parol_runtime::ParolError;
 use std::fmt::{Debug, Display, Error, Formatter};
 

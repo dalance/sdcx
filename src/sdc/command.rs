@@ -1,202 +1,7 @@
-use crate::sdc_grammar_trait as grammar;
-use parol_runtime::ParolError;
+use crate::parser::sdc_grammar_trait as grammar;
+use crate::sdc::util::*;
+use crate::sdc::{Argument, SdcError, SdcVersion, Validate};
 use std::fmt;
-use thiserror::Error;
-
-/// SDC Error
-#[derive(Debug, Error)]
-pub enum SdcError {
-    #[error("WrongArgument: {0:?}")]
-    WrongArgument(Vec<Argument>),
-
-    #[error("UnknownCommand: {0}")]
-    UnknownCommand(String),
-
-    #[error("DuplicatedArgument")]
-    DuplicatedArgument(Argument),
-
-    #[error("MissingOptArgument: {0:?}")]
-    MissingOptArgument(Argument),
-
-    #[error("MissingPosArgument")]
-    MissingPosArgument,
-
-    #[error("TooManyArgument")]
-    TooManyArgument,
-
-    #[error("MissingMandatoryArgument: {0}")]
-    MissingMandatoryArgument(String),
-
-    #[error("ParseError: {0}")]
-    ParseError(#[from] ParolError),
-
-    #[error("SdcVersionPlacement")]
-    SdcVersionPlacement,
-
-    #[error("UnknownVersion")]
-    UnknownVersion,
-}
-
-/// SDC
-#[derive(Clone, Debug, Default, PartialEq)]
-pub struct Sdc {
-    pub header: Vec<String>,
-    pub version: Option<SdcVersion>,
-    pub commands: Vec<Command>,
-}
-
-impl TryFrom<&grammar::Source<'_>> for Sdc {
-    type Error = SdcError;
-
-    fn try_from(value: &grammar::Source<'_>) -> Result<Self, SdcError> {
-        let mut sdc = Sdc::default();
-        let mut is_header = true;
-        let mut is_first_command = true;
-        for source in &value.source_list {
-            match source.source_list_group.as_ref() {
-                grammar::SourceListGroup::CommandLine(x) => {
-                    is_header = false;
-                    let command = x.command_line.command.as_ref().try_into()?;
-
-                    match command {
-                        Command::Set(x) if x.variable_name == "sdc_version".into() => {
-                            if is_first_command {
-                                match x.value.as_str() {
-                                    "1.1" => sdc.version = Some(SdcVersion::SDC1_1),
-                                    "1.2" => sdc.version = Some(SdcVersion::SDC1_2),
-                                    "1.3" => sdc.version = Some(SdcVersion::SDC1_3),
-                                    "1.4" => sdc.version = Some(SdcVersion::SDC1_4),
-                                    "1.5" => sdc.version = Some(SdcVersion::SDC1_5),
-                                    "1.6" => sdc.version = Some(SdcVersion::SDC1_6),
-                                    "1.7" => sdc.version = Some(SdcVersion::SDC1_7),
-                                    "1.8" => sdc.version = Some(SdcVersion::SDC1_8),
-                                    "1.9" => sdc.version = Some(SdcVersion::SDC1_9),
-                                    "2.0" => sdc.version = Some(SdcVersion::SDC2_0),
-                                    "2.1" => sdc.version = Some(SdcVersion::SDC2_1),
-                                    _ => return Err(SdcError::UnknownVersion),
-                                }
-                            } else {
-                                return Err(SdcError::SdcVersionPlacement);
-                            }
-                        }
-                        _ => sdc.commands.push(command),
-                    }
-
-                    if is_first_command {
-                        is_first_command = false;
-                    }
-                }
-                grammar::SourceListGroup::TermComment(x) => {
-                    if is_header {
-                        sdc.header.push(x.term_comment.term_comment.text().into());
-                    }
-                }
-                _ => (),
-            }
-        }
-        Ok(sdc)
-    }
-}
-
-/// SDC version
-#[derive(Clone, Debug, PartialEq)]
-pub enum SdcVersion {
-    SDC1_1,
-    SDC1_2,
-    SDC1_3,
-    SDC1_4,
-    SDC1_5,
-    SDC1_6,
-    SDC1_7,
-    SDC1_8,
-    SDC1_9,
-    SDC2_0,
-    SDC2_1,
-}
-
-impl fmt::Display for SdcVersion {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            SdcVersion::SDC1_1 => "set sdc_version 1.1".fmt(f),
-            SdcVersion::SDC1_2 => "set sdc_version 1.2".fmt(f),
-            SdcVersion::SDC1_3 => "set sdc_version 1.3".fmt(f),
-            SdcVersion::SDC1_4 => "set sdc_version 1.4".fmt(f),
-            SdcVersion::SDC1_5 => "set sdc_version 1.5".fmt(f),
-            SdcVersion::SDC1_6 => "set sdc_version 1.6".fmt(f),
-            SdcVersion::SDC1_7 => "set sdc_version 1.7".fmt(f),
-            SdcVersion::SDC1_8 => "set sdc_version 1.8".fmt(f),
-            SdcVersion::SDC1_9 => "set sdc_version 1.9".fmt(f),
-            SdcVersion::SDC2_0 => "set sdc_version 2.0".fmt(f),
-            SdcVersion::SDC2_1 => "set sdc_version 2.1".fmt(f),
-        }
-    }
-}
-
-/// Argument
-#[derive(Clone, Debug, PartialEq)]
-pub enum Argument {
-    Word(String),
-    StringGroup(String),
-    BraceGroup(String),
-    CommandReplacement(Box<Command>),
-}
-
-impl Argument {
-    fn as_str(&self) -> &str {
-        match self {
-            Argument::Word(x) => x.as_str(),
-            Argument::StringGroup(x) => x.as_str(),
-            Argument::BraceGroup(x) => x.as_str(),
-            Argument::CommandReplacement(_) => "",
-        }
-    }
-}
-
-impl fmt::Display for Argument {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Argument::Word(x) => x.fmt(f),
-            Argument::StringGroup(x) => x.fmt(f),
-            Argument::BraceGroup(x) => x.fmt(f),
-            Argument::CommandReplacement(x) => format!("[{}]", x).fmt(f),
-        }
-    }
-}
-
-impl From<&str> for Argument {
-    fn from(value: &str) -> Self {
-        Argument::Word(value.into())
-    }
-}
-
-impl TryFrom<&grammar::Argument<'_>> for Argument {
-    type Error = SdcError;
-
-    fn try_from(value: &grammar::Argument) -> Result<Self, SdcError> {
-        match value {
-            grammar::Argument::TokenWord(x) => Ok(Self::Word(
-                x.token_word.term_word.term_word.text().to_string(),
-            )),
-            grammar::Argument::TokenStringGroup(x) => Ok(Self::StringGroup(
-                x.token_string_group
-                    .term_string_group
-                    .term_string_group
-                    .text()
-                    .to_string(),
-            )),
-            grammar::Argument::TokenBraceGroup(x) => Ok(Self::BraceGroup(
-                x.token_brace_group
-                    .term_brace_group
-                    .term_brace_group
-                    .text()
-                    .to_string(),
-            )),
-            grammar::Argument::CommandReplacement(x) => Ok(Self::CommandReplacement(Box::new(
-                x.command_replacement.command.as_ref().try_into()?,
-            ))),
-        }
-    }
-}
 
 /// SDC command
 #[derive(Clone, Debug, PartialEq)]
@@ -350,6 +155,83 @@ impl fmt::Display for Command {
     }
 }
 
+impl Validate for Command {
+    fn validate(&self, version: SdcVersion) -> bool {
+        match self {
+            Command::CurrentInstance(x) => x.validate(version),
+            Command::Expr(x) => x.validate(version),
+            Command::List(x) => x.validate(version),
+            Command::Set(x) => x.validate(version),
+            Command::SetHierarchySeparator(x) => x.validate(version),
+            Command::SetUnits(x) => x.validate(version),
+            Command::AllClocks(x) => x.validate(version),
+            Command::AllInputs(x) => x.validate(version),
+            Command::AllOutputs(x) => x.validate(version),
+            Command::AllRegisters(x) => x.validate(version),
+            Command::CurrentDesign(x) => x.validate(version),
+            Command::GetCells(x) => x.validate(version),
+            Command::GetClocks(x) => x.validate(version),
+            Command::GetLibCells(x) => x.validate(version),
+            Command::GetLibPins(x) => x.validate(version),
+            Command::GetLibs(x) => x.validate(version),
+            Command::GetNets(x) => x.validate(version),
+            Command::GetPins(x) => x.validate(version),
+            Command::GetPorts(x) => x.validate(version),
+            Command::CreateClock(x) => x.validate(version),
+            Command::CreateGeneratedClock(x) => x.validate(version),
+            Command::GroupPath(x) => x.validate(version),
+            Command::SetClockGatingCheck(x) => x.validate(version),
+            Command::SetClockGroups(x) => x.validate(version),
+            Command::SetClockLatency(x) => x.validate(version),
+            Command::SetSense(x) => x.validate(version),
+            Command::SetClockTransition(x) => x.validate(version),
+            Command::SetClockUncertainty(x) => x.validate(version),
+            Command::SetDataCheck(x) => x.validate(version),
+            Command::SetDisableTiming(x) => x.validate(version),
+            Command::SetFalsePath(x) => x.validate(version),
+            Command::SetIdealLatency(x) => x.validate(version),
+            Command::SetIdealNetwork(x) => x.validate(version),
+            Command::SetIdealTransition(x) => x.validate(version),
+            Command::SetInputDelay(x) => x.validate(version),
+            Command::SetMaxDelay(x) => x.validate(version),
+            Command::SetMaxTimeBorrow(x) => x.validate(version),
+            Command::SetMinDelay(x) => x.validate(version),
+            Command::SetMinPulseWidth(x) => x.validate(version),
+            Command::SetMulticyclePath(x) => x.validate(version),
+            Command::SetOutputDelay(x) => x.validate(version),
+            Command::SetPropagatedClock(x) => x.validate(version),
+            Command::SetCaseAnalysis(x) => x.validate(version),
+            Command::SetDrive(x) => x.validate(version),
+            Command::SetDrivingCell(x) => x.validate(version),
+            Command::SetFanoutLoad(x) => x.validate(version),
+            Command::SetInputTransition(x) => x.validate(version),
+            Command::SetLoad(x) => x.validate(version),
+            Command::SetLogicDc(x) => x.validate(version),
+            Command::SetLogicOne(x) => x.validate(version),
+            Command::SetLogicZero(x) => x.validate(version),
+            Command::SetMaxArea(x) => x.validate(version),
+            Command::SetMaxCapacitance(x) => x.validate(version),
+            Command::SetMaxFanout(x) => x.validate(version),
+            Command::SetMaxTransition(x) => x.validate(version),
+            Command::SetMinCapacitance(x) => x.validate(version),
+            Command::SetOperatingConditions(x) => x.validate(version),
+            Command::SetPortFanoutNumber(x) => x.validate(version),
+            Command::SetResistance(x) => x.validate(version),
+            Command::SetTimingDerate(x) => x.validate(version),
+            Command::SetVoltage(x) => x.validate(version),
+            Command::SetWireLoadMinBlockSize(x) => x.validate(version),
+            Command::SetWireLoadMode(x) => x.validate(version),
+            Command::SetWireLoadModel(x) => x.validate(version),
+            Command::SetWireLoadSelectionGroup(x) => x.validate(version),
+            Command::CreateVoltageArea(x) => x.validate(version),
+            Command::SetLevelShifterStrategy(x) => x.validate(version),
+            Command::SetLevelShifterThreshold(x) => x.validate(version),
+            Command::SetMaxDynamicPower(x) => x.validate(version),
+            Command::SetMaxLeakagePower(x) => x.validate(version),
+        }
+    }
+}
+
 impl TryFrom<&grammar::Command<'_>> for Command {
     type Error = SdcError;
 
@@ -449,6 +331,12 @@ impl fmt::Display for CurrentInstance {
     }
 }
 
+impl Validate for CurrentInstance {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
+    }
+}
+
 fn current_instance(args: Vec<Argument>) -> Result<Command, SdcError> {
     let mut instance = None;
 
@@ -473,6 +361,12 @@ impl fmt::Display for Expr {
             text.push_str(&fmt_arg(arg));
         }
         text.fmt(f)
+    }
+}
+
+impl Validate for Expr {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
     }
 }
 
@@ -503,6 +397,12 @@ impl fmt::Display for List {
     }
 }
 
+impl Validate for List {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
+    }
+}
+
 fn list(args: Vec<Argument>) -> Result<Command, SdcError> {
     let mut ret = vec![];
 
@@ -527,6 +427,12 @@ impl fmt::Display for Set {
         text.push_str(&fmt_arg(&self.variable_name));
         text.push_str(&fmt_arg(&self.value));
         text.fmt(f)
+    }
+}
+
+impl Validate for Set {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
     }
 }
 
@@ -559,6 +465,12 @@ impl fmt::Display for SetHierarchySeparator {
         let mut text = "set_hierarchy_separator".to_string();
         text.push_str(&fmt_arg(&self.separator));
         text.fmt(f)
+    }
+}
+
+impl Validate for SetHierarchySeparator {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_2)
     }
 }
 
@@ -598,6 +510,12 @@ impl fmt::Display for SetUnits {
         text.push_str(&fmt_named_opt_arg(&self.current, "current"));
         text.push_str(&fmt_named_opt_arg(&self.power, "power"));
         text.fmt(f)
+    }
+}
+
+impl Validate for SetUnits {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_7)
     }
 }
 
@@ -643,6 +561,12 @@ impl fmt::Display for AllClocks {
     }
 }
 
+impl Validate for AllClocks {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
+    }
+}
+
 fn all_clocks(args: Vec<Argument>) -> Result<Command, SdcError> {
     if !args.is_empty() {
         return Err(SdcError::WrongArgument(args));
@@ -666,6 +590,13 @@ impl fmt::Display for AllInputs {
         text.push_str(&fmt_named_flg(self.edge_triggered, "edge_triggered"));
         text.push_str(&fmt_named_opt_arg(&self.clock, "clock"));
         text.fmt(f)
+    }
+}
+
+impl Validate for AllInputs {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
+            && check2(&self.level_sensitive, &self.edge_triggered, |a, b| !(a & b))
     }
 }
 
@@ -706,6 +637,13 @@ impl fmt::Display for AllOutputs {
         text.push_str(&fmt_named_flg(self.edge_triggered, "edge_triggered"));
         text.push_str(&fmt_named_opt_arg(&self.clock, "clock"));
         text.fmt(f)
+    }
+}
+
+impl Validate for AllOutputs {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
+            && check2(&self.level_sensitive, &self.edge_triggered, |a, b| !(a & b))
     }
 }
 
@@ -767,6 +705,12 @@ impl fmt::Display for AllRegisters {
         text.push_str(&fmt_named_flg(self.edge_triggered, "edge_triggered"));
         text.push_str(&fmt_named_flg(self.master_slave, "master_slave"));
         text.fmt(f)
+    }
+}
+
+impl Validate for AllRegisters {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_7)
     }
 }
 
@@ -836,6 +780,12 @@ impl fmt::Display for CurrentDesign {
     }
 }
 
+impl Validate for CurrentDesign {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
+    }
+}
+
 fn current_design(args: Vec<Argument>) -> Result<Command, SdcError> {
     if !args.is_empty() {
         return Err(SdcError::WrongArgument(args));
@@ -851,7 +801,7 @@ pub struct GetCells {
     pub regexp: bool,
     pub nocase: bool,
     pub of_objects: Option<Argument>,
-    pub patterns: Argument,
+    pub patterns: Option<Argument>,
 }
 
 impl fmt::Display for GetCells {
@@ -861,8 +811,17 @@ impl fmt::Display for GetCells {
         text.push_str(&fmt_named_flg(self.regexp, "regexp"));
         text.push_str(&fmt_named_flg(self.nocase, "nocase"));
         text.push_str(&fmt_named_opt_arg(&self.of_objects, "of_objects"));
-        text.push_str(&fmt_arg(&self.patterns));
+        text.push_str(&fmt_opt_arg(&self.patterns));
         text.fmt(f)
+    }
+}
+
+impl Validate for GetCells {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
+            && check2(&self.patterns, &self.of_objects, |a, b| {
+                (a & !b) | (b & !a) | !a
+            })
     }
 }
 
@@ -883,8 +842,6 @@ fn get_cells(args: Vec<Argument>) -> Result<Command, SdcError> {
             _ => patterns = pos_args1(Some(arg), patterns)?,
         }
     }
-
-    let patterns = mandatory(patterns, "patterns")?;
 
     Ok(Command::GetCells(GetCells {
         hierarchical,
@@ -910,6 +867,12 @@ impl fmt::Display for GetClocks {
         text.push_str(&fmt_named_flg(self.nocase, "nocase"));
         text.push_str(&fmt_arg(&self.patterns));
         text.fmt(f)
+    }
+}
+
+impl Validate for GetClocks {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
     }
 }
 
@@ -953,6 +916,12 @@ impl fmt::Display for GetLibCells {
         text.push_str(&fmt_named_flg(self.nocase, "nocase"));
         text.push_str(&fmt_arg(&self.patterns));
         text.fmt(f)
+    }
+}
+
+impl Validate for GetLibCells {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
     }
 }
 
@@ -1000,6 +969,12 @@ impl fmt::Display for GetLibPins {
     }
 }
 
+impl Validate for GetLibPins {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
+    }
+}
+
 fn get_lib_pins(args: Vec<Argument>) -> Result<Command, SdcError> {
     let mut regexp = false;
     let mut nocase = false;
@@ -1041,6 +1016,12 @@ impl fmt::Display for GetLibs {
     }
 }
 
+impl Validate for GetLibs {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
+    }
+}
+
 fn get_libs(args: Vec<Argument>) -> Result<Command, SdcError> {
     let mut regexp = false;
     let mut nocase = false;
@@ -1072,7 +1053,7 @@ pub struct GetNets {
     pub regexp: bool,
     pub nocase: bool,
     pub of_objects: Option<Argument>,
-    pub patterns: Argument,
+    pub patterns: Option<Argument>,
 }
 
 impl fmt::Display for GetNets {
@@ -1083,8 +1064,17 @@ impl fmt::Display for GetNets {
         text.push_str(&fmt_named_flg(self.regexp, "regexp"));
         text.push_str(&fmt_named_flg(self.nocase, "nocase"));
         text.push_str(&fmt_named_opt_arg(&self.of_objects, "of_objects"));
-        text.push_str(&fmt_arg(&self.patterns));
+        text.push_str(&fmt_opt_arg(&self.patterns));
         text.fmt(f)
+    }
+}
+
+impl Validate for GetNets {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
+            && check2(&self.patterns, &self.of_objects, |a, b| {
+                (a & !b) | (b & !a) | !a
+            })
     }
 }
 
@@ -1108,8 +1098,6 @@ fn get_nets(args: Vec<Argument>) -> Result<Command, SdcError> {
         }
     }
 
-    let patterns = mandatory(patterns, "patterns")?;
-
     Ok(Command::GetNets(GetNets {
         hierarchical,
         hsc,
@@ -1128,7 +1116,7 @@ pub struct GetPins {
     pub regexp: bool,
     pub nocase: bool,
     pub of_objects: Option<Argument>,
-    pub patterns: Argument,
+    pub patterns: Option<Argument>,
 }
 
 impl fmt::Display for GetPins {
@@ -1139,8 +1127,17 @@ impl fmt::Display for GetPins {
         text.push_str(&fmt_named_flg(self.regexp, "regexp"));
         text.push_str(&fmt_named_flg(self.nocase, "nocase"));
         text.push_str(&fmt_named_opt_arg(&self.of_objects, "of_objects"));
-        text.push_str(&fmt_arg(&self.patterns));
+        text.push_str(&fmt_opt_arg(&self.patterns));
         text.fmt(f)
+    }
+}
+
+impl Validate for GetPins {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
+            && check2(&self.patterns, &self.of_objects, |a, b| {
+                (a & !b) | (b & !a) | !a
+            })
     }
 }
 
@@ -1163,8 +1160,6 @@ fn get_pins(args: Vec<Argument>) -> Result<Command, SdcError> {
             _ => patterns = pos_args1(Some(arg), patterns)?,
         }
     }
-
-    let patterns = mandatory(patterns, "patterns")?;
 
     Ok(Command::GetPins(GetPins {
         hierarchical,
@@ -1191,6 +1186,12 @@ impl fmt::Display for GetPorts {
         text.push_str(&fmt_named_flg(self.nocase, "nocase"));
         text.push_str(&fmt_arg(&self.patterns));
         text.fmt(f)
+    }
+}
+
+impl Validate for GetPorts {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
     }
 }
 
@@ -1225,7 +1226,7 @@ pub struct CreateClock {
     pub waveform: Option<Argument>,
     pub add: bool,
     pub comment: Option<Argument>,
-    pub source_objects: Argument,
+    pub source_objects: Option<Argument>,
 }
 
 impl fmt::Display for CreateClock {
@@ -1236,8 +1237,15 @@ impl fmt::Display for CreateClock {
         text.push_str(&fmt_named_opt_arg(&self.waveform, "waveform"));
         text.push_str(&fmt_named_flg(self.add, "add"));
         text.push_str(&fmt_named_opt_arg(&self.comment, "comment"));
-        text.push_str(&fmt_arg(&self.source_objects));
+        text.push_str(&fmt_opt_arg(&self.source_objects));
         text.fmt(f)
+    }
+}
+
+impl Validate for CreateClock {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
+            && check2(&self.name, &self.source_objects, |a, b| a | b)
     }
 }
 
@@ -1262,7 +1270,6 @@ fn create_clock(args: Vec<Argument>) -> Result<Command, SdcError> {
     }
 
     let period = mandatory(period, "-period")?;
-    let source_objects = mandatory(source_objects, "source_objects")?;
 
     Ok(Command::CreateClock(CreateClock {
         period,
@@ -1309,6 +1316,13 @@ impl fmt::Display for CreateGeneratedClock {
         text.push_str(&fmt_named_opt_arg(&self.comment, "comment"));
         text.push_str(&fmt_arg(&self.source_objects));
         text.fmt(f)
+    }
+}
+
+impl Validate for CreateGeneratedClock {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_3)
+            && check2(&self.multiply_by, &self.divide_by, |a, b| !(a & b))
     }
 }
 
@@ -1404,6 +1418,20 @@ impl fmt::Display for GroupPath {
     }
 }
 
+impl Validate for GroupPath {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_7)
+            && check5(
+                &self.name,
+                &self.default,
+                &self.from,
+                &self.rise_from,
+                &self.fall_from,
+                |a, b, c, d, e| (a & !b) | (b & !a) | !a & (c ^ d ^ e),
+            )
+    }
+}
+
 fn group_path(args: Vec<Argument>) -> Result<Command, SdcError> {
     let mut name = None;
     let mut default = false;
@@ -1482,6 +1510,19 @@ impl fmt::Display for SetClockGatingCheck {
     }
 }
 
+impl Validate for SetClockGatingCheck {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_2)
+            && check4(
+                &self.setup,
+                &self.hold,
+                &self.high,
+                &self.low,
+                |a, b, c, d| (a | b | c | d) & !(c & d),
+            )
+    }
+}
+
 fn set_clock_gating_check(args: Vec<Argument>) -> Result<Command, SdcError> {
     let mut setup = None;
     let mut hold = None;
@@ -1544,6 +1585,18 @@ impl fmt::Display for SetClockGroups {
         text.push_str(&fmt_named_opt_arg(&self.name, "name"));
         text.push_str(&fmt_named_opt_arg(&self.comment, "comment"));
         text.fmt(f)
+    }
+}
+
+impl Validate for SetClockGroups {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_7)
+            && check3(
+                &self.phisically_exclusive,
+                &self.logically_exclusive,
+                &self.asynchronous,
+                |a, b, c| a ^ b ^ c,
+            )
     }
 }
 
@@ -1614,6 +1667,12 @@ impl fmt::Display for SetClockLatency {
         text.push_str(&fmt_arg(&self.delay));
         text.push_str(&fmt_arg(&self.object_list));
         text.fmt(f)
+    }
+}
+
+impl Validate for SetClockLatency {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
     }
 }
 
@@ -1694,6 +1753,21 @@ impl fmt::Display for SetSense {
     }
 }
 
+impl Validate for SetSense {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC2_1)
+            && check6(
+                &self.positive,
+                &self.negative,
+                &self.pulse,
+                &self.stop_propagation,
+                &self.non_unate,
+                &self.clocks,
+                |a, b, c, d, e, f| a ^ b ^ c ^ d ^ (e & f),
+            )
+    }
+}
+
 fn set_sense(args: Vec<Argument>) -> Result<Command, SdcError> {
     let mut r#type = None;
     let mut non_unate = false;
@@ -1756,6 +1830,13 @@ impl fmt::Display for SetClockTransition {
         text.push_str(&fmt_arg(&self.transition));
         text.push_str(&fmt_arg(&self.clock_list));
         text.fmt(f)
+    }
+}
+
+impl Validate for SetClockTransition {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
+            && check2(&self.rise, &self.fall, |a, b| !(a & b))
     }
 }
 
@@ -1824,6 +1905,22 @@ impl fmt::Display for SetClockUncertainty {
         text.push_str(&fmt_arg(&self.uncertainty));
         text.push_str(&fmt_opt_arg(&self.object_list));
         text.fmt(f)
+    }
+}
+
+impl Validate for SetClockUncertainty {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
+            && check7(
+                &self.object_list,
+                &self.from,
+                &self.rise_from,
+                &self.fall_from,
+                &self.to,
+                &self.rise_to,
+                &self.fall_to,
+                |a, b, c, d, e, f, g| a ^ ((b ^ c ^ d) & (e ^ f ^ g)),
+            )
     }
 }
 
@@ -1908,6 +2005,21 @@ impl fmt::Display for SetDataCheck {
     }
 }
 
+impl Validate for SetDataCheck {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_4)
+            && check6(
+                &self.from,
+                &self.rise_from,
+                &self.fall_from,
+                &self.to,
+                &self.rise_to,
+                &self.fall_to,
+                |a, b, c, d, e, f| (a | b | c) & (d | e | f),
+            )
+    }
+}
+
 fn set_data_check(args: Vec<Argument>) -> Result<Command, SdcError> {
     let mut from = None;
     let mut to = None;
@@ -1967,6 +2079,13 @@ impl fmt::Display for SetDisableTiming {
         text.push_str(&fmt_named_opt_arg(&self.to, "to"));
         text.push_str(&fmt_arg(&self.cell_pin_list));
         text.fmt(f)
+    }
+}
+
+impl Validate for SetDisableTiming {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
+            && check2(&self.from, &self.to, |a, b| !(a ^ b))
     }
 }
 
@@ -2030,6 +2149,22 @@ impl fmt::Display for SetFalsePath {
         text.push_str(&fmt_named_opt_arg(&self.fall_through, "fall_through"));
         text.push_str(&fmt_named_opt_arg(&self.comment, "comment"));
         text.fmt(f)
+    }
+}
+
+impl Validate for SetFalsePath {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
+            && check7(
+                &self.from,
+                &self.to,
+                &self.through,
+                &self.rise,
+                &self.fall,
+                &self.setup,
+                &self.hold,
+                |a, b, c, d, e, f, g| (a | b | c) & !(d & e) & !(f & g),
+            )
     }
 }
 
@@ -2112,6 +2247,12 @@ impl fmt::Display for SetIdealLatency {
     }
 }
 
+impl Validate for SetIdealLatency {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_7)
+    }
+}
+
 fn set_ideal_latency(args: Vec<Argument>) -> Result<Command, SdcError> {
     let mut rise = false;
     let mut fall = false;
@@ -2160,6 +2301,12 @@ impl fmt::Display for SetIdealNetwork {
     }
 }
 
+impl Validate for SetIdealNetwork {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_7)
+    }
+}
+
 fn set_ideal_network(args: Vec<Argument>) -> Result<Command, SdcError> {
     let mut no_propagate = false;
     let mut object_list = None;
@@ -2201,6 +2348,12 @@ impl fmt::Display for SetIdealTransition {
         text.push_str(&fmt_arg(&self.transition_time));
         text.push_str(&fmt_arg(&self.object_list));
         text.fmt(f)
+    }
+}
+
+impl Validate for SetIdealTransition {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
     }
 }
 
@@ -2280,6 +2433,18 @@ impl fmt::Display for SetInputDelay {
         text.push_str(&fmt_arg(&self.delay_value));
         text.push_str(&fmt_arg(&self.port_pin_list));
         text.fmt(f)
+    }
+}
+
+impl Validate for SetInputDelay {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
+            && check3(
+                &self.clock_fall,
+                &self.level_sensitive,
+                &self.clock,
+                |a, b, c| !((a | b) & !c),
+            )
     }
 }
 
@@ -2383,6 +2548,13 @@ impl fmt::Display for SetMaxDelay {
     }
 }
 
+impl Validate for SetMaxDelay {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
+            && check2(&self.rise, &self.fall, |a, b| !(a & b))
+    }
+}
+
 fn set_max_delay(args: Vec<Argument>) -> Result<Command, SdcError> {
     let mut rise = false;
     let mut fall = false;
@@ -2455,6 +2627,12 @@ impl fmt::Display for SetMaxTimeBorrow {
     }
 }
 
+impl Validate for SetMaxTimeBorrow {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
+    }
+}
+
 fn set_max_time_borrow(args: Vec<Argument>) -> Result<Command, SdcError> {
     let mut delay_value = None;
     let mut object_list = None;
@@ -2515,6 +2693,13 @@ impl fmt::Display for SetMinDelay {
         text.push_str(&fmt_named_opt_arg(&self.comment, "comment"));
         text.push_str(&fmt_arg(&self.delay_value));
         text.fmt(f)
+    }
+}
+
+impl Validate for SetMinDelay {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
+            && check2(&self.rise, &self.fall, |a, b| !(a & b))
     }
 }
 
@@ -2594,6 +2779,12 @@ impl fmt::Display for SetMinPulseWidth {
     }
 }
 
+impl Validate for SetMinPulseWidth {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC2_0)
+    }
+}
+
 fn set_min_pulse_width(args: Vec<Argument>) -> Result<Command, SdcError> {
     let mut low = false;
     let mut high = false;
@@ -2662,6 +2853,12 @@ impl fmt::Display for SetMulticyclePath {
         text.push_str(&fmt_named_opt_arg(&self.comment, "comment"));
         text.push_str(&fmt_arg(&self.path_multiplier));
         text.fmt(f)
+    }
+}
+
+impl Validate for SetMulticyclePath {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
     }
 }
 
@@ -2774,6 +2971,18 @@ impl fmt::Display for SetOutputDelay {
     }
 }
 
+impl Validate for SetOutputDelay {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
+            && check3(
+                &self.clock_fall,
+                &self.level_sensitive,
+                &self.clock,
+                |a, b, c| !((a | b) & !c),
+            )
+    }
+}
+
 fn set_output_delay(args: Vec<Argument>) -> Result<Command, SdcError> {
     let mut clock = None;
     let mut reference_pin = None;
@@ -2845,6 +3054,12 @@ impl fmt::Display for SetPropagatedClock {
     }
 }
 
+impl Validate for SetPropagatedClock {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
+    }
+}
+
 fn set_propagated_clock(args: Vec<Argument>) -> Result<Command, SdcError> {
     let mut object_list = None;
 
@@ -2875,6 +3090,12 @@ impl fmt::Display for SetCaseAnalysis {
         text.push_str(&fmt_arg(&self.value));
         text.push_str(&fmt_arg(&self.port_or_pin_list));
         text.fmt(f)
+    }
+}
+
+impl Validate for SetCaseAnalysis {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
     }
 }
 
@@ -2922,6 +3143,12 @@ impl fmt::Display for SetDrive {
     }
 }
 
+impl Validate for SetDrive {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
+    }
+}
+
 fn set_drive(args: Vec<Argument>) -> Result<Command, SdcError> {
     let mut rise = false;
     let mut fall = false;
@@ -2957,7 +3184,7 @@ fn set_drive(args: Vec<Argument>) -> Result<Command, SdcError> {
 /// set_driving_cell
 #[derive(Clone, Debug, PartialEq)]
 pub struct SetDrivingCell {
-    pub lib_cell: Option<Argument>,
+    pub lib_cell: Argument,
     pub rise: bool,
     pub fall: bool,
     pub min: bool,
@@ -2977,7 +3204,7 @@ pub struct SetDrivingCell {
 impl fmt::Display for SetDrivingCell {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut text = "set_driving_cell".to_string();
-        text.push_str(&fmt_named_opt_arg(&self.lib_cell, "lib_cell"));
+        text.push_str(&fmt_named_arg(&self.lib_cell, "lib_cell"));
         text.push_str(&fmt_named_flg(self.rise, "rise"));
         text.push_str(&fmt_named_flg(self.fall, "fall"));
         text.push_str(&fmt_named_flg(self.min, "min"));
@@ -2999,6 +3226,12 @@ impl fmt::Display for SetDrivingCell {
         ));
         text.push_str(&fmt_arg(&self.port_list));
         text.fmt(f)
+    }
+}
+
+impl Validate for SetDrivingCell {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
     }
 }
 
@@ -3044,6 +3277,7 @@ fn set_driving_cell(args: Vec<Argument>) -> Result<Command, SdcError> {
         }
     }
 
+    let lib_cell = mandatory(lib_cell, "lib_cell")?;
     let port_list = mandatory(port_list, "port_list")?;
 
     Ok(Command::SetDrivingCell(SetDrivingCell {
@@ -3078,6 +3312,12 @@ impl fmt::Display for SetFanoutLoad {
         text.push_str(&fmt_arg(&self.value));
         text.push_str(&fmt_arg(&self.port_list));
         text.fmt(f)
+    }
+}
+
+impl Validate for SetFanoutLoad {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
     }
 }
 
@@ -3123,6 +3363,12 @@ impl fmt::Display for SetInputTransition {
         text.push_str(&fmt_arg(&self.transition));
         text.push_str(&fmt_arg(&self.port_list));
         text.fmt(f)
+    }
+}
+
+impl Validate for SetInputTransition {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
     }
 }
 
@@ -3190,6 +3436,12 @@ impl fmt::Display for SetLoad {
     }
 }
 
+impl Validate for SetLoad {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
+    }
+}
+
 fn set_load(args: Vec<Argument>) -> Result<Command, SdcError> {
     let mut min = false;
     let mut max = false;
@@ -3239,6 +3491,12 @@ impl fmt::Display for SetLogicDc {
     }
 }
 
+impl Validate for SetLogicDc {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
+    }
+}
+
 fn set_logic_dc(args: Vec<Argument>) -> Result<Command, SdcError> {
     let mut port_list = None;
 
@@ -3265,6 +3523,12 @@ impl fmt::Display for SetLogicOne {
         let mut text = "set_logic_one".to_string();
         text.push_str(&fmt_arg(&self.port_list));
         text.fmt(f)
+    }
+}
+
+impl Validate for SetLogicOne {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
     }
 }
 
@@ -3297,6 +3561,12 @@ impl fmt::Display for SetLogicZero {
     }
 }
 
+impl Validate for SetLogicZero {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
+    }
+}
+
 fn set_logic_zero(args: Vec<Argument>) -> Result<Command, SdcError> {
     let mut port_list = None;
 
@@ -3323,6 +3593,12 @@ impl fmt::Display for SetMaxArea {
         let mut text = "set_max_area".to_string();
         text.push_str(&fmt_arg(&self.area_value));
         text.fmt(f)
+    }
+}
+
+impl Validate for SetMaxArea {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
     }
 }
 
@@ -3354,6 +3630,12 @@ impl fmt::Display for SetMaxCapacitance {
         text.push_str(&fmt_arg(&self.value));
         text.push_str(&fmt_arg(&self.object_list));
         text.fmt(f)
+    }
+}
+
+impl Validate for SetMaxCapacitance {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
     }
 }
 
@@ -3390,6 +3672,12 @@ impl fmt::Display for SetMaxFanout {
         text.push_str(&fmt_arg(&self.value));
         text.push_str(&fmt_arg(&self.object_list));
         text.fmt(f)
+    }
+}
+
+impl Validate for SetMaxFanout {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
     }
 }
 
@@ -3431,6 +3719,12 @@ impl fmt::Display for SetMaxTransition {
         text.push_str(&fmt_arg(&self.value));
         text.push_str(&fmt_arg(&self.object_list));
         text.fmt(f)
+    }
+}
+
+impl Validate for SetMaxTransition {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
     }
 }
 
@@ -3482,6 +3776,12 @@ impl fmt::Display for SetMinCapacitance {
     }
 }
 
+impl Validate for SetMinCapacitance {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
+    }
+}
+
 fn set_min_capacitance(args: Vec<Argument>) -> Result<Command, SdcError> {
     let mut value = None;
     let mut object_list = None;
@@ -3527,6 +3827,12 @@ impl fmt::Display for SetOperatingConditions {
         text.push_str(&fmt_named_opt_arg(&self.object_list, "object_list"));
         text.push_str(&fmt_opt_arg(&self.condition));
         text.fmt(f)
+    }
+}
+
+impl Validate for SetOperatingConditions {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
     }
 }
 
@@ -3582,6 +3888,12 @@ impl fmt::Display for SetPortFanoutNumber {
     }
 }
 
+impl Validate for SetPortFanoutNumber {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
+    }
+}
+
 fn set_port_fanout_number(args: Vec<Argument>) -> Result<Command, SdcError> {
     let mut value = None;
     let mut port_list = None;
@@ -3619,6 +3931,12 @@ impl fmt::Display for SetResistance {
         text.push_str(&fmt_arg(&self.value));
         text.push_str(&fmt_arg(&self.net_list));
         text.fmt(f)
+    }
+}
+
+impl Validate for SetResistance {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
     }
 }
 
@@ -3685,6 +4003,13 @@ impl fmt::Display for SetTimingDerate {
         text.push_str(&fmt_arg(&self.derate_value));
         text.push_str(&fmt_opt_arg(&self.object_list));
         text.fmt(f)
+    }
+}
+
+impl Validate for SetTimingDerate {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_5)
+            && check2(&self.early, &self.late, |a, b| (a & !b) | (b & !a))
     }
 }
 
@@ -3761,6 +4086,12 @@ impl fmt::Display for SetVoltage {
     }
 }
 
+impl Validate for SetVoltage {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_8)
+    }
+}
+
 fn set_voltage(args: Vec<Argument>) -> Result<Command, SdcError> {
     let mut min = None;
     let mut object_list = None;
@@ -3798,6 +4129,12 @@ impl fmt::Display for SetWireLoadMinBlockSize {
     }
 }
 
+impl Validate for SetWireLoadMinBlockSize {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
+    }
+}
+
 fn set_wire_load_min_block_size(args: Vec<Argument>) -> Result<Command, SdcError> {
     let mut size = None;
 
@@ -3826,6 +4163,12 @@ impl fmt::Display for SetWireLoadMode {
         let mut text = "set_wire_load_mode".to_string();
         text.push_str(&fmt_arg(&self.mode_name));
         text.fmt(f)
+    }
+}
+
+impl Validate for SetWireLoadMode {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
     }
 }
 
@@ -3863,6 +4206,12 @@ impl fmt::Display for SetWireLoadModel {
         text.push_str(&fmt_named_flg(self.max, "max"));
         text.push_str(&fmt_opt_arg(&self.object_list));
         text.fmt(f)
+    }
+}
+
+impl Validate for SetWireLoadModel {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
     }
 }
 
@@ -3914,6 +4263,12 @@ impl fmt::Display for SetWireLoadSelectionGroup {
         text.push_str(&fmt_arg(&self.group_name));
         text.push_str(&fmt_opt_arg(&self.object_list));
         text.fmt(f)
+    }
+}
+
+impl Validate for SetWireLoadSelectionGroup {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_1)
     }
 }
 
@@ -3969,6 +4324,12 @@ impl fmt::Display for CreateVoltageArea {
     }
 }
 
+impl Validate for CreateVoltageArea {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_6)
+    }
+}
+
 fn create_voltage_area(args: Vec<Argument>) -> Result<Command, SdcError> {
     let mut name = None;
     let mut coordinate = None;
@@ -4002,14 +4363,20 @@ fn create_voltage_area(args: Vec<Argument>) -> Result<Command, SdcError> {
 /// set_level_shifter_strategy
 #[derive(Clone, Debug, PartialEq)]
 pub struct SetLevelShifterStrategy {
-    pub rule: Option<Argument>,
+    pub rule: Argument,
 }
 
 impl fmt::Display for SetLevelShifterStrategy {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut text = "set_level_shifter_strategy".to_string();
-        text.push_str(&fmt_named_opt_arg(&self.rule, "rule"));
+        text.push_str(&fmt_named_arg(&self.rule, "rule"));
         text.fmt(f)
+    }
+}
+
+impl Validate for SetLevelShifterStrategy {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_6)
     }
 }
 
@@ -4024,6 +4391,8 @@ fn set_level_shifter_strategy(args: Vec<Argument>) -> Result<Command, SdcError> 
         }
     }
 
+    let rule = mandatory(rule, "rule")?;
+
     Ok(Command::SetLevelShifterStrategy(SetLevelShifterStrategy {
         rule,
     }))
@@ -4032,16 +4401,22 @@ fn set_level_shifter_strategy(args: Vec<Argument>) -> Result<Command, SdcError> 
 /// set_level_shifter_threshold
 #[derive(Clone, Debug, PartialEq)]
 pub struct SetLevelShifterThreshold {
-    pub voltage: Option<Argument>,
+    pub voltage: Argument,
     pub percent: Option<Argument>,
 }
 
 impl fmt::Display for SetLevelShifterThreshold {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut text = "set_level_shifter_threshold".to_string();
-        text.push_str(&fmt_named_opt_arg(&self.voltage, "voltage"));
+        text.push_str(&fmt_named_arg(&self.voltage, "voltage"));
         text.push_str(&fmt_named_opt_arg(&self.percent, "percent"));
         text.fmt(f)
+    }
+}
+
+impl Validate for SetLevelShifterThreshold {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_6)
     }
 }
 
@@ -4057,6 +4432,8 @@ fn set_level_shifter_threshold(args: Vec<Argument>) -> Result<Command, SdcError>
             _ => return Err(SdcError::WrongArgument(vec![arg])),
         }
     }
+
+    let voltage = mandatory(voltage, "voltage")?;
 
     Ok(Command::SetLevelShifterThreshold(
         SetLevelShifterThreshold { voltage, percent },
@@ -4076,6 +4453,12 @@ impl fmt::Display for SetMaxDynamicPower {
         text.push_str(&fmt_arg(&self.power));
         text.push_str(&fmt_opt_arg(&self.unit));
         text.fmt(f)
+    }
+}
+
+impl Validate for SetMaxDynamicPower {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_4)
     }
 }
 
@@ -4114,6 +4497,12 @@ impl fmt::Display for SetMaxLeakagePower {
     }
 }
 
+impl Validate for SetMaxLeakagePower {
+    fn validate(&self, version: SdcVersion) -> bool {
+        minimum_supported_version(version, SdcVersion::SDC1_4)
+    }
+}
+
 fn set_max_leakage_power(args: Vec<Argument>) -> Result<Command, SdcError> {
     let mut power = None;
     let mut unit = None;
@@ -4131,85 +4520,4 @@ fn set_max_leakage_power(args: Vec<Argument>) -> Result<Command, SdcError> {
         power,
         unit,
     }))
-}
-
-fn opt_arg(
-    name: Argument,
-    arg: Option<Argument>,
-    tgt: Option<Argument>,
-) -> Result<Option<Argument>, SdcError> {
-    if arg.is_none() {
-        return Err(SdcError::MissingOptArgument(name));
-    }
-    match tgt {
-        Some(_) => Err(SdcError::DuplicatedArgument(name)),
-        None => Ok(arg),
-    }
-}
-
-fn opt_flg(name: Argument, tgt: bool) -> Result<bool, SdcError> {
-    match tgt {
-        true => Err(SdcError::DuplicatedArgument(name)),
-        false => Ok(true),
-    }
-}
-
-fn pos_args1(arg: Option<Argument>, tgt: Option<Argument>) -> Result<Option<Argument>, SdcError> {
-    if arg.is_none() {
-        return Err(SdcError::MissingPosArgument);
-    }
-    match tgt {
-        Some(_) => Err(SdcError::TooManyArgument),
-        None => Ok(arg),
-    }
-}
-
-fn pos_args2(
-    arg: Option<Argument>,
-    tgt: (Option<Argument>, Option<Argument>),
-) -> Result<(Option<Argument>, Option<Argument>), SdcError> {
-    let (tgt0, tgt1) = tgt;
-    if tgt0.is_none() {
-        Ok((pos_args1(arg, tgt0)?, None))
-    } else if tgt1.is_none() {
-        Ok((tgt0, pos_args1(arg, tgt1)?))
-    } else {
-        Err(SdcError::TooManyArgument)
-    }
-}
-
-fn mandatory(arg: Option<Argument>, name: &str) -> Result<Argument, SdcError> {
-    arg.ok_or(SdcError::MissingMandatoryArgument(name.into()))
-}
-
-fn fmt_arg(x: &Argument) -> String {
-    format!(" {}", x.as_str())
-}
-
-fn fmt_opt_arg(x: &Option<Argument>) -> String {
-    if let Some(x) = x {
-        format!(" {}", x.as_str())
-    } else {
-        "".into()
-    }
-}
-
-fn fmt_named_arg(x: &Argument, name: &str) -> String {
-    format!(" -{} {}", name, x.as_str())
-}
-
-fn fmt_named_opt_arg(x: &Option<Argument>, name: &str) -> String {
-    if let Some(x) = x {
-        format!(" -{} {}", name, x.as_str())
-    } else {
-        "".into()
-    }
-}
-
-fn fmt_named_flg(x: bool, name: &str) -> String {
-    if x {
-        format!(" -{}", name)
-    } else {
-        "".into()
-    }
 }

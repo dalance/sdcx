@@ -11,8 +11,8 @@ use parol_runtime::{ParolError, ParseTree, TerminalIndex};
 use parol_runtime::{TokenStream, Tokenizer};
 use std::path::Path;
 
-use crate::sdc_grammar::SdcGrammar;
-use crate::sdc_grammar_trait::SdcGrammarAuto;
+use crate::parser::sdc_grammar::SdcGrammar;
+use crate::parser::sdc_grammar_trait::SdcGrammarAuto;
 
 use parol_runtime::lexer::tokenizer::{ERROR_TOKEN, UNMATCHABLE_TOKEN, WHITESPACE_TOKEN};
 
