@@ -70,7 +70,7 @@ fn version() {
 }
 
 #[test]
-fn single_command() {
+fn command() {
     check_command(
         "current_instance A",
         Command::CurrentInstance(CurrentInstance {

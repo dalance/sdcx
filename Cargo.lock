@@ -584,6 +584,8 @@ dependencies = [
 name = "sdcx"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
+ "clap",
  "parol",
  "parol_runtime",
  "thiserror",

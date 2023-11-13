@@ -56,6 +56,26 @@ impl Sdc {
         let version = self.version.unwrap_or(SdcVersion::SDC2_1);
         self.commands.iter().all(|x| x.validate(version))
     }
+
+    pub fn normalize(&mut self) {
+        self.commands.sort()
+    }
+}
+
+impl fmt::Display for Sdc {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for s in &self.header {
+            write!(f, "{}", s)?;
+        }
+        if let Some(version) = self.version {
+            write!(f, "{}\n", version)?;
+        }
+        for c in &self.commands {
+            write!(f, "{}\n", c)?;
+        }
+
+        Ok(())
+    }
 }
 
 impl TryFrom<&grammar::Source<'_>> for Sdc {

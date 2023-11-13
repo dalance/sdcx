@@ -4,7 +4,7 @@ use crate::sdc::{Argument, SdcError, SdcVersion, Validate};
 use std::fmt;
 
 /// SDC command
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Command {
     CurrentInstance(CurrentInstance),
     Expr(Expr),
@@ -318,7 +318,7 @@ impl TryFrom<&grammar::Command<'_>> for Command {
 }
 
 /// current_instance
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct CurrentInstance {
     pub instance: Option<Argument>,
 }
@@ -349,7 +349,7 @@ fn current_instance(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// expr
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Expr {
     pub args: Vec<Argument>,
 }
@@ -382,7 +382,7 @@ fn expr(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// list
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct List {
     pub args: Vec<Argument>,
 }
@@ -415,7 +415,7 @@ fn list(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Set {
     pub variable_name: Argument,
     pub value: Argument,
@@ -455,7 +455,7 @@ fn set(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_hierarchy_separator
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetHierarchySeparator {
     pub separator: Argument,
 }
@@ -490,7 +490,7 @@ fn set_hierarchy_separator(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_units
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetUnits {
     pub capacitance: Option<Argument>,
     pub resistance: Option<Argument>,
@@ -551,7 +551,7 @@ fn set_units(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// all_clocks
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct AllClocks;
 
 impl fmt::Display for AllClocks {
@@ -576,7 +576,7 @@ fn all_clocks(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// all_inputs
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct AllInputs {
     pub level_sensitive: bool,
     pub edge_triggered: bool,
@@ -623,7 +623,7 @@ fn all_inputs(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// all_outputs
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct AllOutputs {
     pub level_sensitive: bool,
     pub edge_triggered: bool,
@@ -670,7 +670,7 @@ fn all_outputs(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// all_registers
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct AllRegisters {
     pub no_hierarchy: bool,
     pub hsc: Option<Argument>,
@@ -770,7 +770,7 @@ fn all_registers(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// current_design
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct CurrentDesign;
 
 impl fmt::Display for CurrentDesign {
@@ -795,7 +795,7 @@ fn current_design(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// get_cells
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct GetCells {
     pub hierarchical: bool,
     pub regexp: bool,
@@ -853,7 +853,7 @@ fn get_cells(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// get_clocks
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct GetClocks {
     pub regexp: bool,
     pub nocase: bool,
@@ -900,7 +900,7 @@ fn get_clocks(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// get_lib_cells
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct GetLibCells {
     pub regexp: bool,
     pub hsc: Option<Argument>,
@@ -952,7 +952,7 @@ fn get_lib_cells(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// get_lib_pins
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct GetLibPins {
     pub regexp: bool,
     pub nocase: bool,
@@ -999,7 +999,7 @@ fn get_lib_pins(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// get_libs
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct GetLibs {
     pub regexp: bool,
     pub nocase: bool,
@@ -1046,7 +1046,7 @@ fn get_libs(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// get_nets
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct GetNets {
     pub hierarchical: bool,
     pub hsc: Option<Argument>,
@@ -1109,7 +1109,7 @@ fn get_nets(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// get_pins
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct GetPins {
     pub hierarchical: bool,
     pub hsc: Option<Argument>,
@@ -1172,7 +1172,7 @@ fn get_pins(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// get_ports
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct GetPorts {
     pub regexp: bool,
     pub nocase: bool,
@@ -1219,7 +1219,7 @@ fn get_ports(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// create_clock
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct CreateClock {
     pub period: Argument,
     pub name: Option<Argument>,
@@ -1282,7 +1282,7 @@ fn create_clock(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// create_generated_clock
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct CreateGeneratedClock {
     pub name: Option<Argument>,
     pub source: Argument,
@@ -1381,7 +1381,7 @@ fn create_generated_clock(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// group_path
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct GroupPath {
     pub name: Option<Argument>,
     pub default: bool,
@@ -1485,7 +1485,7 @@ fn group_path(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_clock_gating_check
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetClockGatingCheck {
     pub setup: Option<Argument>,
     pub hold: Option<Argument>,
@@ -1557,7 +1557,7 @@ fn set_clock_gating_check(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_clock_groups
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetClockGroups {
     pub group: Argument,
     pub logically_exclusive: bool,
@@ -1637,7 +1637,7 @@ fn set_clock_groups(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_clock_latency
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetClockLatency {
     pub rise: bool,
     pub fall: bool,
@@ -1724,7 +1724,7 @@ fn set_clock_latency(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_sense
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetSense {
     pub r#type: Option<Argument>,
     pub non_unate: bool,
@@ -1810,7 +1810,7 @@ fn set_sense(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_clock_transition
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetClockTransition {
     pub rise: bool,
     pub fall: bool,
@@ -1873,7 +1873,7 @@ fn set_clock_transition(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_clock_uncertainty
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetClockUncertainty {
     pub from: Option<Argument>,
     pub rise_from: Option<Argument>,
@@ -1974,7 +1974,7 @@ fn set_clock_uncertainty(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_data_check
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetDataCheck {
     pub from: Option<Argument>,
     pub to: Option<Argument>,
@@ -2065,7 +2065,7 @@ fn set_data_check(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_disable_timing
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetDisableTiming {
     pub from: Option<Argument>,
     pub to: Option<Argument>,
@@ -2113,7 +2113,7 @@ fn set_disable_timing(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_false_path
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetFalsePath {
     pub setup: bool,
     pub hold: bool,
@@ -2224,7 +2224,7 @@ fn set_false_path(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_ideal_latency
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetIdealLatency {
     pub rise: bool,
     pub fall: bool,
@@ -2286,7 +2286,7 @@ fn set_ideal_latency(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_ideal_network
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetIdealNetwork {
     pub no_propagate: bool,
     pub object_list: Argument,
@@ -2328,7 +2328,7 @@ fn set_ideal_network(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_ideal_transition
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetIdealTransition {
     pub rise: bool,
     pub fall: bool,
@@ -2393,7 +2393,7 @@ fn set_ideal_transition(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_input_delay
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetInputDelay {
     pub clock: Option<Argument>,
     pub reference_pin: Option<Argument>,
@@ -2506,7 +2506,7 @@ fn set_input_delay(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_max_delay
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetMaxDelay {
     pub rise: bool,
     pub fall: bool,
@@ -2612,7 +2612,7 @@ fn set_max_delay(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_max_time_borrow
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetMaxTimeBorrow {
     pub delay_value: Argument,
     pub object_list: Argument,
@@ -2654,7 +2654,7 @@ fn set_max_time_borrow(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_min_delay
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetMinDelay {
     pub rise: bool,
     pub fall: bool,
@@ -2760,7 +2760,7 @@ fn set_min_delay(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_min_pulse_width
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetMinPulseWidth {
     pub low: bool,
     pub high: bool,
@@ -2811,7 +2811,7 @@ fn set_min_pulse_width(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_multicycle_path
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetMulticyclePath {
     pub setup: bool,
     pub hold: bool,
@@ -2928,7 +2928,7 @@ fn set_multicycle_path(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_output_delay
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetOutputDelay {
     pub clock: Option<Argument>,
     pub reference_pin: Option<Argument>,
@@ -3041,7 +3041,7 @@ fn set_output_delay(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_propagated_clock
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetPropagatedClock {
     pub object_list: Argument,
 }
@@ -3078,7 +3078,7 @@ fn set_propagated_clock(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_case_analysis
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetCaseAnalysis {
     pub value: Argument,
     pub port_or_pin_list: Argument,
@@ -3120,7 +3120,7 @@ fn set_case_analysis(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_drive
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetDrive {
     pub rise: bool,
     pub fall: bool,
@@ -3182,7 +3182,7 @@ fn set_drive(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_driving_cell
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetDrivingCell {
     pub lib_cell: Argument,
     pub rise: bool,
@@ -3300,7 +3300,7 @@ fn set_driving_cell(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_fanout_load
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetFanoutLoad {
     pub value: Argument,
     pub port_list: Argument,
@@ -3339,7 +3339,7 @@ fn set_fanout_load(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_input_transition
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetInputTransition {
     pub rise: bool,
     pub fall: bool,
@@ -3411,7 +3411,7 @@ fn set_input_transition(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_load
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetLoad {
     pub min: bool,
     pub max: bool,
@@ -3478,7 +3478,7 @@ fn set_load(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_logic_dc
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetLogicDc {
     pub port_list: Argument,
 }
@@ -3513,7 +3513,7 @@ fn set_logic_dc(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_logic_one
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetLogicOne {
     pub port_list: Argument,
 }
@@ -3548,7 +3548,7 @@ fn set_logic_one(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_logic_zero
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetLogicZero {
     pub port_list: Argument,
 }
@@ -3583,7 +3583,7 @@ fn set_logic_zero(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_max_area
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetMaxArea {
     pub area_value: Argument,
 }
@@ -3618,7 +3618,7 @@ fn set_max_area(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_max_capacitance
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetMaxCapacitance {
     pub value: Argument,
     pub object_list: Argument,
@@ -3660,7 +3660,7 @@ fn set_max_capacitance(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_max_fanout
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetMaxFanout {
     pub value: Argument,
     pub object_list: Argument,
@@ -3699,7 +3699,7 @@ fn set_max_fanout(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_max_transition
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetMaxTransition {
     pub clock_path: bool,
     pub data_path: bool,
@@ -3761,7 +3761,7 @@ fn set_max_transition(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_min_capacitance
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetMinCapacitance {
     pub value: Argument,
     pub object_list: Argument,
@@ -3803,7 +3803,7 @@ fn set_min_capacitance(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_operating_conditions
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetOperatingConditions {
     pub library: Option<Argument>,
     pub analysis_type: Option<Argument>,
@@ -3873,7 +3873,7 @@ fn set_operating_conditions(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_port_fanout_number
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetPortFanoutNumber {
     pub value: Argument,
     pub port_list: Argument,
@@ -3915,7 +3915,7 @@ fn set_port_fanout_number(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_resistance
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetResistance {
     pub min: bool,
     pub max: bool,
@@ -3967,7 +3967,7 @@ fn set_resistance(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_timing_derate
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetTimingDerate {
     pub cell_delay: bool,
     pub cell_check: bool,
@@ -4069,7 +4069,7 @@ fn set_timing_derate(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_voltage
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetVoltage {
     pub min: Option<Argument>,
     pub object_list: Option<Argument>,
@@ -4116,7 +4116,7 @@ fn set_voltage(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_wire_load_min_block_size
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetWireLoadMinBlockSize {
     pub size: Argument,
 }
@@ -4153,7 +4153,7 @@ fn set_wire_load_min_block_size(args: Vec<Argument>) -> Result<Command, SdcError
 }
 
 /// set_wire_load_mode
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetWireLoadMode {
     pub mode_name: Argument,
 }
@@ -4188,7 +4188,7 @@ fn set_wire_load_mode(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_wire_load_model
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetWireLoadModel {
     pub name: Argument,
     pub library: Option<Argument>,
@@ -4245,7 +4245,7 @@ fn set_wire_load_model(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_wire_load_selection_group
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetWireLoadSelectionGroup {
     pub library: Option<Argument>,
     pub min: bool,
@@ -4303,7 +4303,7 @@ fn set_wire_load_selection_group(args: Vec<Argument>) -> Result<Command, SdcErro
 }
 
 /// create_voltage_area
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct CreateVoltageArea {
     pub name: Argument,
     pub coordinate: Option<Argument>,
@@ -4361,7 +4361,7 @@ fn create_voltage_area(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_level_shifter_strategy
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetLevelShifterStrategy {
     pub rule: Argument,
 }
@@ -4399,7 +4399,7 @@ fn set_level_shifter_strategy(args: Vec<Argument>) -> Result<Command, SdcError> 
 }
 
 /// set_level_shifter_threshold
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetLevelShifterThreshold {
     pub voltage: Argument,
     pub percent: Option<Argument>,
@@ -4441,7 +4441,7 @@ fn set_level_shifter_threshold(args: Vec<Argument>) -> Result<Command, SdcError>
 }
 
 /// set_max_dynamic_power
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetMaxDynamicPower {
     pub power: Argument,
     pub unit: Option<Argument>,
@@ -4482,7 +4482,7 @@ fn set_max_dynamic_power(args: Vec<Argument>) -> Result<Command, SdcError> {
 }
 
 /// set_max_leakage_power
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetMaxLeakagePower {
     pub power: Argument,
     pub unit: Option<Argument>,

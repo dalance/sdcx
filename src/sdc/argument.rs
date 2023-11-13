@@ -3,7 +3,7 @@ use crate::sdc::{Command, SdcError};
 use std::fmt;
 
 /// Argument
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Argument {
     Word(String),
     StringGroup(String),
@@ -55,15 +55,28 @@ impl TryFrom<&grammar::Argument<'_>> for Argument {
                     .to_string(),
             )),
             grammar::Argument::TokenBraceGroup(x) => Ok(Self::BraceGroup(
-                x.token_brace_group
-                    .term_brace_group
-                    .term_brace_group
-                    .text()
-                    .to_string(),
+                x.token_brace_group.term_brace_group.to_string(),
             )),
             grammar::Argument::CommandReplacement(x) => Ok(Self::CommandReplacement(Box::new(
                 x.command_replacement.command.as_ref().try_into()?,
             ))),
         }
+    }
+}
+
+impl ToString for grammar::TermBraceGroup<'_> {
+    fn to_string(&self) -> String {
+        let mut ret = String::new();
+        ret.push_str(self.term_l_brace.term_l_brace.text());
+        match self.term_brace_group_group.as_ref() {
+            grammar::TermBraceGroupGroup::TermBraceGroup(x) => {
+                ret.push_str(&x.term_brace_group.to_string());
+            }
+            grammar::TermBraceGroupGroup::TermBraceGroupContent(x) => {
+                ret.push_str(&x.term_brace_group_content.term_brace_group_content.text());
+            }
+        }
+        ret.push_str(self.term_r_brace.term_r_brace.text());
+        ret
     }
 }

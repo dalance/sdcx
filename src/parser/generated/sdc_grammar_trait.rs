@@ -29,8 +29,13 @@ pub trait SdcGrammarTrait<'t> {
         Ok(())
     }
 
-    /// Semantic action for non-terminal 'TermBraceGroup'
-    fn term_brace_group(&mut self, _arg: &TermBraceGroup<'t>) -> Result<()> {
+    /// Semantic action for non-terminal 'TermLBrace'
+    fn term_l_brace(&mut self, _arg: &TermLBrace<'t>) -> Result<()> {
+        Ok(())
+    }
+
+    /// Semantic action for non-terminal 'TermRBrace'
+    fn term_r_brace(&mut self, _arg: &TermRBrace<'t>) -> Result<()> {
         Ok(())
     }
 
@@ -61,6 +66,16 @@ pub trait SdcGrammarTrait<'t> {
 
     /// Semantic action for non-terminal 'TermWord'
     fn term_word(&mut self, _arg: &TermWord<'t>) -> Result<()> {
+        Ok(())
+    }
+
+    /// Semantic action for non-terminal 'TermBraceGroupContent'
+    fn term_brace_group_content(&mut self, _arg: &TermBraceGroupContent<'t>) -> Result<()> {
+        Ok(())
+    }
+
+    /// Semantic action for non-terminal 'TermBraceGroup'
+    fn term_brace_group(&mut self, _arg: &TermBraceGroup<'t>) -> Result<()> {
         Ok(())
     }
 
@@ -130,7 +145,31 @@ pub trait SdcGrammarTrait<'t> {
 //
 
 ///
-/// Type derived for production 9
+/// Type derived for production 12
+///
+/// TermBraceGroupGroup: TermBraceGroup;
+///
+#[allow(dead_code)]
+#[derive(Builder, Debug, Clone)]
+#[builder(crate = "parol_runtime::derive_builder")]
+pub struct TermBraceGroupGroupTermBraceGroup<'t> {
+    pub term_brace_group: Box<TermBraceGroup<'t>>,
+}
+
+///
+/// Type derived for production 13
+///
+/// TermBraceGroupGroup: TermBraceGroupContent;
+///
+#[allow(dead_code)]
+#[derive(Builder, Debug, Clone)]
+#[builder(crate = "parol_runtime::derive_builder")]
+pub struct TermBraceGroupGroupTermBraceGroupContent<'t> {
+    pub term_brace_group_content: Box<TermBraceGroupContent<'t>>,
+}
+
+///
+/// Type derived for production 14
 ///
 /// TokenEnd: TermLineBreak;
 ///
@@ -142,7 +181,7 @@ pub struct TokenEndTermLineBreak<'t> {
 }
 
 ///
-/// Type derived for production 10
+/// Type derived for production 15
 ///
 /// TokenEnd: TermSemiColon;
 ///
@@ -154,7 +193,7 @@ pub struct TokenEndTermSemiColon<'t> {
 }
 
 ///
-/// Type derived for production 26
+/// Type derived for production 31
 ///
 /// Argument: TokenWord;
 ///
@@ -166,7 +205,7 @@ pub struct ArgumentTokenWord<'t> {
 }
 
 ///
-/// Type derived for production 27
+/// Type derived for production 32
 ///
 /// Argument: TokenStringGroup;
 ///
@@ -178,7 +217,7 @@ pub struct ArgumentTokenStringGroup<'t> {
 }
 
 ///
-/// Type derived for production 28
+/// Type derived for production 33
 ///
 /// Argument: TokenBraceGroup;
 ///
@@ -190,7 +229,7 @@ pub struct ArgumentTokenBraceGroup<'t> {
 }
 
 ///
-/// Type derived for production 29
+/// Type derived for production 34
 ///
 /// Argument: CommandReplacement;
 ///
@@ -202,7 +241,7 @@ pub struct ArgumentCommandReplacement<'t> {
 }
 
 ///
-/// Type derived for production 37
+/// Type derived for production 42
 ///
 /// SourceListGroup: CommandLine;
 ///
@@ -214,7 +253,7 @@ pub struct SourceListGroupCommandLine<'t> {
 }
 
 ///
-/// Type derived for production 38
+/// Type derived for production 43
 ///
 /// SourceListGroup: TokenEnd;
 ///
@@ -226,7 +265,7 @@ pub struct SourceListGroupTokenEnd<'t> {
 }
 
 ///
-/// Type derived for production 39
+/// Type derived for production 44
 ///
 /// SourceListGroup: TermComment;
 ///
@@ -346,7 +385,29 @@ pub struct TermBackslashLineBreak<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct TermBraceGroup<'t> {
-    pub term_brace_group: Token<'t>, /* \{[^}]*\} */
+    pub term_l_brace: Box<TermLBrace<'t>>,
+    pub term_brace_group_group: Box<TermBraceGroupGroup<'t>>,
+    pub term_r_brace: Box<TermRBrace<'t>>,
+}
+
+///
+/// Type derived for non-terminal TermBraceGroupContent
+///
+#[allow(dead_code)]
+#[derive(Builder, Debug, Clone)]
+#[builder(crate = "parol_runtime::derive_builder")]
+pub struct TermBraceGroupContent<'t> {
+    pub term_brace_group_content: Token<'t>, /* [^}]* */
+}
+
+///
+/// Type derived for non-terminal TermBraceGroupGroup
+///
+#[allow(dead_code)]
+#[derive(Debug, Clone)]
+pub enum TermBraceGroupGroup<'t> {
+    TermBraceGroup(TermBraceGroupGroupTermBraceGroup<'t>),
+    TermBraceGroupContent(TermBraceGroupGroupTermBraceGroupContent<'t>),
 }
 
 ///
@@ -357,6 +418,16 @@ pub struct TermBraceGroup<'t> {
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct TermComment<'t> {
     pub term_comment: Token<'t>, /* #.*(\r\n|\r|\n|$) */
+}
+
+///
+/// Type derived for non-terminal TermLBrace
+///
+#[allow(dead_code)]
+#[derive(Builder, Debug, Clone)]
+#[builder(crate = "parol_runtime::derive_builder")]
+pub struct TermLBrace<'t> {
+    pub term_l_brace: Token<'t>, /* { */
 }
 
 ///
@@ -377,6 +448,16 @@ pub struct TermLBracket<'t> {
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct TermLineBreak<'t> {
     pub term_line_break: Token<'t>, /* (\r\n|\r|\n|$) */
+}
+
+///
+/// Type derived for non-terminal TermRBrace
+///
+#[allow(dead_code)]
+#[derive(Builder, Debug, Clone)]
+#[builder(crate = "parol_runtime::derive_builder")]
+pub struct TermRBrace<'t> {
+    pub term_r_brace: Token<'t>, /* } */
 }
 
 ///
@@ -552,9 +633,13 @@ pub enum ASTType<'t> {
     SourceListGroup(SourceListGroup<'t>),
     TermBackslashLineBreak(TermBackslashLineBreak<'t>),
     TermBraceGroup(TermBraceGroup<'t>),
+    TermBraceGroupContent(TermBraceGroupContent<'t>),
+    TermBraceGroupGroup(TermBraceGroupGroup<'t>),
     TermComment(TermComment<'t>),
+    TermLBrace(TermLBrace<'t>),
     TermLBracket(TermLBracket<'t>),
     TermLineBreak(TermLineBreak<'t>),
+    TermRBrace(TermRBrace<'t>),
     TermRBracket(TermRBracket<'t>),
     TermSemiColon(TermSemiColon<'t>),
     TermStringGroup(TermStringGroup<'t>),
@@ -665,22 +750,37 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
 
     /// Semantic action for production 2:
     ///
-    /// TermBraceGroup: /\{[^}]*\}/;
+    /// TermLBrace: <INITIAL, BraceGroup>'{';
     ///
     #[parol_runtime::function_name::named]
-    fn term_brace_group(&mut self, term_brace_group: &ParseTreeType<'t>) -> Result<()> {
+    fn term_l_brace(&mut self, term_l_brace: &ParseTreeType<'t>) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let term_brace_group = term_brace_group.token()?.clone();
-        let term_brace_group_built = TermBraceGroup { term_brace_group };
+        let term_l_brace = term_l_brace.token()?.clone();
+        let term_l_brace_built = TermLBrace { term_l_brace };
         // Calling user action here
-        self.user_grammar
-            .term_brace_group(&term_brace_group_built)?;
-        self.push(ASTType::TermBraceGroup(term_brace_group_built), context);
+        self.user_grammar.term_l_brace(&term_l_brace_built)?;
+        self.push(ASTType::TermLBrace(term_l_brace_built), context);
         Ok(())
     }
 
     /// Semantic action for production 3:
+    ///
+    /// TermRBrace: <INITIAL, BraceGroup>'}';
+    ///
+    #[parol_runtime::function_name::named]
+    fn term_r_brace(&mut self, term_r_brace: &ParseTreeType<'t>) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let term_r_brace = term_r_brace.token()?.clone();
+        let term_r_brace_built = TermRBrace { term_r_brace };
+        // Calling user action here
+        self.user_grammar.term_r_brace(&term_r_brace_built)?;
+        self.push(ASTType::TermRBrace(term_r_brace_built), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 4:
     ///
     /// TermStringGroup: "\u{0022}(?:\\[\u{0022}\\/bfnrt]|u[0-9a-fA-F]{4}|[^\u{0022}\\])*\u{0022}";
     ///
@@ -697,7 +797,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 4:
+    /// Semantic action for production 5:
     ///
     /// TermComment: /#.*(\r\n|\r|\n|$)/;
     ///
@@ -713,7 +813,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 5:
+    /// Semantic action for production 6:
     ///
     /// TermSemiColon: ';';
     ///
@@ -729,7 +829,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 6:
+    /// Semantic action for production 7:
     ///
     /// TermBackslashLineBreak: /\\(\r\n|\r|\n)/;
     ///
@@ -754,7 +854,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 7:
+    /// Semantic action for production 8:
     ///
     /// TermLineBreak: /(\r\n|\r|\n|$)/;
     ///
@@ -770,7 +870,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 8:
+    /// Semantic action for production 9:
     ///
     /// TermWord: /[^\s\[\]]+/;
     ///
@@ -786,7 +886,111 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 9:
+    /// Semantic action for production 10:
+    ///
+    /// TermBraceGroupContent: <BraceGroup>/[^}]*/;
+    ///
+    #[parol_runtime::function_name::named]
+    fn term_brace_group_content(
+        &mut self,
+        term_brace_group_content: &ParseTreeType<'t>,
+    ) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let term_brace_group_content = term_brace_group_content.token()?.clone();
+        let term_brace_group_content_built = TermBraceGroupContent {
+            term_brace_group_content,
+        };
+        // Calling user action here
+        self.user_grammar
+            .term_brace_group_content(&term_brace_group_content_built)?;
+        self.push(
+            ASTType::TermBraceGroupContent(term_brace_group_content_built),
+            context,
+        );
+        Ok(())
+    }
+
+    /// Semantic action for production 11:
+    ///
+    /// TermBraceGroup: TermLBrace %push(BraceGroup) TermBraceGroupGroup TermRBrace %pop();
+    ///
+    #[parol_runtime::function_name::named]
+    fn term_brace_group(
+        &mut self,
+        _term_l_brace: &ParseTreeType<'t>,
+        _term_brace_group_group: &ParseTreeType<'t>,
+        _term_r_brace: &ParseTreeType<'t>,
+    ) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let term_r_brace = pop_item!(self, term_r_brace, TermRBrace, context);
+        let term_brace_group_group =
+            pop_item!(self, term_brace_group_group, TermBraceGroupGroup, context);
+        let term_l_brace = pop_item!(self, term_l_brace, TermLBrace, context);
+        let term_brace_group_built = TermBraceGroup {
+            term_l_brace: Box::new(term_l_brace),
+            term_brace_group_group: Box::new(term_brace_group_group),
+            term_r_brace: Box::new(term_r_brace),
+        };
+        // Calling user action here
+        self.user_grammar
+            .term_brace_group(&term_brace_group_built)?;
+        self.push(ASTType::TermBraceGroup(term_brace_group_built), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 12:
+    ///
+    /// TermBraceGroupGroup: TermBraceGroup;
+    ///
+    #[parol_runtime::function_name::named]
+    fn term_brace_group_group_0(&mut self, _term_brace_group: &ParseTreeType<'t>) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let term_brace_group = pop_item!(self, term_brace_group, TermBraceGroup, context);
+        let term_brace_group_group_0_built = TermBraceGroupGroupTermBraceGroup {
+            term_brace_group: Box::new(term_brace_group),
+        };
+        let term_brace_group_group_0_built =
+            TermBraceGroupGroup::TermBraceGroup(term_brace_group_group_0_built);
+        self.push(
+            ASTType::TermBraceGroupGroup(term_brace_group_group_0_built),
+            context,
+        );
+        Ok(())
+    }
+
+    /// Semantic action for production 13:
+    ///
+    /// TermBraceGroupGroup: TermBraceGroupContent;
+    ///
+    #[parol_runtime::function_name::named]
+    fn term_brace_group_group_1(
+        &mut self,
+        _term_brace_group_content: &ParseTreeType<'t>,
+    ) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let term_brace_group_content = pop_item!(
+            self,
+            term_brace_group_content,
+            TermBraceGroupContent,
+            context
+        );
+        let term_brace_group_group_1_built = TermBraceGroupGroupTermBraceGroupContent {
+            term_brace_group_content: Box::new(term_brace_group_content),
+        };
+        let term_brace_group_group_1_built =
+            TermBraceGroupGroup::TermBraceGroupContent(term_brace_group_group_1_built);
+        self.push(
+            ASTType::TermBraceGroupGroup(term_brace_group_group_1_built),
+            context,
+        );
+        Ok(())
+    }
+
+    /// Semantic action for production 14:
     ///
     /// TokenEnd: TermLineBreak;
     ///
@@ -805,7 +1009,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 10:
+    /// Semantic action for production 15:
     ///
     /// TokenEnd: TermSemiColon;
     ///
@@ -824,7 +1028,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 11:
+    /// Semantic action for production 16:
     ///
     /// TokenBraceGroup: TermBraceGroup TokenBraceGroupOpt /* Option */;
     ///
@@ -850,7 +1054,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 12:
+    /// Semantic action for production 17:
     ///
     /// TokenBraceGroupOpt /* `Option<T>::Some` */: TermBackslashLineBreak;
     ///
@@ -877,7 +1081,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 13:
+    /// Semantic action for production 18:
     ///
     /// TokenBraceGroupOpt /* `Option<T>::None` */: ;
     ///
@@ -889,7 +1093,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 14:
+    /// Semantic action for production 19:
     ///
     /// TokenStringGroup: TermStringGroup TokenStringGroupOpt /* Option */;
     ///
@@ -915,7 +1119,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 15:
+    /// Semantic action for production 20:
     ///
     /// TokenStringGroupOpt /* `Option<T>::Some` */: TermBackslashLineBreak;
     ///
@@ -942,7 +1146,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 16:
+    /// Semantic action for production 21:
     ///
     /// TokenStringGroupOpt /* `Option<T>::None` */: ;
     ///
@@ -954,7 +1158,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 17:
+    /// Semantic action for production 22:
     ///
     /// TokenLBracket: TermLBracket TokenLBracketOpt /* Option */;
     ///
@@ -978,7 +1182,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 18:
+    /// Semantic action for production 23:
     ///
     /// TokenLBracketOpt /* `Option<T>::Some` */: TermBackslashLineBreak;
     ///
@@ -1005,7 +1209,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 19:
+    /// Semantic action for production 24:
     ///
     /// TokenLBracketOpt /* `Option<T>::None` */: ;
     ///
@@ -1017,7 +1221,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 20:
+    /// Semantic action for production 25:
     ///
     /// TokenRBracket: TermRBracket TokenRBracketOpt /* Option */;
     ///
@@ -1041,7 +1245,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 21:
+    /// Semantic action for production 26:
     ///
     /// TokenRBracketOpt /* `Option<T>::Some` */: TermBackslashLineBreak;
     ///
@@ -1068,7 +1272,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 22:
+    /// Semantic action for production 27:
     ///
     /// TokenRBracketOpt /* `Option<T>::None` */: ;
     ///
@@ -1080,7 +1284,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 23:
+    /// Semantic action for production 28:
     ///
     /// TokenWord: TermWord TokenWordOpt /* Option */;
     ///
@@ -1104,7 +1308,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 24:
+    /// Semantic action for production 29:
     ///
     /// TokenWordOpt /* `Option<T>::Some` */: TermBackslashLineBreak;
     ///
@@ -1128,7 +1332,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 25:
+    /// Semantic action for production 30:
     ///
     /// TokenWordOpt /* `Option<T>::None` */: ;
     ///
@@ -1140,7 +1344,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 26:
+    /// Semantic action for production 31:
     ///
     /// Argument: TokenWord;
     ///
@@ -1159,7 +1363,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 27:
+    /// Semantic action for production 32:
     ///
     /// Argument: TokenStringGroup;
     ///
@@ -1178,7 +1382,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 28:
+    /// Semantic action for production 33:
     ///
     /// Argument: TokenBraceGroup;
     ///
@@ -1197,7 +1401,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 29:
+    /// Semantic action for production 34:
     ///
     /// Argument: CommandReplacement;
     ///
@@ -1216,7 +1420,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 30:
+    /// Semantic action for production 35:
     ///
     /// CommandReplacement: TokenLBracket Command TokenRBracket;
     ///
@@ -1247,7 +1451,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 31:
+    /// Semantic action for production 36:
     ///
     /// Command: TokenWord CommandList /* Vec */;
     ///
@@ -1271,7 +1475,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 32:
+    /// Semantic action for production 37:
     ///
     /// CommandList /* `Vec<T>::Push` */: Argument CommandList;
     ///
@@ -1294,7 +1498,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 33:
+    /// Semantic action for production 38:
     ///
     /// CommandList /* `Vec<T>::New` */: ;
     ///
@@ -1307,7 +1511,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 34:
+    /// Semantic action for production 39:
     ///
     /// CommandLine: Command TokenEnd;
     ///
@@ -1331,7 +1535,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 35:
+    /// Semantic action for production 40:
     ///
     /// Source: SourceList /* Vec */;
     ///
@@ -1347,7 +1551,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 36:
+    /// Semantic action for production 41:
     ///
     /// SourceList /* `Vec<T>::Push` */: SourceListGroup SourceList;
     ///
@@ -1370,7 +1574,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 37:
+    /// Semantic action for production 42:
     ///
     /// SourceListGroup: CommandLine;
     ///
@@ -1387,7 +1591,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 38:
+    /// Semantic action for production 43:
     ///
     /// SourceListGroup: TokenEnd;
     ///
@@ -1404,7 +1608,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 39:
+    /// Semantic action for production 44:
     ///
     /// SourceListGroup: TermComment;
     ///
@@ -1421,7 +1625,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 40:
+    /// Semantic action for production 45:
     ///
     /// SourceList /* `Vec<T>::New` */: ;
     ///
@@ -1447,45 +1651,50 @@ impl<'t> UserActionsTrait<'t> for SdcGrammarAuto<'t, '_> {
         match prod_num {
             0 => self.term_l_bracket(&children[0]),
             1 => self.term_r_bracket(&children[0]),
-            2 => self.term_brace_group(&children[0]),
-            3 => self.term_string_group(&children[0]),
-            4 => self.term_comment(&children[0]),
-            5 => self.term_semi_colon(&children[0]),
-            6 => self.term_backslash_line_break(&children[0]),
-            7 => self.term_line_break(&children[0]),
-            8 => self.term_word(&children[0]),
-            9 => self.token_end_0(&children[0]),
-            10 => self.token_end_1(&children[0]),
-            11 => self.token_brace_group(&children[0], &children[1]),
-            12 => self.token_brace_group_opt_0(&children[0]),
-            13 => self.token_brace_group_opt_1(),
-            14 => self.token_string_group(&children[0], &children[1]),
-            15 => self.token_string_group_opt_0(&children[0]),
-            16 => self.token_string_group_opt_1(),
-            17 => self.token_l_bracket(&children[0], &children[1]),
-            18 => self.token_l_bracket_opt_0(&children[0]),
-            19 => self.token_l_bracket_opt_1(),
-            20 => self.token_r_bracket(&children[0], &children[1]),
-            21 => self.token_r_bracket_opt_0(&children[0]),
-            22 => self.token_r_bracket_opt_1(),
-            23 => self.token_word(&children[0], &children[1]),
-            24 => self.token_word_opt_0(&children[0]),
-            25 => self.token_word_opt_1(),
-            26 => self.argument_0(&children[0]),
-            27 => self.argument_1(&children[0]),
-            28 => self.argument_2(&children[0]),
-            29 => self.argument_3(&children[0]),
-            30 => self.command_replacement(&children[0], &children[1], &children[2]),
-            31 => self.command(&children[0], &children[1]),
-            32 => self.command_list_0(&children[0], &children[1]),
-            33 => self.command_list_1(),
-            34 => self.command_line(&children[0], &children[1]),
-            35 => self.source(&children[0]),
-            36 => self.source_list_0(&children[0], &children[1]),
-            37 => self.source_list_group_0(&children[0]),
-            38 => self.source_list_group_1(&children[0]),
-            39 => self.source_list_group_2(&children[0]),
-            40 => self.source_list_1(),
+            2 => self.term_l_brace(&children[0]),
+            3 => self.term_r_brace(&children[0]),
+            4 => self.term_string_group(&children[0]),
+            5 => self.term_comment(&children[0]),
+            6 => self.term_semi_colon(&children[0]),
+            7 => self.term_backslash_line_break(&children[0]),
+            8 => self.term_line_break(&children[0]),
+            9 => self.term_word(&children[0]),
+            10 => self.term_brace_group_content(&children[0]),
+            11 => self.term_brace_group(&children[0], &children[1], &children[2]),
+            12 => self.term_brace_group_group_0(&children[0]),
+            13 => self.term_brace_group_group_1(&children[0]),
+            14 => self.token_end_0(&children[0]),
+            15 => self.token_end_1(&children[0]),
+            16 => self.token_brace_group(&children[0], &children[1]),
+            17 => self.token_brace_group_opt_0(&children[0]),
+            18 => self.token_brace_group_opt_1(),
+            19 => self.token_string_group(&children[0], &children[1]),
+            20 => self.token_string_group_opt_0(&children[0]),
+            21 => self.token_string_group_opt_1(),
+            22 => self.token_l_bracket(&children[0], &children[1]),
+            23 => self.token_l_bracket_opt_0(&children[0]),
+            24 => self.token_l_bracket_opt_1(),
+            25 => self.token_r_bracket(&children[0], &children[1]),
+            26 => self.token_r_bracket_opt_0(&children[0]),
+            27 => self.token_r_bracket_opt_1(),
+            28 => self.token_word(&children[0], &children[1]),
+            29 => self.token_word_opt_0(&children[0]),
+            30 => self.token_word_opt_1(),
+            31 => self.argument_0(&children[0]),
+            32 => self.argument_1(&children[0]),
+            33 => self.argument_2(&children[0]),
+            34 => self.argument_3(&children[0]),
+            35 => self.command_replacement(&children[0], &children[1], &children[2]),
+            36 => self.command(&children[0], &children[1]),
+            37 => self.command_list_0(&children[0], &children[1]),
+            38 => self.command_list_1(),
+            39 => self.command_line(&children[0], &children[1]),
+            40 => self.source(&children[0]),
+            41 => self.source_list_0(&children[0], &children[1]),
+            42 => self.source_list_group_0(&children[0]),
+            43 => self.source_list_group_1(&children[0]),
+            44 => self.source_list_group_2(&children[0]),
+            45 => self.source_list_1(),
             _ => Err(ParserError::InternalError(format!(
                 "Unhandled production number: {}",
                 prod_num

@@ -53,24 +53,24 @@ pub(crate) fn mandatory(arg: Option<Argument>, name: &str) -> Result<Argument, S
 }
 
 pub(crate) fn fmt_arg(x: &Argument) -> String {
-    format!(" {}", x.as_str())
+    format!(" {}", x)
 }
 
 pub(crate) fn fmt_opt_arg(x: &Option<Argument>) -> String {
     if let Some(x) = x {
-        format!(" {}", x.as_str())
+        format!(" {}", x)
     } else {
         "".into()
     }
 }
 
 pub(crate) fn fmt_named_arg(x: &Argument, name: &str) -> String {
-    format!(" -{} {}", name, x.as_str())
+    format!(" -{} {}", name, x)
 }
 
 pub(crate) fn fmt_named_opt_arg(x: &Option<Argument>, name: &str) -> String {
     if let Some(x) = x {
-        format!(" -{} {}", name, x.as_str())
+        format!(" -{} {}", name, x)
     } else {
         "".into()
     }
