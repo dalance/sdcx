@@ -113,7 +113,7 @@ fn single_command() {
             power: Some("F".into()),
         }),
     );
-    check_command("all_clocks", Command::AllClocks);
+    check_command("all_clocks", Command::AllClocks(AllClocks));
     check_command(
         "all_inputs -level_sensitive -edge_triggered -clock A",
         Command::AllInputs(AllInputs {
