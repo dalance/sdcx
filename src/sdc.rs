@@ -1,49 +1,17 @@
 use crate::parser::sdc_grammar_trait as grammar;
+use crate::sdc::sdc_error::FileDb;
 use std::fmt;
 use std::ops::Range;
 use std::path::PathBuf;
 use std::sync::Arc;
-use thiserror::Error;
 
 pub mod argument;
 pub mod command;
+pub mod sdc_error;
 pub mod util;
 pub use argument::Argument;
 pub use command::*;
-
-/// SDC Error
-#[derive(Debug, Error)]
-pub enum SdcError {
-    #[error("WrongArgument: {0:?}")]
-    WrongArgument(Vec<Argument>),
-
-    #[error("UnknownCommand: {0}")]
-    UnknownCommand(String),
-
-    #[error("DuplicatedArgument")]
-    DuplicatedArgument(Argument),
-
-    #[error("MissingOptArgument: {0:?}")]
-    MissingOptArgument(Argument),
-
-    #[error("MissingPosArgument")]
-    MissingPosArgument,
-
-    #[error("TooManyArgument")]
-    TooManyArgument,
-
-    #[error("MissingMandatoryArgument: {0}")]
-    MissingMandatoryArgument(String),
-
-    #[error("ParseError: {0}")]
-    ParseError(#[from] anyhow::Error),
-
-    #[error("SdcVersionPlacement")]
-    SdcVersionPlacement,
-
-    #[error("UnknownVersion")]
-    UnknownVersion,
-}
+pub use sdc_error::SdcError;
 
 /// SDC
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -94,7 +62,7 @@ impl TryFrom<&grammar::Source<'_>> for Sdc {
                     let command = x.command_line.command.as_ref().try_into()?;
 
                     match command {
-                        Command::Set(x) if x.variable_name == "sdc_version".into() => {
+                        Command::Set(x) if x.variable_name.as_str() == "sdc_version" => {
                             if is_first_command {
                                 match x.value.as_str() {
                                     "1.1" => sdc.version = Some(SdcVersion::SDC1_1),
@@ -190,6 +158,12 @@ impl Location {
             length: to.start_byte - from.start_byte + to.length,
             file_name: from.file_name.clone(),
         }
+    }
+
+    fn range_file(&self, files: &FileDb<String, &str>) -> (Range<usize>, usize) {
+        let range: Range<usize> = self.into();
+        let file_id = files.get_id(&self.file_name.display().to_string()).unwrap();
+        (range, file_id)
     }
 }
 

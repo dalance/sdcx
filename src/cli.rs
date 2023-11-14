@@ -2,6 +2,7 @@ use anyhow::Result;
 use clap::{Parser, Subcommand};
 use flate2::read::GzDecoder;
 use sdcx;
+use sdcx::sdc::sdc_error::FileDb;
 use std::fs::File;
 use std::io::{BufReader, Read};
 use std::path::PathBuf;
@@ -57,9 +58,20 @@ fn format(opt: &Opt) -> Result<()> {
         reader.read_to_string(&mut s)?;
     }
 
-    let mut sdc = sdcx::parser::Parser::parse(&s, &file)?;
-    sdc.normalize();
-    println!("{}", sdc);
+    let mut files = FileDb::new();
+    files.add(file.display().to_string(), s.as_str());
+
+    let sdc = sdcx::parser::Parser::parse(&s, &file);
+
+    match sdc {
+        Ok(mut sdc) => {
+            sdc.normalize();
+            println!("{}", sdc);
+        }
+        Err(err) => {
+            err.report(&files)?;
+        }
+    }
 
     Ok(())
 }

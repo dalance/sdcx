@@ -21,6 +21,19 @@ pub(crate) fn opt_flg(name: Argument, tgt: bool) -> Result<bool, SdcError> {
     }
 }
 
+pub(crate) fn vec_arg(
+    name: Argument,
+    arg: Option<Argument>,
+    mut tgt: Vec<Argument>,
+) -> Result<Vec<Argument>, SdcError> {
+    if let Some(arg) = arg {
+        tgt.push(arg);
+        Ok(tgt)
+    } else {
+        Err(SdcError::MissingOptArgument(name))
+    }
+}
+
 pub(crate) fn pos_args1(
     arg: Option<Argument>,
     tgt: Option<Argument>,
@@ -76,6 +89,14 @@ pub(crate) fn fmt_named_opt_arg(x: &Option<Argument>, name: &str) -> String {
     }
 }
 
+pub(crate) fn fmt_named_vec_arg(x: &Vec<Argument>, name: &str) -> String {
+    let mut ret = "".to_string();
+    for x in x {
+        ret.push_str(&format!(" -{} {}", name, x))
+    }
+    ret
+}
+
 pub(crate) fn fmt_named_flg(x: bool, name: &str) -> String {
     if x {
         format!(" -{}", name)
@@ -101,6 +122,12 @@ impl Exist for bool {
 impl<T> Exist for Option<T> {
     fn exist(&self) -> bool {
         self.is_some()
+    }
+}
+
+impl<T> Exist for Vec<T> {
+    fn exist(&self) -> bool {
+        !self.is_empty()
     }
 }
 

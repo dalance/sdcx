@@ -15,11 +15,12 @@ name = "sdcx"
 path = "src/cli.rs"
 
 [dependencies]
-anyhow        = "1.0"
-clap          = {version = "4.4", features = ["derive"]}
-flate2        = "1.0"
-parol_runtime = {version = "0.20.0", features = ["auto_generation"]}
-thiserror     = "1.0"
+anyhow             = "1.0"
+clap               = {version = "4.4", features = ["derive"]}
+codespan-reporting = "0.11.1"
+flate2             = "1.0"
+parol_runtime      = {version = "0.20.0", features = ["auto_generation"]}
+thiserror          = "1.0"
 
 [build-dependencies]
 parol         =  "0.25.0"

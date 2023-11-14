@@ -690,6 +690,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
+ "codespan-reporting",
  "flate2",
  "parol",
  "parol_runtime",

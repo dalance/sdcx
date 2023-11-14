@@ -398,7 +398,7 @@ impl TryFrom<&grammar::Command<'_>> for Command {
             "set_wire_load_mode" => set_wire_load_mode(args, loc),
             "set_wire_load_model" => set_wire_load_model(args, loc),
             "set_wire_load_selection_group" => set_wire_load_selection_group(args, loc),
-            _ => return Err(SdcError::UnknownCommand(command.into())),
+            _ => return Err(SdcError::UnknownCommand(command.into(), loc)),
         }
     }
 }
@@ -424,7 +424,7 @@ impl Validate for AllClocks {
 
 fn all_clocks(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     if !args.is_empty() {
-        return Err(SdcError::WrongArgument(args));
+        return Err(SdcError::WrongArgument(args[0].clone()));
     }
 
     Ok(Command::AllClocks(AllClocks { location }))
@@ -467,7 +467,7 @@ fn all_inputs(args: Vec<Argument>, location: Location) -> Result<Command, SdcErr
             "-level_sensitive" => level_sensitive = opt_flg(arg, level_sensitive)?,
             "-edge_triggered" => edge_triggered = opt_flg(arg, edge_triggered)?,
             "-clock" => clock = opt_arg(arg, iter.next(), clock)?,
-            _ => return Err(SdcError::WrongArgument(vec![arg])),
+            _ => return Err(SdcError::WrongArgument(arg)),
         }
     }
 
@@ -516,7 +516,7 @@ fn all_outputs(args: Vec<Argument>, location: Location) -> Result<Command, SdcEr
             "-level_sensitive" => level_sensitive = opt_flg(arg, level_sensitive)?,
             "-edge_triggered" => edge_triggered = opt_flg(arg, edge_triggered)?,
             "-clock" => clock = opt_arg(arg, iter.next(), clock)?,
-            _ => return Err(SdcError::WrongArgument(vec![arg])),
+            _ => return Err(SdcError::WrongArgument(arg)),
         }
     }
 
@@ -607,7 +607,7 @@ fn all_registers(args: Vec<Argument>, location: Location) -> Result<Command, Sdc
             "-level_sensitive" => level_sensitive = opt_flg(arg, level_sensitive)?,
             "-edge_triggered" => edge_triggered = opt_flg(arg, edge_triggered)?,
             "-master_slave" => master_slave = opt_flg(arg, master_slave)?,
-            _ => return Err(SdcError::WrongArgument(vec![arg])),
+            _ => return Err(SdcError::WrongArgument(arg)),
         }
     }
 
@@ -877,7 +877,7 @@ impl Validate for CurrentDesign {
 
 fn current_design(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     if !args.is_empty() {
-        return Err(SdcError::WrongArgument(args));
+        return Err(SdcError::WrongArgument(args[0].clone()));
     }
 
     Ok(Command::CurrentDesign(CurrentDesign { location }))
@@ -1407,9 +1407,9 @@ pub struct GroupPath {
     pub to: Option<Argument>,
     pub rise_to: Option<Argument>,
     pub fall_to: Option<Argument>,
-    pub through: Option<Argument>,
-    pub rise_through: Option<Argument>,
-    pub fall_through: Option<Argument>,
+    pub through: Vec<Argument>,
+    pub rise_through: Vec<Argument>,
+    pub fall_through: Vec<Argument>,
     pub comment: Option<Argument>,
     location: Location,
 }
@@ -1426,9 +1426,9 @@ impl fmt::Display for GroupPath {
         text.push_str(&fmt_named_opt_arg(&self.to, "to"));
         text.push_str(&fmt_named_opt_arg(&self.rise_to, "rise_to"));
         text.push_str(&fmt_named_opt_arg(&self.fall_to, "fall_to"));
-        text.push_str(&fmt_named_opt_arg(&self.through, "through"));
-        text.push_str(&fmt_named_opt_arg(&self.rise_through, "rise_through"));
-        text.push_str(&fmt_named_opt_arg(&self.fall_through, "fall_through"));
+        text.push_str(&fmt_named_vec_arg(&self.through, "through"));
+        text.push_str(&fmt_named_vec_arg(&self.rise_through, "rise_through"));
+        text.push_str(&fmt_named_vec_arg(&self.fall_through, "fall_through"));
         text.push_str(&fmt_named_opt_arg(&self.comment, "comment"));
         text.fmt(f)
     }
@@ -1458,9 +1458,9 @@ fn group_path(args: Vec<Argument>, location: Location) -> Result<Command, SdcErr
     let mut to = None;
     let mut rise_to = None;
     let mut fall_to = None;
-    let mut through = None;
-    let mut rise_through = None;
-    let mut fall_through = None;
+    let mut through = vec![];
+    let mut rise_through = vec![];
+    let mut fall_through = vec![];
     let mut comment = None;
 
     let mut iter = args.into_iter();
@@ -1475,11 +1475,11 @@ fn group_path(args: Vec<Argument>, location: Location) -> Result<Command, SdcErr
             "-to" => to = opt_arg(arg, iter.next(), to)?,
             "-rise_to" => rise_to = opt_arg(arg, iter.next(), rise_to)?,
             "-fall_to" => fall_to = opt_arg(arg, iter.next(), fall_to)?,
-            "-through" => through = opt_arg(arg, iter.next(), through)?,
-            "-rise_through" => rise_through = opt_arg(arg, iter.next(), rise_through)?,
-            "-fall_through" => fall_through = opt_arg(arg, iter.next(), fall_through)?,
+            "-through" => through = vec_arg(arg, iter.next(), through)?,
+            "-rise_through" => rise_through = vec_arg(arg, iter.next(), rise_through)?,
+            "-fall_through" => fall_through = vec_arg(arg, iter.next(), fall_through)?,
             "-comment" => comment = opt_arg(arg, iter.next(), comment)?,
-            _ => return Err(SdcError::WrongArgument(vec![arg])),
+            _ => return Err(SdcError::WrongArgument(arg)),
         }
     }
 
@@ -1701,9 +1701,9 @@ fn set_clock_gating_check(args: Vec<Argument>, location: Location) -> Result<Com
 /// set_clock_groups
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetClockGroups {
-    pub group: Argument,
+    pub group: Vec<Argument>,
     pub logically_exclusive: bool,
-    pub phisically_exclusive: bool,
+    pub physically_exclusive: bool,
     pub asynchronous: bool,
     pub allow_paths: bool,
     pub name: Option<Argument>,
@@ -1714,13 +1714,13 @@ pub struct SetClockGroups {
 impl fmt::Display for SetClockGroups {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut text = "set_clock_groups".to_string();
-        text.push_str(&fmt_named_arg(&self.group, "group"));
+        text.push_str(&fmt_named_vec_arg(&self.group, "group"));
         text.push_str(&fmt_named_flg(
             self.logically_exclusive,
             "logically_exclusive",
         ));
         text.push_str(&fmt_named_flg(
-            self.phisically_exclusive,
+            self.physically_exclusive,
             "phisically_exclusive",
         ));
         text.push_str(&fmt_named_flg(self.asynchronous, "asynchronous"));
@@ -1735,7 +1735,7 @@ impl Validate for SetClockGroups {
     fn validate(&self, version: SdcVersion) -> bool {
         minimum_supported_version(version, SdcVersion::SDC1_7)
             && check3(
-                &self.phisically_exclusive,
+                &self.physically_exclusive,
                 &self.logically_exclusive,
                 &self.asynchronous,
                 |a, b, c| a ^ b ^ c,
@@ -1744,9 +1744,9 @@ impl Validate for SetClockGroups {
 }
 
 fn set_clock_groups(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
-    let mut group = None;
+    let mut group = vec![];
     let mut logically_exclusive = false;
-    let mut phisically_exclusive = false;
+    let mut physically_exclusive = false;
     let mut asynchronous = false;
     let mut allow_paths = false;
     let mut name = None;
@@ -1755,23 +1755,21 @@ fn set_clock_groups(args: Vec<Argument>, location: Location) -> Result<Command, 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-group" => group = opt_arg(arg, iter.next(), group)?,
+            "-group" => group = vec_arg(arg, iter.next(), group)?,
             "-logically_exclusive" => logically_exclusive = opt_flg(arg, logically_exclusive)?,
-            "-phisically_exclusive" => phisically_exclusive = opt_flg(arg, phisically_exclusive)?,
+            "-physically_exclusive" => physically_exclusive = opt_flg(arg, physically_exclusive)?,
             "-asynchronous" => asynchronous = opt_flg(arg, asynchronous)?,
             "-allow_paths" => allow_paths = opt_flg(arg, allow_paths)?,
             "-name" => name = opt_arg(arg, iter.next(), name)?,
             "-comment" => comment = opt_arg(arg, iter.next(), comment)?,
-            _ => return Err(SdcError::WrongArgument(vec![arg])),
+            _ => return Err(SdcError::WrongArgument(arg)),
         }
     }
-
-    let group = mandatory(group, "-group")?;
 
     Ok(Command::SetClockGroups(SetClockGroups {
         group,
         logically_exclusive,
-        phisically_exclusive,
+        physically_exclusive,
         asynchronous,
         allow_paths,
         name,
@@ -2373,13 +2371,13 @@ pub struct SetFalsePath {
     pub fall: bool,
     pub from: Option<Argument>,
     pub to: Option<Argument>,
-    pub through: Option<Argument>,
+    pub through: Vec<Argument>,
     pub rise_from: Option<Argument>,
     pub rise_to: Option<Argument>,
-    pub rise_through: Option<Argument>,
+    pub rise_through: Vec<Argument>,
     pub fall_from: Option<Argument>,
     pub fall_to: Option<Argument>,
-    pub fall_through: Option<Argument>,
+    pub fall_through: Vec<Argument>,
     pub comment: Option<Argument>,
     location: Location,
 }
@@ -2393,13 +2391,13 @@ impl fmt::Display for SetFalsePath {
         text.push_str(&fmt_named_flg(self.fall, "fall"));
         text.push_str(&fmt_named_opt_arg(&self.from, "from"));
         text.push_str(&fmt_named_opt_arg(&self.to, "to"));
-        text.push_str(&fmt_named_opt_arg(&self.through, "through"));
+        text.push_str(&fmt_named_vec_arg(&self.through, "through"));
         text.push_str(&fmt_named_opt_arg(&self.rise_from, "rise_from"));
         text.push_str(&fmt_named_opt_arg(&self.rise_to, "rise_to"));
-        text.push_str(&fmt_named_opt_arg(&self.rise_through, "rise_through"));
+        text.push_str(&fmt_named_vec_arg(&self.rise_through, "rise_through"));
         text.push_str(&fmt_named_opt_arg(&self.fall_from, "fall_from"));
         text.push_str(&fmt_named_opt_arg(&self.fall_to, "fall_to"));
-        text.push_str(&fmt_named_opt_arg(&self.fall_through, "fall_through"));
+        text.push_str(&fmt_named_vec_arg(&self.fall_through, "fall_through"));
         text.push_str(&fmt_named_opt_arg(&self.comment, "comment"));
         text.fmt(f)
     }
@@ -2428,13 +2426,13 @@ fn set_false_path(args: Vec<Argument>, location: Location) -> Result<Command, Sd
     let mut fall = false;
     let mut from = None;
     let mut to = None;
-    let mut through = None;
+    let mut through = vec![];
     let mut rise_from = None;
     let mut rise_to = None;
-    let mut rise_through = None;
+    let mut rise_through = vec![];
     let mut fall_from = None;
     let mut fall_to = None;
-    let mut fall_through = None;
+    let mut fall_through = vec![];
     let mut comment = None;
 
     let mut iter = args.into_iter();
@@ -2446,15 +2444,15 @@ fn set_false_path(args: Vec<Argument>, location: Location) -> Result<Command, Sd
             "-fall" => fall = opt_flg(arg, fall)?,
             "-from" => from = opt_arg(arg, iter.next(), from)?,
             "-to" => to = opt_arg(arg, iter.next(), to)?,
-            "-through" => through = opt_arg(arg, iter.next(), through)?,
+            "-through" => through = vec_arg(arg, iter.next(), through)?,
             "-rise_from" => rise_from = opt_arg(arg, iter.next(), rise_from)?,
             "-rise_to" => rise_to = opt_arg(arg, iter.next(), rise_to)?,
-            "-rise_through" => rise_through = opt_arg(arg, iter.next(), rise_through)?,
+            "-rise_through" => rise_through = vec_arg(arg, iter.next(), rise_through)?,
             "-fall_from" => fall_from = opt_arg(arg, iter.next(), fall_from)?,
             "-fall_to" => fall_to = opt_arg(arg, iter.next(), fall_to)?,
-            "-fall_through" => fall_through = opt_arg(arg, iter.next(), fall_through)?,
+            "-fall_through" => fall_through = vec_arg(arg, iter.next(), fall_through)?,
             "-comment" => comment = opt_arg(arg, iter.next(), comment)?,
-            _ => return Err(SdcError::WrongArgument(vec![arg])),
+            _ => return Err(SdcError::WrongArgument(arg)),
         }
     }
 
@@ -2953,7 +2951,7 @@ fn set_level_shifter_strategy(
     while let Some(arg) = iter.next() {
         match arg.as_str() {
             "-rule" => rule = opt_arg(arg, iter.next(), rule)?,
-            _ => return Err(SdcError::WrongArgument(vec![arg])),
+            _ => return Err(SdcError::WrongArgument(arg)),
         }
     }
 
@@ -3000,7 +2998,7 @@ fn set_level_shifter_threshold(
         match arg.as_str() {
             "-voltage" => voltage = opt_arg(arg, iter.next(), voltage)?,
             "-percent" => percent = opt_arg(arg, iter.next(), percent)?,
-            _ => return Err(SdcError::WrongArgument(vec![arg])),
+            _ => return Err(SdcError::WrongArgument(arg)),
         }
     }
 
@@ -3291,13 +3289,13 @@ pub struct SetMaxDelay {
     pub fall: bool,
     pub from: Option<Argument>,
     pub to: Option<Argument>,
-    pub through: Option<Argument>,
+    pub through: Vec<Argument>,
     pub rise_from: Option<Argument>,
     pub rise_to: Option<Argument>,
-    pub rise_through: Option<Argument>,
+    pub rise_through: Vec<Argument>,
     pub fall_from: Option<Argument>,
     pub fall_to: Option<Argument>,
-    pub fall_through: Option<Argument>,
+    pub fall_through: Vec<Argument>,
     pub ignore_clock_latency: bool,
     pub comment: Option<Argument>,
     pub delay_value: Argument,
@@ -3311,13 +3309,13 @@ impl fmt::Display for SetMaxDelay {
         text.push_str(&fmt_named_flg(self.fall, "fall"));
         text.push_str(&fmt_named_opt_arg(&self.from, "from"));
         text.push_str(&fmt_named_opt_arg(&self.to, "to"));
-        text.push_str(&fmt_named_opt_arg(&self.through, "through"));
+        text.push_str(&fmt_named_vec_arg(&self.through, "through"));
         text.push_str(&fmt_named_opt_arg(&self.rise_from, "rise_from"));
         text.push_str(&fmt_named_opt_arg(&self.rise_to, "rise_to"));
-        text.push_str(&fmt_named_opt_arg(&self.rise_through, "rise_through"));
+        text.push_str(&fmt_named_vec_arg(&self.rise_through, "rise_through"));
         text.push_str(&fmt_named_opt_arg(&self.fall_from, "fall_from"));
         text.push_str(&fmt_named_opt_arg(&self.fall_to, "fall_to"));
-        text.push_str(&fmt_named_opt_arg(&self.fall_through, "fall_through"));
+        text.push_str(&fmt_named_vec_arg(&self.fall_through, "fall_through"));
         text.push_str(&fmt_named_flg(
             self.ignore_clock_latency,
             "ignore_clock_latency",
@@ -3340,13 +3338,13 @@ fn set_max_delay(args: Vec<Argument>, location: Location) -> Result<Command, Sdc
     let mut fall = false;
     let mut from = None;
     let mut to = None;
-    let mut through = None;
+    let mut through = vec![];
     let mut rise_from = None;
     let mut rise_to = None;
-    let mut rise_through = None;
+    let mut rise_through = vec![];
     let mut fall_from = None;
     let mut fall_to = None;
-    let mut fall_through = None;
+    let mut fall_through = vec![];
     let mut ignore_clock_latency = false;
     let mut comment = None;
     let mut delay_value = None;
@@ -3358,13 +3356,13 @@ fn set_max_delay(args: Vec<Argument>, location: Location) -> Result<Command, Sdc
             "-fall" => fall = opt_flg(arg, fall)?,
             "-from" => from = opt_arg(arg, iter.next(), from)?,
             "-to" => to = opt_arg(arg, iter.next(), to)?,
-            "-through" => through = opt_arg(arg, iter.next(), through)?,
+            "-through" => through = vec_arg(arg, iter.next(), through)?,
             "-rise_from" => rise_from = opt_arg(arg, iter.next(), rise_from)?,
             "-rise_to" => rise_to = opt_arg(arg, iter.next(), rise_to)?,
-            "-rise_through" => rise_through = opt_arg(arg, iter.next(), rise_through)?,
+            "-rise_through" => rise_through = vec_arg(arg, iter.next(), rise_through)?,
             "-fall_from" => fall_from = opt_arg(arg, iter.next(), fall_from)?,
             "-fall_to" => fall_to = opt_arg(arg, iter.next(), fall_to)?,
-            "-fall_through" => fall_through = opt_arg(arg, iter.next(), fall_through)?,
+            "-fall_through" => fall_through = vec_arg(arg, iter.next(), fall_through)?,
             "-ignore_clock_latency" => ignore_clock_latency = opt_flg(arg, ignore_clock_latency)?,
             "-comment" => comment = opt_arg(arg, iter.next(), comment)?,
             _ => delay_value = pos_args1(Some(arg), delay_value)?,
@@ -3681,13 +3679,13 @@ pub struct SetMinDelay {
     pub fall: bool,
     pub from: Option<Argument>,
     pub to: Option<Argument>,
-    pub through: Option<Argument>,
+    pub through: Vec<Argument>,
     pub rise_from: Option<Argument>,
     pub rise_to: Option<Argument>,
-    pub rise_through: Option<Argument>,
+    pub rise_through: Vec<Argument>,
     pub fall_from: Option<Argument>,
     pub fall_to: Option<Argument>,
-    pub fall_through: Option<Argument>,
+    pub fall_through: Vec<Argument>,
     pub ignore_clock_latency: bool,
     pub comment: Option<Argument>,
     pub delay_value: Argument,
@@ -3701,13 +3699,13 @@ impl fmt::Display for SetMinDelay {
         text.push_str(&fmt_named_flg(self.fall, "fall"));
         text.push_str(&fmt_named_opt_arg(&self.from, "from"));
         text.push_str(&fmt_named_opt_arg(&self.to, "to"));
-        text.push_str(&fmt_named_opt_arg(&self.through, "through"));
+        text.push_str(&fmt_named_vec_arg(&self.through, "through"));
         text.push_str(&fmt_named_opt_arg(&self.rise_from, "rise_from"));
         text.push_str(&fmt_named_opt_arg(&self.rise_to, "rise_to"));
-        text.push_str(&fmt_named_opt_arg(&self.rise_through, "rise_through"));
+        text.push_str(&fmt_named_vec_arg(&self.rise_through, "rise_through"));
         text.push_str(&fmt_named_opt_arg(&self.fall_from, "fall_from"));
         text.push_str(&fmt_named_opt_arg(&self.fall_to, "fall_to"));
-        text.push_str(&fmt_named_opt_arg(&self.fall_through, "fall_through"));
+        text.push_str(&fmt_named_vec_arg(&self.fall_through, "fall_through"));
         text.push_str(&fmt_named_flg(
             self.ignore_clock_latency,
             "ignore_clock_latency",
@@ -3730,13 +3728,13 @@ fn set_min_delay(args: Vec<Argument>, location: Location) -> Result<Command, Sdc
     let mut fall = false;
     let mut from = None;
     let mut to = None;
-    let mut through = None;
+    let mut through = vec![];
     let mut rise_from = None;
     let mut rise_to = None;
-    let mut rise_through = None;
+    let mut rise_through = vec![];
     let mut fall_from = None;
     let mut fall_to = None;
-    let mut fall_through = None;
+    let mut fall_through = vec![];
     let mut ignore_clock_latency = false;
     let mut comment = None;
     let mut delay_value = None;
@@ -3748,13 +3746,13 @@ fn set_min_delay(args: Vec<Argument>, location: Location) -> Result<Command, Sdc
             "-fall" => fall = opt_flg(arg, fall)?,
             "-from" => from = opt_arg(arg, iter.next(), from)?,
             "-to" => to = opt_arg(arg, iter.next(), to)?,
-            "-through" => through = opt_arg(arg, iter.next(), through)?,
+            "-through" => through = vec_arg(arg, iter.next(), through)?,
             "-rise_from" => rise_from = opt_arg(arg, iter.next(), rise_from)?,
             "-rise_to" => rise_to = opt_arg(arg, iter.next(), rise_to)?,
-            "-rise_through" => rise_through = opt_arg(arg, iter.next(), rise_through)?,
+            "-rise_through" => rise_through = vec_arg(arg, iter.next(), rise_through)?,
             "-fall_from" => fall_from = opt_arg(arg, iter.next(), fall_from)?,
             "-fall_to" => fall_to = opt_arg(arg, iter.next(), fall_to)?,
-            "-fall_through" => fall_through = opt_arg(arg, iter.next(), fall_through)?,
+            "-fall_through" => fall_through = vec_arg(arg, iter.next(), fall_through)?,
             "-ignore_clock_latency" => ignore_clock_latency = opt_flg(arg, ignore_clock_latency)?,
             "-comment" => comment = opt_arg(arg, iter.next(), comment)?,
             _ => delay_value = pos_args1(Some(arg), delay_value)?,
@@ -3846,13 +3844,13 @@ pub struct SetMulticyclePath {
     pub end: bool,
     pub from: Option<Argument>,
     pub to: Option<Argument>,
-    pub through: Option<Argument>,
+    pub through: Vec<Argument>,
     pub rise_from: Option<Argument>,
     pub rise_to: Option<Argument>,
-    pub rise_through: Option<Argument>,
+    pub rise_through: Vec<Argument>,
     pub fall_from: Option<Argument>,
     pub fall_to: Option<Argument>,
-    pub fall_through: Option<Argument>,
+    pub fall_through: Vec<Argument>,
     pub comment: Option<Argument>,
     pub path_multiplier: Argument,
     location: Location,
@@ -3869,13 +3867,13 @@ impl fmt::Display for SetMulticyclePath {
         text.push_str(&fmt_named_flg(self.end, "end"));
         text.push_str(&fmt_named_opt_arg(&self.from, "from"));
         text.push_str(&fmt_named_opt_arg(&self.to, "to"));
-        text.push_str(&fmt_named_opt_arg(&self.through, "through"));
+        text.push_str(&fmt_named_vec_arg(&self.through, "through"));
         text.push_str(&fmt_named_opt_arg(&self.rise_from, "rise_from"));
         text.push_str(&fmt_named_opt_arg(&self.rise_to, "rise_to"));
-        text.push_str(&fmt_named_opt_arg(&self.rise_through, "rise_through"));
+        text.push_str(&fmt_named_vec_arg(&self.rise_through, "rise_through"));
         text.push_str(&fmt_named_opt_arg(&self.fall_from, "fall_from"));
         text.push_str(&fmt_named_opt_arg(&self.fall_to, "fall_to"));
-        text.push_str(&fmt_named_opt_arg(&self.fall_through, "fall_through"));
+        text.push_str(&fmt_named_vec_arg(&self.fall_through, "fall_through"));
         text.push_str(&fmt_named_opt_arg(&self.comment, "comment"));
         text.push_str(&fmt_arg(&self.path_multiplier));
         text.fmt(f)
@@ -3897,13 +3895,13 @@ fn set_multicycle_path(args: Vec<Argument>, location: Location) -> Result<Comman
     let mut end = false;
     let mut from = None;
     let mut to = None;
-    let mut through = None;
+    let mut through = vec![];
     let mut rise_from = None;
     let mut rise_to = None;
-    let mut rise_through = None;
+    let mut rise_through = vec![];
     let mut fall_from = None;
     let mut fall_to = None;
-    let mut fall_through = None;
+    let mut fall_through = vec![];
     let mut comment = None;
     let mut path_multiplier = None;
 
@@ -3918,13 +3916,13 @@ fn set_multicycle_path(args: Vec<Argument>, location: Location) -> Result<Comman
             "-end" => end = opt_flg(arg, end)?,
             "-from" => from = opt_arg(arg, iter.next(), from)?,
             "-to" => to = opt_arg(arg, iter.next(), to)?,
-            "-through" => through = opt_arg(arg, iter.next(), through)?,
+            "-through" => through = vec_arg(arg, iter.next(), through)?,
             "-rise_from" => rise_from = opt_arg(arg, iter.next(), rise_from)?,
             "-rise_to" => rise_to = opt_arg(arg, iter.next(), rise_to)?,
-            "-rise_through" => rise_through = opt_arg(arg, iter.next(), rise_through)?,
+            "-rise_through" => rise_through = vec_arg(arg, iter.next(), rise_through)?,
             "-fall_from" => fall_from = opt_arg(arg, iter.next(), fall_from)?,
             "-fall_to" => fall_to = opt_arg(arg, iter.next(), fall_to)?,
-            "-fall_through" => fall_through = opt_arg(arg, iter.next(), fall_through)?,
+            "-fall_through" => fall_through = vec_arg(arg, iter.next(), fall_through)?,
             "-comment" => comment = opt_arg(arg, iter.next(), comment)?,
             _ => path_multiplier = pos_args1(Some(arg), path_multiplier)?,
         }
@@ -4518,7 +4516,7 @@ fn set_units(args: Vec<Argument>, location: Location) -> Result<Command, SdcErro
             "-voltage" => voltage = opt_arg(arg, iter.next(), voltage)?,
             "-current" => current = opt_arg(arg, iter.next(), current)?,
             "-power" => power = opt_arg(arg, iter.next(), power)?,
-            _ => return Err(SdcError::WrongArgument(vec![arg])),
+            _ => return Err(SdcError::WrongArgument(arg)),
         }
     }
 

@@ -1,11 +1,9 @@
 use crate::sdc::*;
 use crate::Parser;
 
-fn success(code: &str) {
+fn check_parse(code: &str) {
     let code = format!("{code}\n");
     let sdc = Parser::parse(&code, &"");
-    dbg!(&code);
-    dbg!(&sdc);
     assert!(sdc.is_ok());
 }
 
@@ -24,16 +22,16 @@ fn check_version(code: &str, version: Option<SdcVersion>) {
     assert_eq!(sdc.version, version);
 }
 
-fn check_command(code: &str, command: Command) {
+fn check_format(code: &str, format: &str) {
     let code = format!("{code}\n");
     let sdc = Parser::parse(&code, &"").unwrap();
-    assert_eq!(sdc.commands[0], command);
+    assert_eq!(&format!("{}", sdc.commands[0]), format);
 }
 
 #[test]
 fn comment() {
-    success("#comment");
-    success("#comment\n#comment\n\n");
+    check_parse("#comment");
+    check_parse("#comment\n#comment\n\n");
 }
 
 #[test]
@@ -70,64 +68,23 @@ fn version() {
 }
 
 #[test]
-fn command() {
-    check_command(
-        "current_instance A",
-        Command::CurrentInstance(CurrentInstance {
-            instance: Some("A".into()),
-        }),
+fn format() {
+    check_format("all_clocks", "all_clocks");
+    check_format(
+        "all_inputs -clock A -level_sensitive",
+        "all_inputs -level_sensitive -clock A",
     );
-    check_command(
-        "expr A B C",
-        Command::Expr(Expr {
-            args: vec!["A".into(), "B".into(), "C".into()],
-        }),
+    check_format(
+        "all_outputs -clock A -edge_triggered",
+        "all_outputs -edge_triggered -clock A",
     );
-    check_command(
-        "list A B C",
-        Command::List(List {
-            args: vec!["A".into(), "B".into(), "C".into()],
-        }),
+    check_format(
+        "all_registers -clock A -edge_triggered",
+        "all_registers -clock A -edge_triggered",
     );
-    check_command(
-        "set A B",
-        Command::Set(Set {
-            variable_name: "A".into(),
-            value: "B".into(),
-        }),
-    );
-    check_command(
-        "set_hierarchy_separator A",
-        Command::SetHierarchySeparator(SetHierarchySeparator {
-            separator: "A".into(),
-        }),
-    );
-    check_command(
-        "set_units -capacitance A -resistance B -time C -voltage D -current E -power F",
-        Command::SetUnits(SetUnits {
-            capacitance: Some("A".into()),
-            resistance: Some("B".into()),
-            time: Some("C".into()),
-            voltage: Some("D".into()),
-            current: Some("E".into()),
-            power: Some("F".into()),
-        }),
-    );
-    check_command("all_clocks", Command::AllClocks(AllClocks));
-    check_command(
-        "all_inputs -level_sensitive -edge_triggered -clock A",
-        Command::AllInputs(AllInputs {
-            level_sensitive: true,
-            edge_triggered: true,
-            clock: Some("A".into()),
-        }),
-    );
-    check_command(
-        "all_outputs -level_sensitive -edge_triggered -clock A",
-        Command::AllOutputs(AllOutputs {
-            level_sensitive: true,
-            edge_triggered: true,
-            clock: Some("A".into()),
-        }),
-    );
+    check_format("current_instance   A  ", "current_instance A");
+    check_format("expr A B C ", "expr A B C");
+    check_format("list A B C ", "list A B C");
+    check_format("set A B", "set A B");
+    check_format("set A B", "set A B");
 }
