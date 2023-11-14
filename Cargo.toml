@@ -18,12 +18,12 @@ path = "src/cli.rs"
 anyhow        = "1.0"
 clap          = {version = "4.4", features = ["derive"]}
 flate2        = "1.0"
-parol_runtime = {version = "0.19.0", features = ["auto_generation"]}
+parol_runtime = {version = "0.20.0", features = ["auto_generation"]}
 thiserror     = "1.0"
 
 [build-dependencies]
-parol         =  "0.24.0"
-parol_runtime = {version = "0.19.0", features = ["auto_generation"]}
+parol         =  "0.25.0"
+parol_runtime = {version = "0.20.0", features = ["auto_generation"]}
 walkdir       = "2.4.0"
 
 [workspace.dependencies]

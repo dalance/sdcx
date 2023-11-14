@@ -1,5 +1,8 @@
 use crate::parser::sdc_grammar_trait as grammar;
 use std::fmt;
+use std::ops::Range;
+use std::path::PathBuf;
+use std::sync::Arc;
 use thiserror::Error;
 
 pub mod argument;
@@ -160,6 +163,56 @@ impl fmt::Display for SdcVersion {
             SdcVersion::SDC1_9 => "set sdc_version 1.9".fmt(f),
             SdcVersion::SDC2_0 => "set sdc_version 2.0".fmt(f),
             SdcVersion::SDC2_1 => "set sdc_version 2.1".fmt(f),
+        }
+    }
+}
+
+/// Location
+#[derive(Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord)]
+pub struct Location {
+    pub start_byte: u32,
+    pub start_line: u32,
+    pub start_column: u32,
+    pub end_line: u32,
+    pub end_column: u32,
+    pub length: u32,
+    pub file_name: Arc<PathBuf>,
+}
+
+impl Location {
+    fn from_to(from: &Location, to: &Location) -> Location {
+        Location {
+            start_byte: from.start_byte,
+            start_line: from.start_line,
+            start_column: to.start_column,
+            end_line: to.end_line,
+            end_column: to.end_column,
+            length: to.start_byte - from.start_byte + to.length,
+            file_name: from.file_name.clone(),
+        }
+    }
+}
+
+impl From<&Location> for Range<usize> {
+    fn from(value: &Location) -> Self {
+        Range {
+            start: value.start_byte as usize,
+            end: (value.start_byte + value.length) as usize,
+        }
+    }
+}
+
+impl From<&parol_runtime::Location> for Location {
+    fn from(value: &parol_runtime::Location) -> Self {
+        let start_byte = value.scanner_switch_pos as u32 + value.offset as u32 - value.length;
+        Location {
+            start_byte,
+            start_line: value.start_line,
+            start_column: value.start_column,
+            end_line: value.end_line,
+            end_column: value.end_column,
+            length: value.length,
+            file_name: value.file_name.clone(),
         }
     }
 }

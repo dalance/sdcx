@@ -1,6 +1,6 @@
 use crate::parser::sdc_grammar_trait as grammar;
 use crate::sdc::util::*;
-use crate::sdc::{Argument, SdcError, SdcVersion, Validate};
+use crate::sdc::{Argument, Location, SdcError, SdcVersion, Validate};
 use std::fmt;
 
 /// SDC command
@@ -76,6 +76,83 @@ pub enum Command {
     SetLevelShifterThreshold(SetLevelShifterThreshold),
     SetMaxDynamicPower(SetMaxDynamicPower),
     SetMaxLeakagePower(SetMaxLeakagePower),
+}
+
+impl Command {
+    pub fn location(&self) -> &Location {
+        match self {
+            Command::CurrentInstance(x) => &x.location,
+            Command::Expr(x) => &x.location,
+            Command::List(x) => &x.location,
+            Command::Set(x) => &x.location,
+            Command::SetHierarchySeparator(x) => &x.location,
+            Command::SetUnits(x) => &x.location,
+            Command::AllClocks(x) => &x.location,
+            Command::AllInputs(x) => &x.location,
+            Command::AllOutputs(x) => &x.location,
+            Command::AllRegisters(x) => &x.location,
+            Command::CurrentDesign(x) => &x.location,
+            Command::GetCells(x) => &x.location,
+            Command::GetClocks(x) => &x.location,
+            Command::GetLibCells(x) => &x.location,
+            Command::GetLibPins(x) => &x.location,
+            Command::GetLibs(x) => &x.location,
+            Command::GetNets(x) => &x.location,
+            Command::GetPins(x) => &x.location,
+            Command::GetPorts(x) => &x.location,
+            Command::CreateClock(x) => &x.location,
+            Command::CreateGeneratedClock(x) => &x.location,
+            Command::GroupPath(x) => &x.location,
+            Command::SetClockGatingCheck(x) => &x.location,
+            Command::SetClockGroups(x) => &x.location,
+            Command::SetClockLatency(x) => &x.location,
+            Command::SetSense(x) => &x.location,
+            Command::SetClockTransition(x) => &x.location,
+            Command::SetClockUncertainty(x) => &x.location,
+            Command::SetDataCheck(x) => &x.location,
+            Command::SetDisableTiming(x) => &x.location,
+            Command::SetFalsePath(x) => &x.location,
+            Command::SetIdealLatency(x) => &x.location,
+            Command::SetIdealNetwork(x) => &x.location,
+            Command::SetIdealTransition(x) => &x.location,
+            Command::SetInputDelay(x) => &x.location,
+            Command::SetMaxDelay(x) => &x.location,
+            Command::SetMaxTimeBorrow(x) => &x.location,
+            Command::SetMinDelay(x) => &x.location,
+            Command::SetMinPulseWidth(x) => &x.location,
+            Command::SetMulticyclePath(x) => &x.location,
+            Command::SetOutputDelay(x) => &x.location,
+            Command::SetPropagatedClock(x) => &x.location,
+            Command::SetCaseAnalysis(x) => &x.location,
+            Command::SetDrive(x) => &x.location,
+            Command::SetDrivingCell(x) => &x.location,
+            Command::SetFanoutLoad(x) => &x.location,
+            Command::SetInputTransition(x) => &x.location,
+            Command::SetLoad(x) => &x.location,
+            Command::SetLogicDc(x) => &x.location,
+            Command::SetLogicOne(x) => &x.location,
+            Command::SetLogicZero(x) => &x.location,
+            Command::SetMaxArea(x) => &x.location,
+            Command::SetMaxCapacitance(x) => &x.location,
+            Command::SetMaxFanout(x) => &x.location,
+            Command::SetMaxTransition(x) => &x.location,
+            Command::SetMinCapacitance(x) => &x.location,
+            Command::SetOperatingConditions(x) => &x.location,
+            Command::SetPortFanoutNumber(x) => &x.location,
+            Command::SetResistance(x) => &x.location,
+            Command::SetTimingDerate(x) => &x.location,
+            Command::SetVoltage(x) => &x.location,
+            Command::SetWireLoadMinBlockSize(x) => &x.location,
+            Command::SetWireLoadMode(x) => &x.location,
+            Command::SetWireLoadModel(x) => &x.location,
+            Command::SetWireLoadSelectionGroup(x) => &x.location,
+            Command::CreateVoltageArea(x) => &x.location,
+            Command::SetLevelShifterStrategy(x) => &x.location,
+            Command::SetLevelShifterThreshold(x) => &x.location,
+            Command::SetMaxDynamicPower(x) => &x.location,
+            Command::SetMaxLeakagePower(x) => &x.location,
+        }
+    }
 }
 
 impl fmt::Display for Command {
@@ -237,81 +314,90 @@ impl TryFrom<&grammar::Command<'_>> for Command {
 
     fn try_from(value: &grammar::Command<'_>) -> Result<Self, SdcError> {
         let command = value.token_word.term_word.term_word.text();
-        let mut args = vec![];
+        let start: Location = (&value.token_word.term_word.term_word.location).into();
+
+        let mut args: Vec<Argument> = vec![];
         for arg in &value.command_list {
             args.push(arg.argument.as_ref().try_into()?);
         }
+
+        let loc = if args.is_empty() {
+            start
+        } else {
+            Location::from_to(&start, &args.last().unwrap().location())
+        };
+
         match command {
-            "current_instance" => current_instance(args),
-            "expr" => expr(args),
-            "list" => list(args),
-            "set" => set(args),
-            "set_hierarchy_separator" => set_hierarchy_separator(args),
-            "set_units" => set_units(args),
-            "all_clocks" => all_clocks(args),
-            "all_inputs" => all_inputs(args),
-            "all_outputs" => all_outputs(args),
-            "all_registers" => all_registers(args),
-            "current_design" => current_design(args),
-            "get_cells" => get_cells(args),
-            "get_clocks" => get_clocks(args),
-            "get_lib_cells" => get_lib_cells(args),
-            "get_lib_pins" => get_lib_pins(args),
-            "get_libs" => get_libs(args),
-            "get_nets" => get_nets(args),
-            "get_pins" => get_pins(args),
-            "get_ports" => get_ports(args),
-            "create_clock" => create_clock(args),
-            "create_generated_clock" => create_generated_clock(args),
-            "group_path" => group_path(args),
-            "set_clock_gating_check" => set_clock_gating_check(args),
-            "set_clock_groups" => set_clock_groups(args),
-            "set_clock_latency" => set_clock_latency(args),
-            "set_sense" => set_sense(args),
-            "set_clock_transition" => set_clock_transition(args),
-            "set_clock_uncertainty" => set_clock_uncertainty(args),
-            "set_data_check" => set_data_check(args),
-            "set_disable_timing" => set_disable_timing(args),
-            "set_false_path" => set_false_path(args),
-            "set_ideal_latency" => set_ideal_latency(args),
-            "set_ideal_network" => set_ideal_network(args),
-            "set_ideal_transition" => set_ideal_transition(args),
-            "set_input_delay" => set_input_delay(args),
-            "set_max_delay" => set_max_delay(args),
-            "set_max_time_borrow" => set_max_time_borrow(args),
-            "set_min_delay" => set_min_delay(args),
-            "set_min_pulse_width" => set_min_pulse_width(args),
-            "set_multicycle_path" => set_multicycle_path(args),
-            "set_output_delay" => set_output_delay(args),
-            "set_propagated_clock" => set_propagated_clock(args),
-            "set_case_analysis" => set_case_analysis(args),
-            "set_drive" => set_drive(args),
-            "set_driving_cell" => set_driving_cell(args),
-            "set_fanout_load" => set_fanout_load(args),
-            "set_input_transition" => set_input_transition(args),
-            "set_load" => set_load(args),
-            "set_logic_dc" => set_logic_dc(args),
-            "set_logic_one" => set_logic_one(args),
-            "set_logic_zero" => set_logic_zero(args),
-            "set_max_area" => set_max_area(args),
-            "set_max_capacitance" => set_max_capacitance(args),
-            "set_max_fanout" => set_max_fanout(args),
-            "set_max_transition" => set_max_transition(args),
-            "set_min_capacitance" => set_min_capacitance(args),
-            "set_operating_conditions" => set_operating_conditions(args),
-            "set_port_fanout_number" => set_port_fanout_number(args),
-            "set_resistance" => set_resistance(args),
-            "set_timing_derate" => set_timing_derate(args),
-            "set_voltage" => set_voltage(args),
-            "set_wire_load_min_block_size" => set_wire_load_min_block_size(args),
-            "set_wire_load_mode" => set_wire_load_mode(args),
-            "set_wire_load_model" => set_wire_load_model(args),
-            "set_wire_load_selection_group" => set_wire_load_selection_group(args),
-            "create_voltage_area" => create_voltage_area(args),
-            "set_level_shifter_strategy" => set_level_shifter_strategy(args),
-            "set_level_shifter_threshold" => set_level_shifter_threshold(args),
-            "set_max_dynamic_power" => set_max_dynamic_power(args),
-            "set_max_leakage_power" => set_max_leakage_power(args),
+            "current_instance" => current_instance(args, loc),
+            "expr" => expr(args, loc),
+            "list" => list(args, loc),
+            "set" => set(args, loc),
+            "set_hierarchy_separator" => set_hierarchy_separator(args, loc),
+            "set_units" => set_units(args, loc),
+            "all_clocks" => all_clocks(args, loc),
+            "all_inputs" => all_inputs(args, loc),
+            "all_outputs" => all_outputs(args, loc),
+            "all_registers" => all_registers(args, loc),
+            "current_design" => current_design(args, loc),
+            "get_cells" => get_cells(args, loc),
+            "get_clocks" => get_clocks(args, loc),
+            "get_lib_cells" => get_lib_cells(args, loc),
+            "get_lib_pins" => get_lib_pins(args, loc),
+            "get_libs" => get_libs(args, loc),
+            "get_nets" => get_nets(args, loc),
+            "get_pins" => get_pins(args, loc),
+            "get_ports" => get_ports(args, loc),
+            "create_clock" => create_clock(args, loc),
+            "create_generated_clock" => create_generated_clock(args, loc),
+            "group_path" => group_path(args, loc),
+            "set_clock_gating_check" => set_clock_gating_check(args, loc),
+            "set_clock_groups" => set_clock_groups(args, loc),
+            "set_clock_latency" => set_clock_latency(args, loc),
+            "set_sense" => set_sense(args, loc),
+            "set_clock_transition" => set_clock_transition(args, loc),
+            "set_clock_uncertainty" => set_clock_uncertainty(args, loc),
+            "set_data_check" => set_data_check(args, loc),
+            "set_disable_timing" => set_disable_timing(args, loc),
+            "set_false_path" => set_false_path(args, loc),
+            "set_ideal_latency" => set_ideal_latency(args, loc),
+            "set_ideal_network" => set_ideal_network(args, loc),
+            "set_ideal_transition" => set_ideal_transition(args, loc),
+            "set_input_delay" => set_input_delay(args, loc),
+            "set_max_delay" => set_max_delay(args, loc),
+            "set_max_time_borrow" => set_max_time_borrow(args, loc),
+            "set_min_delay" => set_min_delay(args, loc),
+            "set_min_pulse_width" => set_min_pulse_width(args, loc),
+            "set_multicycle_path" => set_multicycle_path(args, loc),
+            "set_output_delay" => set_output_delay(args, loc),
+            "set_propagated_clock" => set_propagated_clock(args, loc),
+            "set_case_analysis" => set_case_analysis(args, loc),
+            "set_drive" => set_drive(args, loc),
+            "set_driving_cell" => set_driving_cell(args, loc),
+            "set_fanout_load" => set_fanout_load(args, loc),
+            "set_input_transition" => set_input_transition(args, loc),
+            "set_load" => set_load(args, loc),
+            "set_logic_dc" => set_logic_dc(args, loc),
+            "set_logic_one" => set_logic_one(args, loc),
+            "set_logic_zero" => set_logic_zero(args, loc),
+            "set_max_area" => set_max_area(args, loc),
+            "set_max_capacitance" => set_max_capacitance(args, loc),
+            "set_max_fanout" => set_max_fanout(args, loc),
+            "set_max_transition" => set_max_transition(args, loc),
+            "set_min_capacitance" => set_min_capacitance(args, loc),
+            "set_operating_conditions" => set_operating_conditions(args, loc),
+            "set_port_fanout_number" => set_port_fanout_number(args, loc),
+            "set_resistance" => set_resistance(args, loc),
+            "set_timing_derate" => set_timing_derate(args, loc),
+            "set_voltage" => set_voltage(args, loc),
+            "set_wire_load_min_block_size" => set_wire_load_min_block_size(args, loc),
+            "set_wire_load_mode" => set_wire_load_mode(args, loc),
+            "set_wire_load_model" => set_wire_load_model(args, loc),
+            "set_wire_load_selection_group" => set_wire_load_selection_group(args, loc),
+            "create_voltage_area" => create_voltage_area(args, loc),
+            "set_level_shifter_strategy" => set_level_shifter_strategy(args, loc),
+            "set_level_shifter_threshold" => set_level_shifter_threshold(args, loc),
+            "set_max_dynamic_power" => set_max_dynamic_power(args, loc),
+            "set_max_leakage_power" => set_max_leakage_power(args, loc),
             _ => return Err(SdcError::UnknownCommand(command.into())),
         }
     }
@@ -321,6 +407,7 @@ impl TryFrom<&grammar::Command<'_>> for Command {
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct CurrentInstance {
     pub instance: Option<Argument>,
+    location: Location,
 }
 
 impl fmt::Display for CurrentInstance {
@@ -337,7 +424,7 @@ impl Validate for CurrentInstance {
     }
 }
 
-fn current_instance(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn current_instance(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut instance = None;
 
     let mut iter = args.into_iter();
@@ -345,13 +432,17 @@ fn current_instance(args: Vec<Argument>) -> Result<Command, SdcError> {
         instance = pos_args1(Some(arg), instance)?;
     }
 
-    Ok(Command::CurrentInstance(CurrentInstance { instance }))
+    Ok(Command::CurrentInstance(CurrentInstance {
+        instance,
+        location,
+    }))
 }
 
 /// expr
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Expr {
     pub args: Vec<Argument>,
+    location: Location,
 }
 
 impl fmt::Display for Expr {
@@ -370,7 +461,7 @@ impl Validate for Expr {
     }
 }
 
-fn expr(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn expr(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut ret = vec![];
 
     let mut iter = args.into_iter();
@@ -378,13 +469,17 @@ fn expr(args: Vec<Argument>) -> Result<Command, SdcError> {
         ret.push(arg);
     }
 
-    Ok(Command::Expr(Expr { args: ret }))
+    Ok(Command::Expr(Expr {
+        args: ret,
+        location,
+    }))
 }
 
 /// list
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct List {
     pub args: Vec<Argument>,
+    location: Location,
 }
 
 impl fmt::Display for List {
@@ -403,7 +498,7 @@ impl Validate for List {
     }
 }
 
-fn list(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn list(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut ret = vec![];
 
     let mut iter = args.into_iter();
@@ -411,7 +506,10 @@ fn list(args: Vec<Argument>) -> Result<Command, SdcError> {
         ret.push(arg);
     }
 
-    Ok(Command::List(List { args: ret }))
+    Ok(Command::List(List {
+        args: ret,
+        location,
+    }))
 }
 
 /// set
@@ -419,6 +517,7 @@ fn list(args: Vec<Argument>) -> Result<Command, SdcError> {
 pub struct Set {
     pub variable_name: Argument,
     pub value: Argument,
+    location: Location,
 }
 
 impl fmt::Display for Set {
@@ -436,7 +535,7 @@ impl Validate for Set {
     }
 }
 
-fn set(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut variable_name = None;
     let mut value = None;
 
@@ -451,6 +550,7 @@ fn set(args: Vec<Argument>) -> Result<Command, SdcError> {
     Ok(Command::Set(Set {
         variable_name,
         value,
+        location,
     }))
 }
 
@@ -458,6 +558,7 @@ fn set(args: Vec<Argument>) -> Result<Command, SdcError> {
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetHierarchySeparator {
     pub separator: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetHierarchySeparator {
@@ -474,7 +575,7 @@ impl Validate for SetHierarchySeparator {
     }
 }
 
-fn set_hierarchy_separator(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_hierarchy_separator(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut separator = None;
 
     let mut iter = args.into_iter();
@@ -486,6 +587,7 @@ fn set_hierarchy_separator(args: Vec<Argument>) -> Result<Command, SdcError> {
 
     Ok(Command::SetHierarchySeparator(SetHierarchySeparator {
         separator,
+        location,
     }))
 }
 
@@ -498,6 +600,7 @@ pub struct SetUnits {
     pub voltage: Option<Argument>,
     pub current: Option<Argument>,
     pub power: Option<Argument>,
+    location: Location,
 }
 
 impl fmt::Display for SetUnits {
@@ -519,7 +622,7 @@ impl Validate for SetUnits {
     }
 }
 
-fn set_units(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_units(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut capacitance = None;
     let mut resistance = None;
     let mut time = None;
@@ -547,12 +650,15 @@ fn set_units(args: Vec<Argument>) -> Result<Command, SdcError> {
         voltage,
         current,
         power,
+        location,
     }))
 }
 
 /// all_clocks
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct AllClocks;
+pub struct AllClocks {
+    location: Location,
+}
 
 impl fmt::Display for AllClocks {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -567,12 +673,12 @@ impl Validate for AllClocks {
     }
 }
 
-fn all_clocks(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn all_clocks(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     if !args.is_empty() {
         return Err(SdcError::WrongArgument(args));
     }
 
-    Ok(Command::AllClocks(AllClocks))
+    Ok(Command::AllClocks(AllClocks { location }))
 }
 
 /// all_inputs
@@ -581,6 +687,7 @@ pub struct AllInputs {
     pub level_sensitive: bool,
     pub edge_triggered: bool,
     pub clock: Option<Argument>,
+    location: Location,
 }
 
 impl fmt::Display for AllInputs {
@@ -600,7 +707,7 @@ impl Validate for AllInputs {
     }
 }
 
-fn all_inputs(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn all_inputs(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut level_sensitive = false;
     let mut edge_triggered = false;
     let mut clock = None;
@@ -619,6 +726,7 @@ fn all_inputs(args: Vec<Argument>) -> Result<Command, SdcError> {
         level_sensitive,
         edge_triggered,
         clock,
+        location,
     }))
 }
 
@@ -628,6 +736,7 @@ pub struct AllOutputs {
     pub level_sensitive: bool,
     pub edge_triggered: bool,
     pub clock: Option<Argument>,
+    location: Location,
 }
 
 impl fmt::Display for AllOutputs {
@@ -647,7 +756,7 @@ impl Validate for AllOutputs {
     }
 }
 
-fn all_outputs(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn all_outputs(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut level_sensitive = false;
     let mut edge_triggered = false;
     let mut clock = None;
@@ -666,6 +775,7 @@ fn all_outputs(args: Vec<Argument>) -> Result<Command, SdcError> {
         level_sensitive,
         edge_triggered,
         clock,
+        location,
     }))
 }
 
@@ -686,6 +796,7 @@ pub struct AllRegisters {
     pub level_sensitive: bool,
     pub edge_triggered: bool,
     pub master_slave: bool,
+    location: Location,
 }
 
 impl fmt::Display for AllRegisters {
@@ -714,7 +825,7 @@ impl Validate for AllRegisters {
     }
 }
 
-fn all_registers(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn all_registers(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut no_hierarchy = false;
     let mut hsc = None;
     let mut clock = None;
@@ -766,12 +877,15 @@ fn all_registers(args: Vec<Argument>) -> Result<Command, SdcError> {
         level_sensitive,
         edge_triggered,
         master_slave,
+        location,
     }))
 }
 
 /// current_design
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct CurrentDesign;
+pub struct CurrentDesign {
+    location: Location,
+}
 
 impl fmt::Display for CurrentDesign {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -786,12 +900,12 @@ impl Validate for CurrentDesign {
     }
 }
 
-fn current_design(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn current_design(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     if !args.is_empty() {
         return Err(SdcError::WrongArgument(args));
     }
 
-    Ok(Command::CurrentDesign(CurrentDesign))
+    Ok(Command::CurrentDesign(CurrentDesign { location }))
 }
 
 /// get_cells
@@ -802,6 +916,7 @@ pub struct GetCells {
     pub nocase: bool,
     pub of_objects: Option<Argument>,
     pub patterns: Option<Argument>,
+    location: Location,
 }
 
 impl fmt::Display for GetCells {
@@ -825,7 +940,7 @@ impl Validate for GetCells {
     }
 }
 
-fn get_cells(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn get_cells(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut hierarchical = false;
     let mut regexp = false;
     let mut nocase = false;
@@ -849,6 +964,7 @@ fn get_cells(args: Vec<Argument>) -> Result<Command, SdcError> {
         nocase,
         of_objects,
         patterns,
+        location,
     }))
 }
 
@@ -858,6 +974,7 @@ pub struct GetClocks {
     pub regexp: bool,
     pub nocase: bool,
     pub patterns: Argument,
+    location: Location,
 }
 
 impl fmt::Display for GetClocks {
@@ -876,7 +993,7 @@ impl Validate for GetClocks {
     }
 }
 
-fn get_clocks(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn get_clocks(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut regexp = false;
     let mut nocase = false;
     let mut patterns = None;
@@ -896,6 +1013,7 @@ fn get_clocks(args: Vec<Argument>) -> Result<Command, SdcError> {
         regexp,
         nocase,
         patterns,
+        location,
     }))
 }
 
@@ -906,6 +1024,7 @@ pub struct GetLibCells {
     pub hsc: Option<Argument>,
     pub nocase: bool,
     pub patterns: Argument,
+    location: Location,
 }
 
 impl fmt::Display for GetLibCells {
@@ -925,7 +1044,7 @@ impl Validate for GetLibCells {
     }
 }
 
-fn get_lib_cells(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn get_lib_cells(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut regexp = false;
     let mut hsc = None;
     let mut nocase = false;
@@ -948,6 +1067,7 @@ fn get_lib_cells(args: Vec<Argument>) -> Result<Command, SdcError> {
         hsc,
         nocase,
         patterns,
+        location,
     }))
 }
 
@@ -957,6 +1077,7 @@ pub struct GetLibPins {
     pub regexp: bool,
     pub nocase: bool,
     pub patterns: Argument,
+    location: Location,
 }
 
 impl fmt::Display for GetLibPins {
@@ -975,7 +1096,7 @@ impl Validate for GetLibPins {
     }
 }
 
-fn get_lib_pins(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn get_lib_pins(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut regexp = false;
     let mut nocase = false;
     let mut patterns = None;
@@ -995,6 +1116,7 @@ fn get_lib_pins(args: Vec<Argument>) -> Result<Command, SdcError> {
         regexp,
         nocase,
         patterns,
+        location,
     }))
 }
 
@@ -1004,6 +1126,7 @@ pub struct GetLibs {
     pub regexp: bool,
     pub nocase: bool,
     pub patterns: Argument,
+    location: Location,
 }
 
 impl fmt::Display for GetLibs {
@@ -1022,7 +1145,7 @@ impl Validate for GetLibs {
     }
 }
 
-fn get_libs(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn get_libs(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut regexp = false;
     let mut nocase = false;
     let mut patterns = None;
@@ -1042,6 +1165,7 @@ fn get_libs(args: Vec<Argument>) -> Result<Command, SdcError> {
         regexp,
         nocase,
         patterns,
+        location,
     }))
 }
 
@@ -1054,6 +1178,7 @@ pub struct GetNets {
     pub nocase: bool,
     pub of_objects: Option<Argument>,
     pub patterns: Option<Argument>,
+    location: Location,
 }
 
 impl fmt::Display for GetNets {
@@ -1078,7 +1203,7 @@ impl Validate for GetNets {
     }
 }
 
-fn get_nets(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn get_nets(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut hierarchical = false;
     let mut hsc = None;
     let mut regexp = false;
@@ -1105,6 +1230,7 @@ fn get_nets(args: Vec<Argument>) -> Result<Command, SdcError> {
         nocase,
         of_objects,
         patterns,
+        location,
     }))
 }
 
@@ -1117,6 +1243,7 @@ pub struct GetPins {
     pub nocase: bool,
     pub of_objects: Option<Argument>,
     pub patterns: Option<Argument>,
+    location: Location,
 }
 
 impl fmt::Display for GetPins {
@@ -1141,7 +1268,7 @@ impl Validate for GetPins {
     }
 }
 
-fn get_pins(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn get_pins(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut hierarchical = false;
     let mut hsc = None;
     let mut regexp = false;
@@ -1168,6 +1295,7 @@ fn get_pins(args: Vec<Argument>) -> Result<Command, SdcError> {
         nocase,
         of_objects,
         patterns,
+        location,
     }))
 }
 
@@ -1177,6 +1305,7 @@ pub struct GetPorts {
     pub regexp: bool,
     pub nocase: bool,
     pub patterns: Argument,
+    location: Location,
 }
 
 impl fmt::Display for GetPorts {
@@ -1195,7 +1324,7 @@ impl Validate for GetPorts {
     }
 }
 
-fn get_ports(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn get_ports(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut regexp = false;
     let mut nocase = false;
     let mut patterns = None;
@@ -1215,6 +1344,7 @@ fn get_ports(args: Vec<Argument>) -> Result<Command, SdcError> {
         regexp,
         nocase,
         patterns,
+        location,
     }))
 }
 
@@ -1227,6 +1357,7 @@ pub struct CreateClock {
     pub add: bool,
     pub comment: Option<Argument>,
     pub source_objects: Option<Argument>,
+    location: Location,
 }
 
 impl fmt::Display for CreateClock {
@@ -1249,7 +1380,7 @@ impl Validate for CreateClock {
     }
 }
 
-fn create_clock(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn create_clock(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut period = None;
     let mut name = None;
     let mut waveform = None;
@@ -1278,6 +1409,7 @@ fn create_clock(args: Vec<Argument>) -> Result<Command, SdcError> {
         add,
         comment,
         source_objects,
+        location,
     }))
 }
 
@@ -1297,6 +1429,7 @@ pub struct CreateGeneratedClock {
     pub combinational: bool,
     pub comment: Option<Argument>,
     pub source_objects: Argument,
+    location: Location,
 }
 
 impl fmt::Display for CreateGeneratedClock {
@@ -1326,7 +1459,7 @@ impl Validate for CreateGeneratedClock {
     }
 }
 
-fn create_generated_clock(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn create_generated_clock(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut name = None;
     let mut source = None;
     let mut edges = None;
@@ -1377,6 +1510,7 @@ fn create_generated_clock(args: Vec<Argument>) -> Result<Command, SdcError> {
         combinational,
         comment,
         source_objects,
+        location,
     }))
 }
 
@@ -1396,6 +1530,7 @@ pub struct GroupPath {
     pub rise_through: Option<Argument>,
     pub fall_through: Option<Argument>,
     pub comment: Option<Argument>,
+    location: Location,
 }
 
 impl fmt::Display for GroupPath {
@@ -1432,7 +1567,7 @@ impl Validate for GroupPath {
     }
 }
 
-fn group_path(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn group_path(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut name = None;
     let mut default = false;
     let mut weight = None;
@@ -1481,6 +1616,7 @@ fn group_path(args: Vec<Argument>) -> Result<Command, SdcError> {
         rise_through,
         fall_through,
         comment,
+        location,
     }))
 }
 
@@ -1494,6 +1630,7 @@ pub struct SetClockGatingCheck {
     pub high: bool,
     pub low: bool,
     pub object_list: Option<Argument>,
+    location: Location,
 }
 
 impl fmt::Display for SetClockGatingCheck {
@@ -1523,7 +1660,7 @@ impl Validate for SetClockGatingCheck {
     }
 }
 
-fn set_clock_gating_check(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_clock_gating_check(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut setup = None;
     let mut hold = None;
     let mut rise = false;
@@ -1553,6 +1690,7 @@ fn set_clock_gating_check(args: Vec<Argument>) -> Result<Command, SdcError> {
         high,
         low,
         object_list,
+        location,
     }))
 }
 
@@ -1566,6 +1704,7 @@ pub struct SetClockGroups {
     pub allow_paths: bool,
     pub name: Option<Argument>,
     pub comment: Option<Argument>,
+    location: Location,
 }
 
 impl fmt::Display for SetClockGroups {
@@ -1600,7 +1739,7 @@ impl Validate for SetClockGroups {
     }
 }
 
-fn set_clock_groups(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_clock_groups(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut group = None;
     let mut logically_exclusive = false;
     let mut phisically_exclusive = false;
@@ -1633,6 +1772,7 @@ fn set_clock_groups(args: Vec<Argument>) -> Result<Command, SdcError> {
         allow_paths,
         name,
         comment,
+        location,
     }))
 }
 
@@ -1650,6 +1790,7 @@ pub struct SetClockLatency {
     pub clock: Option<Argument>,
     pub delay: Argument,
     pub object_list: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetClockLatency {
@@ -1676,7 +1817,7 @@ impl Validate for SetClockLatency {
     }
 }
 
-fn set_clock_latency(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_clock_latency(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut rise = false;
     let mut fall = false;
     let mut min = false;
@@ -1720,6 +1861,7 @@ fn set_clock_latency(args: Vec<Argument>) -> Result<Command, SdcError> {
         clock,
         delay,
         object_list,
+        location,
     }))
 }
 
@@ -1735,6 +1877,7 @@ pub struct SetSense {
     pub pulse: Option<Argument>,
     pub clocks: Option<Argument>,
     pub pin_list: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetSense {
@@ -1768,7 +1911,7 @@ impl Validate for SetSense {
     }
 }
 
-fn set_sense(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_sense(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut r#type = None;
     let mut non_unate = false;
     let mut positive = false;
@@ -1806,6 +1949,7 @@ fn set_sense(args: Vec<Argument>) -> Result<Command, SdcError> {
         pulse,
         clocks,
         pin_list,
+        location,
     }))
 }
 
@@ -1818,6 +1962,7 @@ pub struct SetClockTransition {
     pub max: bool,
     pub transition: Argument,
     pub clock_list: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetClockTransition {
@@ -1840,7 +1985,7 @@ impl Validate for SetClockTransition {
     }
 }
 
-fn set_clock_transition(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_clock_transition(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut rise = false;
     let mut fall = false;
     let mut min = false;
@@ -1869,6 +2014,7 @@ fn set_clock_transition(args: Vec<Argument>) -> Result<Command, SdcError> {
         max,
         transition,
         clock_list,
+        location,
     }))
 }
 
@@ -1887,6 +2033,7 @@ pub struct SetClockUncertainty {
     pub hold: bool,
     pub uncertainty: Argument,
     pub object_list: Option<Argument>,
+    location: Location,
 }
 
 impl fmt::Display for SetClockUncertainty {
@@ -1924,7 +2071,7 @@ impl Validate for SetClockUncertainty {
     }
 }
 
-fn set_clock_uncertainty(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_clock_uncertainty(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut from = None;
     let mut rise_from = None;
     let mut fall_from = None;
@@ -1970,6 +2117,7 @@ fn set_clock_uncertainty(args: Vec<Argument>) -> Result<Command, SdcError> {
         hold,
         uncertainty,
         object_list,
+        location,
     }))
 }
 
@@ -1986,6 +2134,7 @@ pub struct SetDataCheck {
     pub hold: bool,
     pub clock: Option<Argument>,
     pub value: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetDataCheck {
@@ -2020,7 +2169,7 @@ impl Validate for SetDataCheck {
     }
 }
 
-fn set_data_check(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_data_check(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut from = None;
     let mut to = None;
     let mut rise_from = None;
@@ -2061,6 +2210,7 @@ fn set_data_check(args: Vec<Argument>) -> Result<Command, SdcError> {
         hold,
         clock,
         value,
+        location,
     }))
 }
 
@@ -2070,6 +2220,7 @@ pub struct SetDisableTiming {
     pub from: Option<Argument>,
     pub to: Option<Argument>,
     pub cell_pin_list: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetDisableTiming {
@@ -2089,7 +2240,7 @@ impl Validate for SetDisableTiming {
     }
 }
 
-fn set_disable_timing(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_disable_timing(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut from = None;
     let mut to = None;
     let mut cell_pin_list = None;
@@ -2109,6 +2260,7 @@ fn set_disable_timing(args: Vec<Argument>) -> Result<Command, SdcError> {
         from,
         to,
         cell_pin_list,
+        location,
     }))
 }
 
@@ -2129,6 +2281,7 @@ pub struct SetFalsePath {
     pub fall_to: Option<Argument>,
     pub fall_through: Option<Argument>,
     pub comment: Option<Argument>,
+    location: Location,
 }
 
 impl fmt::Display for SetFalsePath {
@@ -2168,7 +2321,7 @@ impl Validate for SetFalsePath {
     }
 }
 
-fn set_false_path(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_false_path(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut setup = false;
     let mut hold = false;
     let mut rise = false;
@@ -2220,6 +2373,7 @@ fn set_false_path(args: Vec<Argument>) -> Result<Command, SdcError> {
         fall_to,
         fall_through,
         comment,
+        location,
     }))
 }
 
@@ -2232,6 +2386,7 @@ pub struct SetIdealLatency {
     pub max: bool,
     pub delay: Argument,
     pub object_list: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetIdealLatency {
@@ -2253,7 +2408,7 @@ impl Validate for SetIdealLatency {
     }
 }
 
-fn set_ideal_latency(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_ideal_latency(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut rise = false;
     let mut fall = false;
     let mut min = false;
@@ -2282,6 +2437,7 @@ fn set_ideal_latency(args: Vec<Argument>) -> Result<Command, SdcError> {
         max,
         delay,
         object_list,
+        location,
     }))
 }
 
@@ -2290,6 +2446,7 @@ fn set_ideal_latency(args: Vec<Argument>) -> Result<Command, SdcError> {
 pub struct SetIdealNetwork {
     pub no_propagate: bool,
     pub object_list: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetIdealNetwork {
@@ -2307,7 +2464,7 @@ impl Validate for SetIdealNetwork {
     }
 }
 
-fn set_ideal_network(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_ideal_network(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut no_propagate = false;
     let mut object_list = None;
 
@@ -2324,6 +2481,7 @@ fn set_ideal_network(args: Vec<Argument>) -> Result<Command, SdcError> {
     Ok(Command::SetIdealNetwork(SetIdealNetwork {
         no_propagate,
         object_list,
+        location,
     }))
 }
 
@@ -2336,6 +2494,7 @@ pub struct SetIdealTransition {
     pub max: bool,
     pub transition_time: Argument,
     pub object_list: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetIdealTransition {
@@ -2357,7 +2516,7 @@ impl Validate for SetIdealTransition {
     }
 }
 
-fn set_ideal_transition(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_ideal_transition(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut rise = false;
     let mut fall = false;
     let mut min = false;
@@ -2389,6 +2548,7 @@ fn set_ideal_transition(args: Vec<Argument>) -> Result<Command, SdcError> {
         max,
         transition_time,
         object_list,
+        location,
     }))
 }
 
@@ -2408,6 +2568,7 @@ pub struct SetInputDelay {
     pub source_latency_included: bool,
     pub delay_value: Argument,
     pub port_pin_list: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetInputDelay {
@@ -2448,7 +2609,7 @@ impl Validate for SetInputDelay {
     }
 }
 
-fn set_input_delay(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_input_delay(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut clock = None;
     let mut reference_pin = None;
     let mut clock_fall = false;
@@ -2502,6 +2663,7 @@ fn set_input_delay(args: Vec<Argument>) -> Result<Command, SdcError> {
         source_latency_included,
         delay_value,
         port_pin_list,
+        location,
     }))
 }
 
@@ -2522,6 +2684,7 @@ pub struct SetMaxDelay {
     pub ignore_clock_latency: bool,
     pub comment: Option<Argument>,
     pub delay_value: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetMaxDelay {
@@ -2555,7 +2718,7 @@ impl Validate for SetMaxDelay {
     }
 }
 
-fn set_max_delay(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_max_delay(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut rise = false;
     let mut fall = false;
     let mut from = None;
@@ -2608,6 +2771,7 @@ fn set_max_delay(args: Vec<Argument>) -> Result<Command, SdcError> {
         ignore_clock_latency,
         comment,
         delay_value,
+        location,
     }))
 }
 
@@ -2616,6 +2780,7 @@ fn set_max_delay(args: Vec<Argument>) -> Result<Command, SdcError> {
 pub struct SetMaxTimeBorrow {
     pub delay_value: Argument,
     pub object_list: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetMaxTimeBorrow {
@@ -2633,7 +2798,7 @@ impl Validate for SetMaxTimeBorrow {
     }
 }
 
-fn set_max_time_borrow(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_max_time_borrow(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut delay_value = None;
     let mut object_list = None;
 
@@ -2650,6 +2815,7 @@ fn set_max_time_borrow(args: Vec<Argument>) -> Result<Command, SdcError> {
     Ok(Command::SetMaxTimeBorrow(SetMaxTimeBorrow {
         delay_value,
         object_list,
+        location,
     }))
 }
 
@@ -2670,6 +2836,7 @@ pub struct SetMinDelay {
     pub ignore_clock_latency: bool,
     pub comment: Option<Argument>,
     pub delay_value: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetMinDelay {
@@ -2703,7 +2870,7 @@ impl Validate for SetMinDelay {
     }
 }
 
-fn set_min_delay(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_min_delay(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut rise = false;
     let mut fall = false;
     let mut from = None;
@@ -2756,6 +2923,7 @@ fn set_min_delay(args: Vec<Argument>) -> Result<Command, SdcError> {
         ignore_clock_latency,
         comment,
         delay_value,
+        location,
     }))
 }
 
@@ -2766,6 +2934,7 @@ pub struct SetMinPulseWidth {
     pub high: bool,
     pub value: Argument,
     pub object_list: Option<Argument>,
+    location: Location,
 }
 
 impl fmt::Display for SetMinPulseWidth {
@@ -2785,7 +2954,7 @@ impl Validate for SetMinPulseWidth {
     }
 }
 
-fn set_min_pulse_width(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_min_pulse_width(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut low = false;
     let mut high = false;
     let mut value = None;
@@ -2807,6 +2976,7 @@ fn set_min_pulse_width(args: Vec<Argument>) -> Result<Command, SdcError> {
         high,
         value,
         object_list,
+        location,
     }))
 }
 
@@ -2830,6 +3000,7 @@ pub struct SetMulticyclePath {
     pub fall_through: Option<Argument>,
     pub comment: Option<Argument>,
     pub path_multiplier: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetMulticyclePath {
@@ -2862,7 +3033,7 @@ impl Validate for SetMulticyclePath {
     }
 }
 
-fn set_multicycle_path(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_multicycle_path(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut setup = false;
     let mut hold = false;
     let mut rise = false;
@@ -2924,6 +3095,7 @@ fn set_multicycle_path(args: Vec<Argument>) -> Result<Command, SdcError> {
         fall_through,
         comment,
         path_multiplier,
+        location,
     }))
 }
 
@@ -2943,6 +3115,7 @@ pub struct SetOutputDelay {
     pub source_latency_included: bool,
     pub delay_value: Argument,
     pub port_pin_list: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetOutputDelay {
@@ -2983,7 +3156,7 @@ impl Validate for SetOutputDelay {
     }
 }
 
-fn set_output_delay(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_output_delay(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut clock = None;
     let mut reference_pin = None;
     let mut clock_fall = false;
@@ -3037,6 +3210,7 @@ fn set_output_delay(args: Vec<Argument>) -> Result<Command, SdcError> {
         source_latency_included,
         delay_value,
         port_pin_list,
+        location,
     }))
 }
 
@@ -3044,6 +3218,7 @@ fn set_output_delay(args: Vec<Argument>) -> Result<Command, SdcError> {
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetPropagatedClock {
     pub object_list: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetPropagatedClock {
@@ -3060,7 +3235,7 @@ impl Validate for SetPropagatedClock {
     }
 }
 
-fn set_propagated_clock(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_propagated_clock(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut object_list = None;
 
     let mut iter = args.into_iter();
@@ -3074,6 +3249,7 @@ fn set_propagated_clock(args: Vec<Argument>) -> Result<Command, SdcError> {
 
     Ok(Command::SetPropagatedClock(SetPropagatedClock {
         object_list,
+        location,
     }))
 }
 
@@ -3082,6 +3258,7 @@ fn set_propagated_clock(args: Vec<Argument>) -> Result<Command, SdcError> {
 pub struct SetCaseAnalysis {
     pub value: Argument,
     pub port_or_pin_list: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetCaseAnalysis {
@@ -3099,7 +3276,7 @@ impl Validate for SetCaseAnalysis {
     }
 }
 
-fn set_case_analysis(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_case_analysis(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut value = None;
     let mut port_or_pin_list = None;
 
@@ -3116,6 +3293,7 @@ fn set_case_analysis(args: Vec<Argument>) -> Result<Command, SdcError> {
     Ok(Command::SetCaseAnalysis(SetCaseAnalysis {
         value,
         port_or_pin_list,
+        location,
     }))
 }
 
@@ -3128,6 +3306,7 @@ pub struct SetDrive {
     pub max: bool,
     pub resistance: Argument,
     pub port_list: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetDrive {
@@ -3149,7 +3328,7 @@ impl Validate for SetDrive {
     }
 }
 
-fn set_drive(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_drive(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut rise = false;
     let mut fall = false;
     let mut min = false;
@@ -3178,6 +3357,7 @@ fn set_drive(args: Vec<Argument>) -> Result<Command, SdcError> {
         max,
         resistance,
         port_list,
+        location,
     }))
 }
 
@@ -3199,6 +3379,7 @@ pub struct SetDrivingCell {
     pub input_transition_rise: Option<Argument>,
     pub input_transition_fall: Option<Argument>,
     pub port_list: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetDrivingCell {
@@ -3235,7 +3416,7 @@ impl Validate for SetDrivingCell {
     }
 }
 
-fn set_driving_cell(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_driving_cell(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut lib_cell = None;
     let mut rise = false;
     let mut fall = false;
@@ -3296,6 +3477,7 @@ fn set_driving_cell(args: Vec<Argument>) -> Result<Command, SdcError> {
         input_transition_rise,
         input_transition_fall,
         port_list,
+        location,
     }))
 }
 
@@ -3304,6 +3486,7 @@ fn set_driving_cell(args: Vec<Argument>) -> Result<Command, SdcError> {
 pub struct SetFanoutLoad {
     pub value: Argument,
     pub port_list: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetFanoutLoad {
@@ -3321,7 +3504,7 @@ impl Validate for SetFanoutLoad {
     }
 }
 
-fn set_fanout_load(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_fanout_load(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut value = None;
     let mut port_list = None;
 
@@ -3335,7 +3518,11 @@ fn set_fanout_load(args: Vec<Argument>) -> Result<Command, SdcError> {
     let value = mandatory(value, "value")?;
     let port_list = mandatory(port_list, "port_list")?;
 
-    Ok(Command::SetFanoutLoad(SetFanoutLoad { value, port_list }))
+    Ok(Command::SetFanoutLoad(SetFanoutLoad {
+        value,
+        port_list,
+        location,
+    }))
 }
 
 /// set_input_transition
@@ -3349,6 +3536,7 @@ pub struct SetInputTransition {
     pub clock_fall: bool,
     pub transition: Argument,
     pub port_list: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetInputTransition {
@@ -3372,7 +3560,7 @@ impl Validate for SetInputTransition {
     }
 }
 
-fn set_input_transition(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_input_transition(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut rise = false;
     let mut fall = false;
     let mut min = false;
@@ -3407,6 +3595,7 @@ fn set_input_transition(args: Vec<Argument>) -> Result<Command, SdcError> {
         clock_fall,
         transition,
         port_list,
+        location,
     }))
 }
 
@@ -3420,6 +3609,7 @@ pub struct SetLoad {
     pub wire_load: bool,
     pub value: Argument,
     pub objects: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetLoad {
@@ -3442,7 +3632,7 @@ impl Validate for SetLoad {
     }
 }
 
-fn set_load(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_load(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut min = false;
     let mut max = false;
     let mut subtract_pin_load = false;
@@ -3474,6 +3664,7 @@ fn set_load(args: Vec<Argument>) -> Result<Command, SdcError> {
         wire_load,
         value,
         objects,
+        location,
     }))
 }
 
@@ -3481,6 +3672,7 @@ fn set_load(args: Vec<Argument>) -> Result<Command, SdcError> {
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetLogicDc {
     pub port_list: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetLogicDc {
@@ -3497,7 +3689,7 @@ impl Validate for SetLogicDc {
     }
 }
 
-fn set_logic_dc(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_logic_dc(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut port_list = None;
 
     let mut iter = args.into_iter();
@@ -3509,13 +3701,17 @@ fn set_logic_dc(args: Vec<Argument>) -> Result<Command, SdcError> {
 
     let port_list = mandatory(port_list, "port_list")?;
 
-    Ok(Command::SetLogicDc(SetLogicDc { port_list }))
+    Ok(Command::SetLogicDc(SetLogicDc {
+        port_list,
+        location,
+    }))
 }
 
 /// set_logic_one
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetLogicOne {
     pub port_list: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetLogicOne {
@@ -3532,7 +3728,7 @@ impl Validate for SetLogicOne {
     }
 }
 
-fn set_logic_one(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_logic_one(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut port_list = None;
 
     let mut iter = args.into_iter();
@@ -3544,13 +3740,17 @@ fn set_logic_one(args: Vec<Argument>) -> Result<Command, SdcError> {
 
     let port_list = mandatory(port_list, "port_list")?;
 
-    Ok(Command::SetLogicOne(SetLogicOne { port_list }))
+    Ok(Command::SetLogicOne(SetLogicOne {
+        port_list,
+        location,
+    }))
 }
 
 /// set_logic_zero
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetLogicZero {
     pub port_list: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetLogicZero {
@@ -3567,7 +3767,7 @@ impl Validate for SetLogicZero {
     }
 }
 
-fn set_logic_zero(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_logic_zero(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut port_list = None;
 
     let mut iter = args.into_iter();
@@ -3579,13 +3779,17 @@ fn set_logic_zero(args: Vec<Argument>) -> Result<Command, SdcError> {
 
     let port_list = mandatory(port_list, "port_list")?;
 
-    Ok(Command::SetLogicZero(SetLogicZero { port_list }))
+    Ok(Command::SetLogicZero(SetLogicZero {
+        port_list,
+        location,
+    }))
 }
 
 /// set_max_area
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetMaxArea {
     pub area_value: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetMaxArea {
@@ -3602,7 +3806,7 @@ impl Validate for SetMaxArea {
     }
 }
 
-fn set_max_area(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_max_area(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut area_value = None;
 
     let mut iter = args.into_iter();
@@ -3614,7 +3818,10 @@ fn set_max_area(args: Vec<Argument>) -> Result<Command, SdcError> {
 
     let area_value = mandatory(area_value, "area_value")?;
 
-    Ok(Command::SetMaxArea(SetMaxArea { area_value }))
+    Ok(Command::SetMaxArea(SetMaxArea {
+        area_value,
+        location,
+    }))
 }
 
 /// set_max_capacitance
@@ -3622,6 +3829,7 @@ fn set_max_area(args: Vec<Argument>) -> Result<Command, SdcError> {
 pub struct SetMaxCapacitance {
     pub value: Argument,
     pub object_list: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetMaxCapacitance {
@@ -3639,7 +3847,7 @@ impl Validate for SetMaxCapacitance {
     }
 }
 
-fn set_max_capacitance(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_max_capacitance(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut value = None;
     let mut object_list = None;
 
@@ -3656,6 +3864,7 @@ fn set_max_capacitance(args: Vec<Argument>) -> Result<Command, SdcError> {
     Ok(Command::SetMaxCapacitance(SetMaxCapacitance {
         value,
         object_list,
+        location,
     }))
 }
 
@@ -3664,6 +3873,7 @@ fn set_max_capacitance(args: Vec<Argument>) -> Result<Command, SdcError> {
 pub struct SetMaxFanout {
     pub value: Argument,
     pub object_list: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetMaxFanout {
@@ -3681,7 +3891,7 @@ impl Validate for SetMaxFanout {
     }
 }
 
-fn set_max_fanout(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_max_fanout(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut value = None;
     let mut object_list = None;
 
@@ -3695,7 +3905,11 @@ fn set_max_fanout(args: Vec<Argument>) -> Result<Command, SdcError> {
     let value = mandatory(value, "value")?;
     let object_list = mandatory(object_list, "object_list")?;
 
-    Ok(Command::SetMaxFanout(SetMaxFanout { value, object_list }))
+    Ok(Command::SetMaxFanout(SetMaxFanout {
+        value,
+        object_list,
+        location,
+    }))
 }
 
 /// set_max_transition
@@ -3707,6 +3921,7 @@ pub struct SetMaxTransition {
     pub fall: bool,
     pub value: Argument,
     pub object_list: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetMaxTransition {
@@ -3728,7 +3943,7 @@ impl Validate for SetMaxTransition {
     }
 }
 
-fn set_max_transition(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_max_transition(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut clock_path = false;
     let mut data_path = false;
     let mut rise = false;
@@ -3757,6 +3972,7 @@ fn set_max_transition(args: Vec<Argument>) -> Result<Command, SdcError> {
         fall,
         value,
         object_list,
+        location,
     }))
 }
 
@@ -3765,6 +3981,7 @@ fn set_max_transition(args: Vec<Argument>) -> Result<Command, SdcError> {
 pub struct SetMinCapacitance {
     pub value: Argument,
     pub object_list: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetMinCapacitance {
@@ -3782,7 +3999,7 @@ impl Validate for SetMinCapacitance {
     }
 }
 
-fn set_min_capacitance(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_min_capacitance(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut value = None;
     let mut object_list = None;
 
@@ -3799,6 +4016,7 @@ fn set_min_capacitance(args: Vec<Argument>) -> Result<Command, SdcError> {
     Ok(Command::SetMinCapacitance(SetMinCapacitance {
         value,
         object_list,
+        location,
     }))
 }
 
@@ -3813,6 +4031,7 @@ pub struct SetOperatingConditions {
     pub min_library: Option<Argument>,
     pub object_list: Option<Argument>,
     pub condition: Option<Argument>,
+    location: Location,
 }
 
 impl fmt::Display for SetOperatingConditions {
@@ -3836,7 +4055,7 @@ impl Validate for SetOperatingConditions {
     }
 }
 
-fn set_operating_conditions(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_operating_conditions(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut library = None;
     let mut analysis_type = None;
     let mut max = None;
@@ -3869,6 +4088,7 @@ fn set_operating_conditions(args: Vec<Argument>) -> Result<Command, SdcError> {
         min_library,
         object_list,
         condition,
+        location,
     }))
 }
 
@@ -3877,6 +4097,7 @@ fn set_operating_conditions(args: Vec<Argument>) -> Result<Command, SdcError> {
 pub struct SetPortFanoutNumber {
     pub value: Argument,
     pub port_list: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetPortFanoutNumber {
@@ -3894,7 +4115,7 @@ impl Validate for SetPortFanoutNumber {
     }
 }
 
-fn set_port_fanout_number(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_port_fanout_number(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut value = None;
     let mut port_list = None;
 
@@ -3911,6 +4132,7 @@ fn set_port_fanout_number(args: Vec<Argument>) -> Result<Command, SdcError> {
     Ok(Command::SetPortFanoutNumber(SetPortFanoutNumber {
         value,
         port_list,
+        location,
     }))
 }
 
@@ -3921,6 +4143,7 @@ pub struct SetResistance {
     pub max: bool,
     pub value: Argument,
     pub net_list: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetResistance {
@@ -3940,7 +4163,7 @@ impl Validate for SetResistance {
     }
 }
 
-fn set_resistance(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_resistance(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut min = false;
     let mut max = false;
     let mut value = None;
@@ -3963,6 +4186,7 @@ fn set_resistance(args: Vec<Argument>) -> Result<Command, SdcError> {
         max,
         value,
         net_list,
+        location,
     }))
 }
 
@@ -3983,6 +4207,7 @@ pub struct SetTimingDerate {
     pub increment: bool,
     pub derate_value: Argument,
     pub object_list: Option<Argument>,
+    location: Location,
 }
 
 impl fmt::Display for SetTimingDerate {
@@ -4013,7 +4238,7 @@ impl Validate for SetTimingDerate {
     }
 }
 
-fn set_timing_derate(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_timing_derate(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut cell_delay = false;
     let mut cell_check = false;
     let mut net_delay = false;
@@ -4065,6 +4290,7 @@ fn set_timing_derate(args: Vec<Argument>) -> Result<Command, SdcError> {
         increment,
         derate_value,
         object_list,
+        location,
     }))
 }
 
@@ -4074,6 +4300,7 @@ pub struct SetVoltage {
     pub min: Option<Argument>,
     pub object_list: Option<Argument>,
     pub max_case_voltage: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetVoltage {
@@ -4092,7 +4319,7 @@ impl Validate for SetVoltage {
     }
 }
 
-fn set_voltage(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_voltage(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut min = None;
     let mut object_list = None;
     let mut max_case_voltage = None;
@@ -4112,6 +4339,7 @@ fn set_voltage(args: Vec<Argument>) -> Result<Command, SdcError> {
         min,
         object_list,
         max_case_voltage,
+        location,
     }))
 }
 
@@ -4119,6 +4347,7 @@ fn set_voltage(args: Vec<Argument>) -> Result<Command, SdcError> {
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetWireLoadMinBlockSize {
     pub size: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetWireLoadMinBlockSize {
@@ -4135,7 +4364,10 @@ impl Validate for SetWireLoadMinBlockSize {
     }
 }
 
-fn set_wire_load_min_block_size(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_wire_load_min_block_size(
+    args: Vec<Argument>,
+    location: Location,
+) -> Result<Command, SdcError> {
     let mut size = None;
 
     let mut iter = args.into_iter();
@@ -4149,6 +4381,7 @@ fn set_wire_load_min_block_size(args: Vec<Argument>) -> Result<Command, SdcError
 
     Ok(Command::SetWireLoadMinBlockSize(SetWireLoadMinBlockSize {
         size,
+        location,
     }))
 }
 
@@ -4156,6 +4389,7 @@ fn set_wire_load_min_block_size(args: Vec<Argument>) -> Result<Command, SdcError
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetWireLoadMode {
     pub mode_name: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetWireLoadMode {
@@ -4172,7 +4406,7 @@ impl Validate for SetWireLoadMode {
     }
 }
 
-fn set_wire_load_mode(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_wire_load_mode(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut mode_name = None;
 
     let mut iter = args.into_iter();
@@ -4184,7 +4418,10 @@ fn set_wire_load_mode(args: Vec<Argument>) -> Result<Command, SdcError> {
 
     let mode_name = mandatory(mode_name, "mode_name")?;
 
-    Ok(Command::SetWireLoadMode(SetWireLoadMode { mode_name }))
+    Ok(Command::SetWireLoadMode(SetWireLoadMode {
+        mode_name,
+        location,
+    }))
 }
 
 /// set_wire_load_model
@@ -4195,6 +4432,7 @@ pub struct SetWireLoadModel {
     pub min: bool,
     pub max: bool,
     pub object_list: Option<Argument>,
+    location: Location,
 }
 
 impl fmt::Display for SetWireLoadModel {
@@ -4215,7 +4453,7 @@ impl Validate for SetWireLoadModel {
     }
 }
 
-fn set_wire_load_model(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_wire_load_model(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut name = None;
     let mut library = None;
     let mut min = false;
@@ -4241,6 +4479,7 @@ fn set_wire_load_model(args: Vec<Argument>) -> Result<Command, SdcError> {
         min,
         max,
         object_list,
+        location,
     }))
 }
 
@@ -4252,6 +4491,7 @@ pub struct SetWireLoadSelectionGroup {
     pub max: bool,
     pub group_name: Argument,
     pub object_list: Option<Argument>,
+    location: Location,
 }
 
 impl fmt::Display for SetWireLoadSelectionGroup {
@@ -4272,7 +4512,10 @@ impl Validate for SetWireLoadSelectionGroup {
     }
 }
 
-fn set_wire_load_selection_group(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_wire_load_selection_group(
+    args: Vec<Argument>,
+    location: Location,
+) -> Result<Command, SdcError> {
     let mut library = None;
     let mut min = false;
     let mut max = false;
@@ -4298,6 +4541,7 @@ fn set_wire_load_selection_group(args: Vec<Argument>) -> Result<Command, SdcErro
             max,
             group_name,
             object_list,
+            location,
         },
     ))
 }
@@ -4310,6 +4554,7 @@ pub struct CreateVoltageArea {
     pub guard_band_x: Option<Argument>,
     pub guard_band_y: Option<Argument>,
     pub cell_list: Argument,
+    location: Location,
 }
 
 impl fmt::Display for CreateVoltageArea {
@@ -4330,7 +4575,7 @@ impl Validate for CreateVoltageArea {
     }
 }
 
-fn create_voltage_area(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn create_voltage_area(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut name = None;
     let mut coordinate = None;
     let mut guard_band_x = None;
@@ -4357,6 +4602,7 @@ fn create_voltage_area(args: Vec<Argument>) -> Result<Command, SdcError> {
         guard_band_x,
         guard_band_y,
         cell_list,
+        location,
     }))
 }
 
@@ -4364,6 +4610,7 @@ fn create_voltage_area(args: Vec<Argument>) -> Result<Command, SdcError> {
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetLevelShifterStrategy {
     pub rule: Argument,
+    location: Location,
 }
 
 impl fmt::Display for SetLevelShifterStrategy {
@@ -4380,7 +4627,10 @@ impl Validate for SetLevelShifterStrategy {
     }
 }
 
-fn set_level_shifter_strategy(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_level_shifter_strategy(
+    args: Vec<Argument>,
+    location: Location,
+) -> Result<Command, SdcError> {
     let mut rule = None;
 
     let mut iter = args.into_iter();
@@ -4395,6 +4645,7 @@ fn set_level_shifter_strategy(args: Vec<Argument>) -> Result<Command, SdcError> 
 
     Ok(Command::SetLevelShifterStrategy(SetLevelShifterStrategy {
         rule,
+        location,
     }))
 }
 
@@ -4403,6 +4654,7 @@ fn set_level_shifter_strategy(args: Vec<Argument>) -> Result<Command, SdcError> 
 pub struct SetLevelShifterThreshold {
     pub voltage: Argument,
     pub percent: Option<Argument>,
+    location: Location,
 }
 
 impl fmt::Display for SetLevelShifterThreshold {
@@ -4420,7 +4672,10 @@ impl Validate for SetLevelShifterThreshold {
     }
 }
 
-fn set_level_shifter_threshold(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_level_shifter_threshold(
+    args: Vec<Argument>,
+    location: Location,
+) -> Result<Command, SdcError> {
     let mut voltage = None;
     let mut percent = None;
 
@@ -4436,7 +4691,11 @@ fn set_level_shifter_threshold(args: Vec<Argument>) -> Result<Command, SdcError>
     let voltage = mandatory(voltage, "voltage")?;
 
     Ok(Command::SetLevelShifterThreshold(
-        SetLevelShifterThreshold { voltage, percent },
+        SetLevelShifterThreshold {
+            voltage,
+            percent,
+            location,
+        },
     ))
 }
 
@@ -4445,6 +4704,7 @@ fn set_level_shifter_threshold(args: Vec<Argument>) -> Result<Command, SdcError>
 pub struct SetMaxDynamicPower {
     pub power: Argument,
     pub unit: Option<Argument>,
+    location: Location,
 }
 
 impl fmt::Display for SetMaxDynamicPower {
@@ -4462,7 +4722,7 @@ impl Validate for SetMaxDynamicPower {
     }
 }
 
-fn set_max_dynamic_power(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_max_dynamic_power(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut power = None;
     let mut unit = None;
 
@@ -4478,6 +4738,7 @@ fn set_max_dynamic_power(args: Vec<Argument>) -> Result<Command, SdcError> {
     Ok(Command::SetMaxDynamicPower(SetMaxDynamicPower {
         power,
         unit,
+        location,
     }))
 }
 
@@ -4486,6 +4747,7 @@ fn set_max_dynamic_power(args: Vec<Argument>) -> Result<Command, SdcError> {
 pub struct SetMaxLeakagePower {
     pub power: Argument,
     pub unit: Option<Argument>,
+    location: Location,
 }
 
 impl fmt::Display for SetMaxLeakagePower {
@@ -4503,7 +4765,7 @@ impl Validate for SetMaxLeakagePower {
     }
 }
 
-fn set_max_leakage_power(args: Vec<Argument>) -> Result<Command, SdcError> {
+fn set_max_leakage_power(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut power = None;
     let mut unit = None;
 
@@ -4519,5 +4781,6 @@ fn set_max_leakage_power(args: Vec<Argument>) -> Result<Command, SdcError> {
     Ok(Command::SetMaxLeakagePower(SetMaxLeakagePower {
         power,
         unit,
+        location,
     }))
 }
