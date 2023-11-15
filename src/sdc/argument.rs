@@ -63,56 +63,22 @@ impl TryFrom<&grammar::Argument<'_>> for Argument {
                 Ok(Self::Word(ArgumentWord { text, location }))
             }
             grammar::Argument::TokenStringGroup(x) => {
-                let text = x
-                    .token_string_group
-                    .term_string_group
-                    .term_string_group
-                    .text()
-                    .to_string();
-                let location = (&x
-                    .token_string_group
-                    .term_string_group
-                    .term_string_group
-                    .location)
-                    .into();
+                let text = x.token_string_group.term_string_group.term_string_group.text().to_string();
+                let location = (&x.token_string_group.term_string_group.term_string_group.location).into();
 
                 Ok(Self::StringGroup(ArgumentStringGroup { text, location }))
             }
             grammar::Argument::TokenBraceGroup(x) => {
                 let text = x.token_brace_group.term_brace_group.to_string();
-                let start: Location = (&x
-                    .token_brace_group
-                    .term_brace_group
-                    .term_l_brace
-                    .term_l_brace
-                    .location)
-                    .into();
-                let end: Location = (&x
-                    .token_brace_group
-                    .term_brace_group
-                    .term_r_brace
-                    .term_r_brace
-                    .location)
-                    .into();
+                let start: Location = (&x.token_brace_group.term_brace_group.term_l_brace.term_l_brace.location).into();
+                let end: Location = (&x.token_brace_group.term_brace_group.term_r_brace.term_r_brace.location).into();
                 let location = Location::from_to(&start, &end);
 
                 Ok(Self::StringGroup(ArgumentStringGroup { text, location }))
             }
             grammar::Argument::CommandReplacement(x) => {
-                let start: Location = (&x
-                    .command_replacement
-                    .token_l_bracket
-                    .term_l_bracket
-                    .term_l_bracket
-                    .location)
-                    .into();
-                let end: Location = (&x
-                    .command_replacement
-                    .token_r_bracket
-                    .term_r_bracket
-                    .term_r_bracket
-                    .location)
-                    .into();
+                let start: Location = (&x.command_replacement.token_l_bracket.term_l_bracket.term_l_bracket.location).into();
+                let end: Location = (&x.command_replacement.token_r_bracket.term_r_bracket.term_r_bracket.location).into();
                 let location = Location::from_to(&start, &end);
 
                 Ok(Self::CommandReplacement(

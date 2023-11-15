@@ -56,12 +56,8 @@ impl SdcError {
         let config = term::Config::default();
 
         match self {
-            SdcError::ParseError(ParolError::LexerError(x)) => {
-                Self::report_lexer_error(&x, &writer, &config, &files)
-            }
-            SdcError::ParseError(ParolError::ParserError(x)) => {
-                Self::report_parser_error(&x, &writer, &config, &files)
-            }
+            SdcError::ParseError(ParolError::LexerError(x)) => Self::report_lexer_error(&x, &writer, &config, &files),
+            SdcError::ParseError(ParolError::ParserError(x)) => Self::report_parser_error(&x, &writer, &config, &files),
             SdcError::ParseError(ParolError::UserError(_)) => Ok(()),
             SdcError::WrongArgument(x) => {
                 let (range, file_id) = x.location().range_file(&files);
@@ -122,9 +118,7 @@ impl SdcError {
             SdcError::SdcVersionPlacement(location) => {
                 let (range, file_id) = location.range_file(&files);
                 let diag = Diagnostic::error()
-                    .with_message(format!(
-                        "SDC version should be set at the beginning of file"
-                    ))
+                    .with_message(format!("SDC version should be set at the beginning of file"))
                     .with_code("sdcx::sdc::SdcError")
                     .with_labels(vec![Label::primary(file_id, range).with_message("Found")]);
                 Ok(term::emit(&mut writer.lock(), &config, files, &diag)?)
@@ -140,10 +134,7 @@ impl SdcError {
             SdcError::CmdUnsupportedVersion(version, location) => {
                 let (range, file_id) = location.range_file(&files);
                 let diag = Diagnostic::error()
-                    .with_message(format!(
-                        "Unsupported command at SDC {}",
-                        version.version_string()
-                    ))
+                    .with_message(format!("Unsupported command at SDC {}", version.version_string()))
                     .with_code("sdcx::sdc::SdcError")
                     .with_labels(vec![Label::primary(file_id, range).with_message("Found")]);
                 Ok(term::emit(&mut writer.lock(), &config, files, &diag)?)
@@ -151,10 +142,7 @@ impl SdcError {
             SdcError::ArgUnsupportedVersion(version, location, name) => {
                 let (range, file_id) = location.range_file(&files);
                 let diag = Diagnostic::error()
-                    .with_message(format!(
-                        "Unsupported argument \"-{name}\" at {}",
-                        version.version_string()
-                    ))
+                    .with_message(format!("Unsupported argument \"-{name}\" at {}", version.version_string()))
                     .with_code("sdcx::sdc::SdcError")
                     .with_labels(vec![Label::primary(file_id, range).with_message("Found")]);
                 Ok(term::emit(&mut writer.lock(), &config, files, &diag)?)
@@ -170,12 +158,7 @@ impl SdcError {
         }
     }
 
-    fn report_lexer_error(
-        err: &LexerError,
-        writer: &StandardStream,
-        config: &term::Config,
-        files: &FileDb<String, &str>,
-    ) -> anyhow::Result<()> {
+    fn report_lexer_error(err: &LexerError, writer: &StandardStream, config: &term::Config, files: &FileDb<String, &str>) -> anyhow::Result<()> {
         match err {
             LexerError::TokenBufferEmptyError => Ok(term::emit(
                 &mut writer.lock(),
@@ -217,9 +200,7 @@ impl SdcError {
                 &Diagnostic::bug()
                     .with_message("Tried to pop from empty scanner stack".to_string())
                     .with_code("parol_runtime::lexer::pop_from_empty_scanner_stack")
-                    .with_notes(vec![
-                        "Check balance of %push and %pop directives in your grammar".to_string(),
-                    ]),
+                    .with_notes(vec!["Check balance of %push and %pop directives in your grammar".to_string()]),
             )?),
             LexerError::RecoveryError(e) => Ok(term::emit(
                 &mut writer.lock(),
@@ -232,12 +213,7 @@ impl SdcError {
         }
     }
 
-    fn report_parser_error(
-        err: &ParserError,
-        writer: &StandardStream,
-        config: &term::Config,
-        files: &FileDb<String, &str>,
-    ) -> anyhow::Result<()> {
+    fn report_parser_error(err: &ParserError, writer: &StandardStream, config: &term::Config, files: &FileDb<String, &str>) -> anyhow::Result<()> {
         match err {
             ParserError::TreeError { source } => Ok(term::emit(
                 &mut writer.lock(),
@@ -279,40 +255,26 @@ impl SdcError {
                      -> anyhow::Result<()> {
                         if let Some(source) = source {
                             match source.as_ref() {
-                                ParolError::LexerError(x) => {
-                                    Self::report_lexer_error(x, writer, config, files)?
-                                }
-                                ParolError::ParserError(x) => {
-                                    Self::report_parser_error(x, writer, config, files)?
-                                }
+                                ParolError::LexerError(x) => Self::report_lexer_error(x, writer, config, files)?,
+                                ParolError::ParserError(x) => Self::report_parser_error(x, writer, config, files)?,
                                 _ => (),
                             }
                         }
 
-                        let (range, file_id): (Range<usize>, usize) =
-                            if unexpected_tokens.is_empty() {
-                                let location: Location = (&**error_location).into();
-                                location.range_file(files)
-                            } else {
-                                let token = &unexpected_tokens[0].token;
-                                let range = token.into();
-                                let file_id = files
-                                    .get_id(&token.file_name.display().to_string())
-                                    .unwrap();
-                                (range, file_id)
-                            };
+                        let (range, file_id): (Range<usize>, usize) = if unexpected_tokens.is_empty() {
+                            let location: Location = (&**error_location).into();
+                            location.range_file(files)
+                        } else {
+                            let token = &unexpected_tokens[0].token;
+                            let range = token.into();
+                            let file_id = files.get_id(&token.file_name.display().to_string()).unwrap();
+                            (range, file_id)
+                        };
 
-                        let unexpected_tokens_labels =
-                            unexpected_tokens.iter().fold(vec![], |mut acc, un| {
-                                acc.push(
-                                    Label::secondary(
-                                        file_id,
-                                        Into::<Range<usize>>::into(&un.token),
-                                    )
-                                    .with_message(un.token_type.clone()),
-                                );
-                                acc
-                            });
+                        let unexpected_tokens_labels = unexpected_tokens.iter().fold(vec![], |mut acc, un| {
+                            acc.push(Label::secondary(file_id, Into::<Range<usize>>::into(&un.token)).with_message(un.token_type.clone()));
+                            acc
+                        });
                         Ok(term::emit(
                             &mut writer.lock(),
                             &config,
@@ -320,14 +282,9 @@ impl SdcError {
                             &Diagnostic::error()
                                 .with_message("Syntax error")
                                 .with_code("parol_runtime::parser::syntax_error")
-                                .with_labels(vec![
-                                    Label::primary(file_id, range).with_message("Found")
-                                ])
+                                .with_labels(vec![Label::primary(file_id, range).with_message("Found")])
                                 .with_labels(unexpected_tokens_labels)
-                                .with_notes(vec![
-                                    format!("Expecting {}", expected_tokens),
-                                    cause.to_string(),
-                                ]),
+                                .with_notes(vec![format!("Expecting {}", expected_tokens), cause.to_string()]),
                         )?)
                     },
                 )?;
@@ -335,15 +292,12 @@ impl SdcError {
                     &mut writer.lock(),
                     &config,
                     files,
-                    &Diagnostic::error()
-                        .with_message(format!("{} syntax error(s) found", entries.len())),
+                    &Diagnostic::error().with_message(format!("{} syntax error(s) found", entries.len())),
                 )?)
             }
             ParserError::UnprocessedInput { last_token, .. } => {
                 let un_span: Span = (Into::<Range<usize>>::into(&**last_token)).into();
-                let file_id = files
-                    .get_id(&last_token.file_name.display().to_string())
-                    .unwrap();
+                let file_id = files.get_id(&last_token.file_name.display().to_string()).unwrap();
                 Ok(term::emit(
                     &mut writer.lock(),
                     &config,
@@ -351,17 +305,11 @@ impl SdcError {
                     &Diagnostic::error()
                         .with_message("Unprocessed input is left after parsing has finished")
                         .with_code("parol_runtime::parser::unprocessed_input")
-                        .with_labels(vec![
-                            Label::primary(file_id, un_span).with_message("Unprocessed")
-                        ])
-                        .with_notes(vec![
-                            "Unprocessed input could be a problem in your grammar.".to_string(),
-                        ]),
+                        .with_labels(vec![Label::primary(file_id, un_span).with_message("Unprocessed")])
+                        .with_notes(vec!["Unprocessed input could be a problem in your grammar.".to_string()]),
                 )?)
             }
-            ParserError::PopOnEmptyScannerStateStack {
-                context, source, ..
-            } => {
+            ParserError::PopOnEmptyScannerStateStack { context, source, .. } => {
                 Self::report_lexer_error(source, writer, config, files)?;
 
                 Ok(term::emit(

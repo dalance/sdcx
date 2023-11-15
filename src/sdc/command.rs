@@ -552,12 +552,9 @@ impl fmt::Display for AllInputs {
 impl Validate for AllInputs {
     fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
         self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
-        self.arg_comb2(
-            version.within(SDC1_1, SDC2_1),
-            &self.level_sensitive,
-            &self.edge_triggered,
-            |a, b| !(a & b),
-        )
+        self.arg_comb2(version.within(SDC1_1, SDC2_1), &self.level_sensitive, &self.edge_triggered, |a, b| {
+            !(a & b)
+        })
     }
 
     fn location(&self) -> &Location {
@@ -573,9 +570,9 @@ fn all_inputs(args: Vec<Argument>, location: Location) -> Result<Command, SdcErr
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-level_sensitive" => level_sensitive = opt_flg(arg, level_sensitive)?,
-            "-edge_triggered" => edge_triggered = opt_flg(arg, edge_triggered)?,
-            "-clock" => clock = opt_arg(arg, iter.next(), clock)?,
+            x if x.starts_with("-level_sensitive") => level_sensitive = opt_flg(arg, level_sensitive)?,
+            x if x.starts_with("-edge_triggered") => edge_triggered = opt_flg(arg, edge_triggered)?,
+            x if x.starts_with("-clock") => clock = opt_arg(arg, iter.next(), clock)?,
             _ => return Err(SdcError::WrongArgument(arg)),
         }
     }
@@ -610,12 +607,9 @@ impl fmt::Display for AllOutputs {
 impl Validate for AllOutputs {
     fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
         self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
-        self.arg_comb2(
-            version.within(SDC1_2, SDC2_1),
-            &self.level_sensitive,
-            &self.edge_triggered,
-            |a, b| !(a & b),
-        )
+        self.arg_comb2(version.within(SDC1_2, SDC2_1), &self.level_sensitive, &self.edge_triggered, |a, b| {
+            !(a & b)
+        })
     }
 
     fn location(&self) -> &Location {
@@ -631,9 +625,9 @@ fn all_outputs(args: Vec<Argument>, location: Location) -> Result<Command, SdcEr
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-level_sensitive" => level_sensitive = opt_flg(arg, level_sensitive)?,
-            "-edge_triggered" => edge_triggered = opt_flg(arg, edge_triggered)?,
-            "-clock" => clock = opt_arg(arg, iter.next(), clock)?,
+            x if x.starts_with("-level_sensitive") => level_sensitive = opt_flg(arg, level_sensitive)?,
+            x if x.starts_with("-edge_triggered") => edge_triggered = opt_flg(arg, edge_triggered)?,
+            x if x.starts_with("-clock") => clock = opt_arg(arg, iter.next(), clock)?,
             _ => return Err(SdcError::WrongArgument(arg)),
         }
     }
@@ -712,19 +706,19 @@ fn all_registers(args: Vec<Argument>, location: Location) -> Result<Command, Sdc
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-no_hierarchy" => no_hierarchy = opt_flg(arg, no_hierarchy)?,
-            "-clock" => clock = opt_arg(arg, iter.next(), clock)?,
-            "-rise_clock" => rise_clock = opt_arg(arg, iter.next(), rise_clock)?,
-            "-fall_clock" => fall_clock = opt_arg(arg, iter.next(), fall_clock)?,
-            "-cells" => cells = opt_flg(arg, cells)?,
-            "-data_pins" => data_pins = opt_flg(arg, data_pins)?,
-            "-clock_pins" => clock_pins = opt_flg(arg, clock_pins)?,
-            "-slave_clock_pins" => slave_clock_pins = opt_flg(arg, slave_clock_pins)?,
-            "-async_pins" => async_pins = opt_flg(arg, async_pins)?,
-            "-output_pins" => output_pins = opt_flg(arg, output_pins)?,
-            "-level_sensitive" => level_sensitive = opt_flg(arg, level_sensitive)?,
-            "-edge_triggered" => edge_triggered = opt_flg(arg, edge_triggered)?,
-            "-master_slave" => master_slave = opt_flg(arg, master_slave)?,
+            x if x.starts_with("-no_hierarchy") => no_hierarchy = opt_flg(arg, no_hierarchy)?,
+            x if x.starts_with("-clock") => clock = opt_arg(arg, iter.next(), clock)?,
+            x if x.starts_with("-rise_clock") => rise_clock = opt_arg(arg, iter.next(), rise_clock)?,
+            x if x.starts_with("-fall_clock") => fall_clock = opt_arg(arg, iter.next(), fall_clock)?,
+            x if x.starts_with("-cells") => cells = opt_flg(arg, cells)?,
+            x if x.starts_with("-data_pins") => data_pins = opt_flg(arg, data_pins)?,
+            x if x.starts_with("-clock_pins") => clock_pins = opt_flg(arg, clock_pins)?,
+            x if x.starts_with("-slave_clock_pins") => slave_clock_pins = opt_flg(arg, slave_clock_pins)?,
+            x if x.starts_with("-async_pins") => async_pins = opt_flg(arg, async_pins)?,
+            x if x.starts_with("-output_pins") => output_pins = opt_flg(arg, output_pins)?,
+            x if x.starts_with("-level_sensitive") => level_sensitive = opt_flg(arg, level_sensitive)?,
+            x if x.starts_with("-edge_triggered") => edge_triggered = opt_flg(arg, edge_triggered)?,
+            x if x.starts_with("-master_slave") => master_slave = opt_flg(arg, master_slave)?,
             _ => return Err(SdcError::WrongArgument(arg)),
         }
     }
@@ -777,12 +771,7 @@ impl Validate for CreateClock {
         self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
         self.arg_supported_version(version.within(SDC1_4, SDC2_1), &self.add, "add")?;
         self.arg_supported_version(version.within(SDC1_9, SDC2_1), &self.comment, "comment")?;
-        self.arg_comb2(
-            version.within(SDC1_2, SDC2_1),
-            &self.name,
-            &self.source_objects,
-            |a, b| a | b,
-        )
+        self.arg_comb2(version.within(SDC1_2, SDC2_1), &self.name, &self.source_objects, |a, b| a | b)
     }
 
     fn location(&self) -> &Location {
@@ -801,11 +790,11 @@ fn create_clock(args: Vec<Argument>, location: Location) -> Result<Command, SdcE
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-period" => period = opt_arg(arg, iter.next(), period)?,
-            "-name" => name = opt_arg(arg, iter.next(), name)?,
-            "-waveform" => waveform = opt_arg(arg, iter.next(), waveform)?,
-            "-add" => add = opt_flg(arg, add)?,
-            "-comment" => comment = opt_arg(arg, iter.next(), comment)?,
+            x if x.starts_with("-period") => period = opt_arg(arg, iter.next(), period)?,
+            x if x.starts_with("-name") => name = opt_arg(arg, iter.next(), name)?,
+            x if x.starts_with("-waveform") => waveform = opt_arg(arg, iter.next(), waveform)?,
+            x if x.starts_with("-add") => add = opt_flg(arg, add)?,
+            x if x.starts_with("-comment") => comment = opt_arg(arg, iter.next(), comment)?,
             _ => source_objects = pos_args1(Some(arg), source_objects, &location)?,
         }
     }
@@ -866,23 +855,10 @@ impl Validate for CreateGeneratedClock {
     fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
         self.cmd_supported_version(version.within(SDC1_3, SDC2_1))?;
         self.arg_supported_version(version.within(SDC1_4, SDC2_1), &self.add, "add")?;
-        self.arg_supported_version(
-            version.within(SDC1_4, SDC2_1),
-            &self.master_clock,
-            "master_clock",
-        )?;
-        self.arg_supported_version(
-            version.within(SDC1_7, SDC2_0),
-            &self.combinational,
-            "combinational",
-        )?;
+        self.arg_supported_version(version.within(SDC1_4, SDC2_1), &self.master_clock, "master_clock")?;
+        self.arg_supported_version(version.within(SDC1_7, SDC2_0), &self.combinational, "combinational")?;
         self.arg_supported_version(version.within(SDC1_9, SDC2_1), &self.comment, "comment")?;
-        self.arg_comb2(
-            version.within(SDC1_3, SDC2_1),
-            &self.multiply_by,
-            &self.divide_by,
-            |a, b| !(a & b),
-        )
+        self.arg_comb2(version.within(SDC1_3, SDC2_1), &self.multiply_by, &self.divide_by, |a, b| !(a & b))
     }
 
     fn location(&self) -> &Location {
@@ -908,18 +884,18 @@ fn create_generated_clock(args: Vec<Argument>, location: Location) -> Result<Com
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-name" => name = opt_arg(arg, iter.next(), name)?,
-            "-source" => source = opt_arg(arg, iter.next(), source)?,
-            "-edges" => edges = opt_arg(arg, iter.next(), edges)?,
-            "-divide_by" => divide_by = opt_arg(arg, iter.next(), divide_by)?,
-            "-multiply_by" => multiply_by = opt_arg(arg, iter.next(), multiply_by)?,
-            "-duty_cycle" => duty_cycle = opt_arg(arg, iter.next(), duty_cycle)?,
-            "-invert" => invert = opt_flg(arg, invert)?,
-            "-edge_shift" => edge_shift = opt_arg(arg, iter.next(), edge_shift)?,
-            "-add" => add = opt_flg(arg, add)?,
-            "-master_clock" => master_clock = opt_arg(arg, iter.next(), master_clock)?,
-            "-combinational" => combinational = opt_flg(arg, combinational)?,
-            "-comment" => comment = opt_arg(arg, iter.next(), comment)?,
+            x if x.starts_with("-name") => name = opt_arg(arg, iter.next(), name)?,
+            x if x.starts_with("-source") => source = opt_arg(arg, iter.next(), source)?,
+            x if x.starts_with("-edges") => edges = opt_arg(arg, iter.next(), edges)?,
+            x if x.starts_with("-divide_by") => divide_by = opt_arg(arg, iter.next(), divide_by)?,
+            x if x.starts_with("-multiply_by") => multiply_by = opt_arg(arg, iter.next(), multiply_by)?,
+            x if x.starts_with("-duty_cycle") => duty_cycle = opt_arg(arg, iter.next(), duty_cycle)?,
+            x if x.starts_with("-invert") => invert = opt_flg(arg, invert)?,
+            x if x.starts_with("-edge_shift") => edge_shift = opt_arg(arg, iter.next(), edge_shift)?,
+            x if x.starts_with("-add") => add = opt_flg(arg, add)?,
+            x if x.starts_with("-master_clock") => master_clock = opt_arg(arg, iter.next(), master_clock)?,
+            x if x.starts_with("-combinational") => combinational = opt_flg(arg, combinational)?,
+            x if x.starts_with("-comment") => comment = opt_arg(arg, iter.next(), comment)?,
             _ => source_objects = pos_args1(Some(arg), source_objects, &location)?,
         }
     }
@@ -988,10 +964,10 @@ fn create_voltage_area(args: Vec<Argument>, location: Location) -> Result<Comman
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-name" => name = opt_arg(arg, iter.next(), name)?,
-            "-coordinate" => coordinate = opt_arg(arg, iter.next(), coordinate)?,
-            "-guard_band_x" => guard_band_x = opt_arg(arg, iter.next(), guard_band_x)?,
-            "-guard_band_y" => guard_band_y = opt_arg(arg, iter.next(), guard_band_y)?,
+            x if x.starts_with("-name") => name = opt_arg(arg, iter.next(), name)?,
+            x if x.starts_with("-coordinate") => coordinate = opt_arg(arg, iter.next(), coordinate)?,
+            x if x.starts_with("-guard_band_x") => guard_band_x = opt_arg(arg, iter.next(), guard_band_x)?,
+            x if x.starts_with("-guard_band_y") => guard_band_y = opt_arg(arg, iter.next(), guard_band_y)?,
             _ => cell_list = pos_args1(Some(arg), cell_list, &location)?,
         }
     }
@@ -1073,10 +1049,7 @@ fn current_instance(args: Vec<Argument>, location: Location) -> Result<Command, 
         instance = pos_args1(Some(arg), instance, &location)?;
     }
 
-    Ok(Command::CurrentInstance(CurrentInstance {
-        instance,
-        location,
-    }))
+    Ok(Command::CurrentInstance(CurrentInstance { instance, location }))
 }
 
 /// expr
@@ -1114,10 +1087,7 @@ fn expr(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
         ret.push(arg);
     }
 
-    Ok(Command::Expr(Expr {
-        args: ret,
-        location,
-    }))
+    Ok(Command::Expr(Expr { args: ret, location }))
 }
 
 /// get_cells
@@ -1160,18 +1130,12 @@ impl Validate for GetCells {
             &self.hierarchical,
             |a, b, c| (a & !b) | (b & !a & !c),
         )?;
-        self.arg_comb2(
-            version.within(SDC1_2, SDC1_4),
-            &self.patterns,
-            &self.of_objects,
-            |a, b| (a & !b) | (b & !a),
-        )?;
-        self.arg_comb2(
-            version.within(SDC1_5, SDC2_1),
-            &self.patterns,
-            &self.of_objects,
-            |a, b| (a & !b) | (b & !a) | !a,
-        )
+        self.arg_comb2(version.within(SDC1_2, SDC1_4), &self.patterns, &self.of_objects, |a, b| {
+            (a & !b) | (b & !a)
+        })?;
+        self.arg_comb2(version.within(SDC1_5, SDC2_1), &self.patterns, &self.of_objects, |a, b| {
+            (a & !b) | (b & !a) | !a
+        })
     }
 
     fn location(&self) -> &Location {
@@ -1190,11 +1154,11 @@ fn get_cells(args: Vec<Argument>, location: Location, alias: bool) -> Result<Com
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-hierarchical" => hierarchical = opt_flg(arg, hierarchical)?,
-            "-regexp" => regexp = opt_flg(arg, regexp)?,
-            "-nocase" => nocase = opt_flg(arg, nocase)?,
-            "-hsc" => hsc = opt_arg(arg, iter.next(), hsc)?,
-            "-of_objects" => of_objects = opt_arg(arg, iter.next(), of_objects)?,
+            x if x.starts_with("-hierarchical") => hierarchical = opt_flg(arg, hierarchical)?,
+            x if x.starts_with("-regexp") => regexp = opt_flg(arg, regexp)?,
+            x if x.starts_with("-nocase") => nocase = opt_flg(arg, nocase)?,
+            x if x.starts_with("-hsc") => hsc = opt_arg(arg, iter.next(), hsc)?,
+            x if x.starts_with("-of_objects") => of_objects = opt_arg(arg, iter.next(), of_objects)?,
             _ => patterns = pos_args1(Some(arg), patterns, &location)?,
         }
     }
@@ -1251,8 +1215,8 @@ fn get_clocks(args: Vec<Argument>, location: Location) -> Result<Command, SdcErr
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-regexp" => regexp = opt_flg(arg, regexp)?,
-            "-nocase" => nocase = opt_flg(arg, nocase)?,
+            x if x.starts_with("-regexp") => regexp = opt_flg(arg, regexp)?,
+            x if x.starts_with("-nocase") => nocase = opt_flg(arg, nocase)?,
             _ => patterns = pos_args1(Some(arg), patterns, &location)?,
         }
     }
@@ -1301,11 +1265,7 @@ impl Validate for GetLibCells {
     }
 }
 
-fn get_lib_cells(
-    args: Vec<Argument>,
-    location: Location,
-    alias: bool,
-) -> Result<Command, SdcError> {
+fn get_lib_cells(args: Vec<Argument>, location: Location, alias: bool) -> Result<Command, SdcError> {
     let mut regexp = false;
     let mut hsc = None;
     let mut nocase = false;
@@ -1314,9 +1274,9 @@ fn get_lib_cells(
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-regexp" => regexp = opt_flg(arg, regexp)?,
-            "-hsc" => hsc = opt_arg(arg, iter.next(), hsc)?,
-            "-nocase" => nocase = opt_flg(arg, nocase)?,
+            x if x.starts_with("-regexp") => regexp = opt_flg(arg, regexp)?,
+            x if x.starts_with("-hsc") => hsc = opt_arg(arg, iter.next(), hsc)?,
+            x if x.starts_with("-nocase") => nocase = opt_flg(arg, nocase)?,
             _ => patterns = pos_args1(Some(arg), patterns, &location)?,
         }
     }
@@ -1378,9 +1338,9 @@ fn get_lib_pins(args: Vec<Argument>, location: Location, alias: bool) -> Result<
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-regexp" => regexp = opt_flg(arg, regexp)?,
-            "-hsc" => hsc = opt_flg(arg, hsc)?,
-            "-nocase" => nocase = opt_flg(arg, nocase)?,
+            x if x.starts_with("-regexp") => regexp = opt_flg(arg, regexp)?,
+            x if x.starts_with("-hsc") => hsc = opt_flg(arg, hsc)?,
+            x if x.starts_with("-nocase") => nocase = opt_flg(arg, nocase)?,
             _ => patterns = pos_args1(Some(arg), patterns, &location)?,
         }
     }
@@ -1437,8 +1397,8 @@ fn get_libs(args: Vec<Argument>, location: Location) -> Result<Command, SdcError
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-regexp" => regexp = opt_flg(arg, regexp)?,
-            "-nocase" => nocase = opt_flg(arg, nocase)?,
+            x if x.starts_with("-regexp") => regexp = opt_flg(arg, regexp)?,
+            x if x.starts_with("-nocase") => nocase = opt_flg(arg, nocase)?,
             _ => patterns = pos_args1(Some(arg), patterns, &location)?,
         }
     }
@@ -1482,20 +1442,13 @@ impl Validate for GetNets {
         self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
         self.alias_supported_version(version.within(SDC1_5, SDC2_1), self.alias)?;
         self.arg_supported_version(version.within(SDC1_2, SDC2_1), &self.hsc, "hsc")?;
-        self.arg_supported_version(
-            version.within(SDC1_5, SDC2_1),
-            &self.of_objects,
-            "of_objects",
-        )?;
+        self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.of_objects, "of_objects")?;
         self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.regexp, "regexp")?;
         self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.nocase, "nocase")?;
         self.arg_comb1(version.within(SDC1_1, SDC1_4), &self.patterns, |a| a)?;
-        self.arg_comb2(
-            version.within(SDC1_5, SDC2_1),
-            &self.patterns,
-            &self.of_objects,
-            |a, b| (a & !b) | (b & !a) | !a,
-        )
+        self.arg_comb2(version.within(SDC1_5, SDC2_1), &self.patterns, &self.of_objects, |a, b| {
+            (a & !b) | (b & !a) | !a
+        })
     }
 
     fn location(&self) -> &Location {
@@ -1514,11 +1467,11 @@ fn get_nets(args: Vec<Argument>, location: Location, alias: bool) -> Result<Comm
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-hierarchical" => hierarchical = opt_flg(arg, hierarchical)?,
-            "-hsc" => hsc = opt_arg(arg, iter.next(), hsc)?,
-            "-regexp" => regexp = opt_flg(arg, regexp)?,
-            "-nocase" => nocase = opt_flg(arg, nocase)?,
-            "-of_objects" => of_objects = opt_arg(arg, iter.next(), of_objects)?,
+            x if x.starts_with("-hierarchical") => hierarchical = opt_flg(arg, hierarchical)?,
+            x if x.starts_with("-hsc") => hsc = opt_arg(arg, iter.next(), hsc)?,
+            x if x.starts_with("-regexp") => regexp = opt_flg(arg, regexp)?,
+            x if x.starts_with("-nocase") => nocase = opt_flg(arg, nocase)?,
+            x if x.starts_with("-of_objects") => of_objects = opt_arg(arg, iter.next(), of_objects)?,
             _ => patterns = pos_args1(Some(arg), patterns, &location)?,
         }
     }
@@ -1584,10 +1537,10 @@ fn get_pins(args: Vec<Argument>, location: Location, alias: bool) -> Result<Comm
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-hierarchical" => hierarchical = opt_flg(arg, hierarchical)?,
-            "-hsc" => hsc = opt_arg(arg, iter.next(), hsc)?,
-            "-regexp" => regexp = opt_flg(arg, regexp)?,
-            "-nocase" => nocase = opt_flg(arg, nocase)?,
+            x if x.starts_with("-hierarchical") => hierarchical = opt_flg(arg, hierarchical)?,
+            x if x.starts_with("-hsc") => hsc = opt_arg(arg, iter.next(), hsc)?,
+            x if x.starts_with("-regexp") => regexp = opt_flg(arg, regexp)?,
+            x if x.starts_with("-nocase") => nocase = opt_flg(arg, nocase)?,
             _ => patterns = pos_args1(Some(arg), patterns, &location)?,
         }
     }
@@ -1627,11 +1580,7 @@ impl Validate for GetPorts {
     fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
         self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
         self.alias_supported_version(version.within(SDC1_5, SDC2_1), self.alias)?;
-        self.arg_supported_version(
-            version.within(SDC1_5, SDC2_1),
-            &self.hierarchical,
-            "hierarchical",
-        )?;
+        self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.hierarchical, "hierarchical")?;
         self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.regexp, "regexp")?;
         self.arg_comb1(version.within(SDC1_1, SDC1_4), &self.patterns, |a| a)
     }
@@ -1649,8 +1598,8 @@ fn get_ports(args: Vec<Argument>, location: Location, alias: bool) -> Result<Com
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-hierarchical" => hierarchical = opt_flg(arg, hierarchical)?,
-            "-regexp" => regexp = opt_flg(arg, regexp)?,
+            x if x.starts_with("-hierarchical") => hierarchical = opt_flg(arg, hierarchical)?,
+            x if x.starts_with("-regexp") => regexp = opt_flg(arg, regexp)?,
             _ => patterns = pos_args1(Some(arg), patterns, &location)?,
         }
     }
@@ -1741,19 +1690,19 @@ fn group_path(args: Vec<Argument>, location: Location) -> Result<Command, SdcErr
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-name" => name = opt_arg(arg, iter.next(), name)?,
-            "-default" => default = opt_flg(arg, default)?,
-            "-weight" => weight = opt_arg(arg, iter.next(), weight)?,
-            "-from" => from = opt_arg(arg, iter.next(), from)?,
-            "-rise_from" => rise_from = opt_arg(arg, iter.next(), rise_from)?,
-            "-fall_from" => fall_from = opt_arg(arg, iter.next(), fall_from)?,
-            "-to" => to = opt_arg(arg, iter.next(), to)?,
-            "-rise_to" => rise_to = opt_arg(arg, iter.next(), rise_to)?,
-            "-fall_to" => fall_to = opt_arg(arg, iter.next(), fall_to)?,
-            "-through" => through = vec_arg(arg, iter.next(), through)?,
-            "-rise_through" => rise_through = vec_arg(arg, iter.next(), rise_through)?,
-            "-fall_through" => fall_through = vec_arg(arg, iter.next(), fall_through)?,
-            "-comment" => comment = opt_arg(arg, iter.next(), comment)?,
+            x if x.starts_with("-name") => name = opt_arg(arg, iter.next(), name)?,
+            x if x.starts_with("-default") => default = opt_flg(arg, default)?,
+            x if x.starts_with("-weight") => weight = opt_arg(arg, iter.next(), weight)?,
+            x if x.starts_with("-from") => from = opt_arg(arg, iter.next(), from)?,
+            x if x.starts_with("-rise_from") => rise_from = opt_arg(arg, iter.next(), rise_from)?,
+            x if x.starts_with("-fall_from") => fall_from = opt_arg(arg, iter.next(), fall_from)?,
+            x if x.starts_with("-to") => to = opt_arg(arg, iter.next(), to)?,
+            x if x.starts_with("-rise_to") => rise_to = opt_arg(arg, iter.next(), rise_to)?,
+            x if x.starts_with("-fall_to") => fall_to = opt_arg(arg, iter.next(), fall_to)?,
+            x if x.starts_with("-through") => through = vec_arg(arg, iter.next(), through)?,
+            x if x.starts_with("-rise_through") => rise_through = vec_arg(arg, iter.next(), rise_through)?,
+            x if x.starts_with("-fall_through") => fall_through = vec_arg(arg, iter.next(), fall_through)?,
+            x if x.starts_with("-comment") => comment = opt_arg(arg, iter.next(), comment)?,
             _ => return Err(SdcError::WrongArgument(arg)),
         }
     }
@@ -1811,10 +1760,7 @@ fn list(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
         ret.push(arg);
     }
 
-    Ok(Command::List(List {
-        args: ret,
-        location,
-    }))
+    Ok(Command::List(List { args: ret, location }))
 }
 
 /// set
@@ -1898,10 +1844,7 @@ fn set_case_analysis(args: Vec<Argument>, location: Location) -> Result<Command,
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            _ => {
-                (value, port_or_pin_list) =
-                    pos_args2(Some(arg), (value, port_or_pin_list), &location)?
-            }
+            _ => (value, port_or_pin_list) = pos_args2(Some(arg), (value, port_or_pin_list), &location)?,
         }
     }
 
@@ -1971,12 +1914,12 @@ fn set_clock_gating_check(args: Vec<Argument>, location: Location) -> Result<Com
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-setup" => setup = opt_arg(arg, iter.next(), setup)?,
-            "-hold" => hold = opt_arg(arg, iter.next(), hold)?,
-            "-rise" => rise = opt_flg(arg, rise)?,
-            "-fall" => fall = opt_flg(arg, fall)?,
-            "-high" => high = opt_flg(arg, high)?,
-            "-low" => low = opt_flg(arg, low)?,
+            x if x.starts_with("-setup") => setup = opt_arg(arg, iter.next(), setup)?,
+            x if x.starts_with("-hold") => hold = opt_arg(arg, iter.next(), hold)?,
+            x if x.starts_with("-rise") => rise = opt_flg(arg, rise)?,
+            x if x.starts_with("-fall") => fall = opt_flg(arg, fall)?,
+            x if x.starts_with("-high") => high = opt_flg(arg, high)?,
+            x if x.starts_with("-low") => low = opt_flg(arg, low)?,
             _ => object_list = pos_args1(Some(arg), object_list, &location)?,
         }
     }
@@ -2011,14 +1954,8 @@ impl fmt::Display for SetClockGroups {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut text = "set_clock_groups".to_string();
         text.push_str(&fmt_named_vec_arg(&self.group, "group"));
-        text.push_str(&fmt_named_flg(
-            self.logically_exclusive,
-            "logically_exclusive",
-        ));
-        text.push_str(&fmt_named_flg(
-            self.physically_exclusive,
-            "phisically_exclusive",
-        ));
+        text.push_str(&fmt_named_flg(self.logically_exclusive, "logically_exclusive"));
+        text.push_str(&fmt_named_flg(self.physically_exclusive, "phisically_exclusive"));
         text.push_str(&fmt_named_flg(self.asynchronous, "asynchronous"));
         text.push_str(&fmt_named_flg(self.allow_paths, "low"));
         text.push_str(&fmt_named_opt_arg(&self.name, "name"));
@@ -2047,11 +1984,7 @@ impl Validate for SetClockGroups {
     }
 }
 
-fn set_clock_groups(
-    args: Vec<Argument>,
-    location: Location,
-    alias: bool,
-) -> Result<Command, SdcError> {
+fn set_clock_groups(args: Vec<Argument>, location: Location, alias: bool) -> Result<Command, SdcError> {
     let mut group = vec![];
     let mut logically_exclusive = false;
     let mut physically_exclusive = false;
@@ -2063,13 +1996,13 @@ fn set_clock_groups(
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-group" => group = vec_arg(arg, iter.next(), group)?,
-            "-logically_exclusive" => logically_exclusive = opt_flg(arg, logically_exclusive)?,
-            "-physically_exclusive" => physically_exclusive = opt_flg(arg, physically_exclusive)?,
-            "-asynchronous" => asynchronous = opt_flg(arg, asynchronous)?,
-            "-allow_paths" => allow_paths = opt_flg(arg, allow_paths)?,
-            "-name" => name = opt_arg(arg, iter.next(), name)?,
-            "-comment" => comment = opt_arg(arg, iter.next(), comment)?,
+            x if x.starts_with("-group") => group = vec_arg(arg, iter.next(), group)?,
+            x if x.starts_with("-logically_exclusive") => logically_exclusive = opt_flg(arg, logically_exclusive)?,
+            x if x.starts_with("-physically_exclusive") => physically_exclusive = opt_flg(arg, physically_exclusive)?,
+            x if x.starts_with("-asynchronous") => asynchronous = opt_flg(arg, asynchronous)?,
+            x if x.starts_with("-allow_paths") => allow_paths = opt_flg(arg, allow_paths)?,
+            x if x.starts_with("-name") => name = opt_arg(arg, iter.next(), name)?,
+            x if x.starts_with("-comment") => comment = opt_arg(arg, iter.next(), comment)?,
             _ => return Err(SdcError::WrongArgument(arg)),
         }
     }
@@ -2152,15 +2085,15 @@ fn set_clock_latency(args: Vec<Argument>, location: Location) -> Result<Command,
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-rise" => rise = opt_flg(arg, rise)?,
-            "-fall" => fall = opt_flg(arg, fall)?,
-            "-min" => min = opt_flg(arg, min)?,
-            "-max" => max = opt_flg(arg, max)?,
-            "-source" => source = opt_flg(arg, source)?,
-            "-dynamic" => dynamic = opt_flg(arg, dynamic)?,
-            "-late" => late = opt_flg(arg, late)?,
-            "-early" => early = opt_flg(arg, early)?,
-            "-clock" => clock = opt_arg(arg, iter.next(), clock)?,
+            x if x.starts_with("-rise") => rise = opt_flg(arg, rise)?,
+            x if x.starts_with("-fall") => fall = opt_flg(arg, fall)?,
+            x if x.starts_with("-min") => min = opt_flg(arg, min)?,
+            x if x.starts_with("-max") => max = opt_flg(arg, max)?,
+            x if x.starts_with("-source") => source = opt_flg(arg, source)?,
+            x if x.starts_with("-dynamic") => dynamic = opt_flg(arg, dynamic)?,
+            x if x.starts_with("-late") => late = opt_flg(arg, late)?,
+            x if x.starts_with("-early") => early = opt_flg(arg, early)?,
+            x if x.starts_with("-clock") => clock = opt_arg(arg, iter.next(), clock)?,
             _ => (delay, object_list) = pos_args2(Some(arg), (delay, object_list), &location)?,
         }
     }
@@ -2238,11 +2171,11 @@ fn set_clock_sense(args: Vec<Argument>, location: Location) -> Result<Command, S
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-clocks" => clocks = opt_arg(arg, iter.next(), clocks)?,
-            "-positive" => positive = opt_flg(arg, positive)?,
-            "-negative" => negative = opt_flg(arg, negative)?,
-            "-stop_propagation" => stop_propagation = opt_flg(arg, stop_propagation)?,
-            "-pulse" => pulse = opt_arg(arg, iter.next(), pulse)?,
+            x if x.starts_with("-clocks") => clocks = opt_arg(arg, iter.next(), clocks)?,
+            x if x.starts_with("-positive") => positive = opt_flg(arg, positive)?,
+            x if x.starts_with("-negative") => negative = opt_flg(arg, negative)?,
+            x if x.starts_with("-stop_propagation") => stop_propagation = opt_flg(arg, stop_propagation)?,
+            x if x.starts_with("-pulse") => pulse = opt_arg(arg, iter.next(), pulse)?,
             _ => pins = pos_args1(Some(arg), pins, &location)?,
         }
     }
@@ -2286,12 +2219,7 @@ impl fmt::Display for SetClockTransition {
 impl Validate for SetClockTransition {
     fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
         self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
-        self.arg_comb2(
-            version.within(SDC1_2, SDC2_1),
-            &self.rise,
-            &self.fall,
-            |a, b| !(a & b),
-        )
+        self.arg_comb2(version.within(SDC1_2, SDC2_1), &self.rise, &self.fall, |a, b| !(a & b))
     }
 
     fn location(&self) -> &Location {
@@ -2310,14 +2238,11 @@ fn set_clock_transition(args: Vec<Argument>, location: Location) -> Result<Comma
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-rise" => rise = opt_flg(arg, rise)?,
-            "-fall" => fall = opt_flg(arg, fall)?,
-            "-min" => min = opt_flg(arg, min)?,
-            "-max" => max = opt_flg(arg, max)?,
-            _ => {
-                (transition, clock_list) =
-                    pos_args2(Some(arg), (transition, clock_list), &location)?
-            }
+            x if x.starts_with("-rise") => rise = opt_flg(arg, rise)?,
+            x if x.starts_with("-fall") => fall = opt_flg(arg, fall)?,
+            x if x.starts_with("-min") => min = opt_flg(arg, min)?,
+            x if x.starts_with("-max") => max = opt_flg(arg, max)?,
+            _ => (transition, clock_list) = pos_args2(Some(arg), (transition, clock_list), &location)?,
         }
     }
 
@@ -2379,20 +2304,12 @@ impl Validate for SetClockUncertainty {
         self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.fall_from, "fall_from")?;
         self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.rise_to, "rise_to")?;
         self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.fall_to, "fall_to")?;
-        self.arg_comb3(
-            version.within(SDC1_1, SDC1_2),
-            &self.object_list,
-            &self.from,
-            &self.to,
-            |a, b, c| !(a & (b | c)),
-        )?;
-        self.arg_comb3(
-            version.within(SDC1_3, SDC1_4),
-            &self.object_list,
-            &self.from,
-            &self.to,
-            |a, b, c| a ^ (b & c),
-        )?;
+        self.arg_comb3(version.within(SDC1_1, SDC1_2), &self.object_list, &self.from, &self.to, |a, b, c| {
+            !(a & (b | c))
+        })?;
+        self.arg_comb3(version.within(SDC1_3, SDC1_4), &self.object_list, &self.from, &self.to, |a, b, c| {
+            a ^ (b & c)
+        })?;
         self.arg_comb7(
             version.within(SDC1_5, SDC2_1),
             &self.object_list,
@@ -2428,20 +2345,17 @@ fn set_clock_uncertainty(args: Vec<Argument>, location: Location) -> Result<Comm
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-from" => from = opt_arg(arg, iter.next(), from)?,
-            "-rise_from" => rise_from = opt_arg(arg, iter.next(), rise_from)?,
-            "-fall_from" => fall_from = opt_arg(arg, iter.next(), fall_from)?,
-            "-to" => to = opt_arg(arg, iter.next(), to)?,
-            "-rise_to" => rise_to = opt_arg(arg, iter.next(), rise_to)?,
-            "-fall_to" => fall_to = opt_arg(arg, iter.next(), fall_to)?,
-            "-rise" => rise = opt_flg(arg, rise)?,
-            "-fall" => fall = opt_flg(arg, fall)?,
-            "-setup" => setup = opt_flg(arg, setup)?,
-            "-hold" => hold = opt_flg(arg, hold)?,
-            _ => {
-                (uncertainty, object_list) =
-                    pos_args2(Some(arg), (uncertainty, object_list), &location)?
-            }
+            x if x.starts_with("-from") => from = opt_arg(arg, iter.next(), from)?,
+            x if x.starts_with("-rise_from") => rise_from = opt_arg(arg, iter.next(), rise_from)?,
+            x if x.starts_with("-fall_from") => fall_from = opt_arg(arg, iter.next(), fall_from)?,
+            x if x.starts_with("-to") => to = opt_arg(arg, iter.next(), to)?,
+            x if x.starts_with("-rise_to") => rise_to = opt_arg(arg, iter.next(), rise_to)?,
+            x if x.starts_with("-fall_to") => fall_to = opt_arg(arg, iter.next(), fall_to)?,
+            x if x.starts_with("-rise") => rise = opt_flg(arg, rise)?,
+            x if x.starts_with("-fall") => fall = opt_flg(arg, fall)?,
+            x if x.starts_with("-setup") => setup = opt_flg(arg, setup)?,
+            x if x.starts_with("-hold") => hold = opt_flg(arg, hold)?,
+            _ => (uncertainty, object_list) = pos_args2(Some(arg), (uncertainty, object_list), &location)?,
         }
     }
 
@@ -2532,15 +2446,15 @@ fn set_data_check(args: Vec<Argument>, location: Location) -> Result<Command, Sd
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-from" => from = opt_arg(arg, iter.next(), from)?,
-            "-to" => to = opt_arg(arg, iter.next(), to)?,
-            "-rise_from" => rise_from = opt_arg(arg, iter.next(), rise_from)?,
-            "-fall_from" => fall_from = opt_arg(arg, iter.next(), fall_from)?,
-            "-rise_to" => rise_to = opt_arg(arg, iter.next(), rise_to)?,
-            "-fall_to" => fall_to = opt_arg(arg, iter.next(), fall_to)?,
-            "-setup" => setup = opt_flg(arg, setup)?,
-            "-hold" => hold = opt_flg(arg, hold)?,
-            "-clock" => clock = opt_arg(arg, iter.next(), clock)?,
+            x if x.starts_with("-from") => from = opt_arg(arg, iter.next(), from)?,
+            x if x.starts_with("-to") => to = opt_arg(arg, iter.next(), to)?,
+            x if x.starts_with("-rise_from") => rise_from = opt_arg(arg, iter.next(), rise_from)?,
+            x if x.starts_with("-fall_from") => fall_from = opt_arg(arg, iter.next(), fall_from)?,
+            x if x.starts_with("-rise_to") => rise_to = opt_arg(arg, iter.next(), rise_to)?,
+            x if x.starts_with("-fall_to") => fall_to = opt_arg(arg, iter.next(), fall_to)?,
+            x if x.starts_with("-setup") => setup = opt_flg(arg, setup)?,
+            x if x.starts_with("-hold") => hold = opt_flg(arg, hold)?,
+            x if x.starts_with("-clock") => clock = opt_arg(arg, iter.next(), clock)?,
             _ => value = pos_args1(Some(arg), value, &location)?,
         }
     }
@@ -2584,12 +2498,7 @@ impl fmt::Display for SetDisableTiming {
 impl Validate for SetDisableTiming {
     fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
         self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
-        self.arg_comb2(
-            version.within(SDC1_2, SDC2_1),
-            &self.from,
-            &self.to,
-            |a, b| !(a ^ b),
-        )
+        self.arg_comb2(version.within(SDC1_2, SDC2_1), &self.from, &self.to, |a, b| !(a ^ b))
     }
 
     fn location(&self) -> &Location {
@@ -2605,8 +2514,8 @@ fn set_disable_timing(args: Vec<Argument>, location: Location) -> Result<Command
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-from" => from = opt_arg(arg, iter.next(), from)?,
-            "-to" => to = opt_arg(arg, iter.next(), to)?,
+            x if x.starts_with("-from") => from = opt_arg(arg, iter.next(), from)?,
+            x if x.starts_with("-to") => to = opt_arg(arg, iter.next(), to)?,
             _ => cell_pin_list = pos_args1(Some(arg), cell_pin_list, &location)?,
         }
     }
@@ -2667,13 +2576,11 @@ fn set_drive(args: Vec<Argument>, location: Location) -> Result<Command, SdcErro
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-rise" => rise = opt_flg(arg, rise)?,
-            "-fall" => fall = opt_flg(arg, fall)?,
-            "-min" => min = opt_flg(arg, min)?,
-            "-max" => max = opt_flg(arg, max)?,
-            _ => {
-                (resistance, port_list) = pos_args2(Some(arg), (resistance, port_list), &location)?
-            }
+            x if x.starts_with("-rise") => rise = opt_flg(arg, rise)?,
+            x if x.starts_with("-fall") => fall = opt_flg(arg, fall)?,
+            x if x.starts_with("-min") => min = opt_flg(arg, min)?,
+            x if x.starts_with("-max") => max = opt_flg(arg, max)?,
+            _ => (resistance, port_list) = pos_args2(Some(arg), (resistance, port_list), &location)?,
         }
     }
 
@@ -2729,14 +2636,8 @@ impl fmt::Display for SetDrivingCell {
         text.push_str(&fmt_named_flg(self.no_design_rule, "no_design_rule"));
         text.push_str(&fmt_named_opt_arg(&self.clock, "clock"));
         text.push_str(&fmt_named_flg(self.clock_fall, "clock_fall"));
-        text.push_str(&fmt_named_opt_arg(
-            &self.input_transition_rise,
-            "input_transition_rise",
-        ));
-        text.push_str(&fmt_named_opt_arg(
-            &self.input_transition_fall,
-            "input_transition_fall",
-        ));
+        text.push_str(&fmt_named_opt_arg(&self.input_transition_rise, "input_transition_rise"));
+        text.push_str(&fmt_named_opt_arg(&self.input_transition_fall, "input_transition_fall"));
         text.push_str(&fmt_arg(&self.port_list));
         text.fmt(f)
     }
@@ -2748,16 +2649,8 @@ impl Validate for SetDrivingCell {
         self.arg_supported_version(version.within(SDC1_4, SDC2_1), &self.min, "min")?;
         self.arg_supported_version(version.within(SDC1_4, SDC2_1), &self.max, "max")?;
         self.arg_supported_version(version.within(SDC1_4, SDC2_1), &self.clock, "clock")?;
-        self.arg_supported_version(
-            version.within(SDC1_4, SDC2_1),
-            &self.clock_fall,
-            "clock_fall",
-        )?;
-        self.arg_supported_version(
-            version.within(SDC1_1, SDC2_0),
-            &self.multiply_by,
-            "multiply_by",
-        )
+        self.arg_supported_version(version.within(SDC1_4, SDC2_1), &self.clock_fall, "clock_fall")?;
+        self.arg_supported_version(version.within(SDC1_1, SDC2_0), &self.multiply_by, "multiply_by")
     }
 
     fn location(&self) -> &Location {
@@ -2786,25 +2679,21 @@ fn set_driving_cell(args: Vec<Argument>, location: Location) -> Result<Command, 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-lib_cell" => lib_cell = opt_arg(arg, iter.next(), lib_cell)?,
-            "-rise" => rise = opt_flg(arg, rise)?,
-            "-fall" => fall = opt_flg(arg, fall)?,
-            "-min" => min = opt_flg(arg, min)?,
-            "-max" => max = opt_flg(arg, max)?,
-            "-library" => library = opt_arg(arg, iter.next(), library)?,
-            "-pin" => pin = opt_arg(arg, iter.next(), pin)?,
-            "-from_pin" => from_pin = opt_arg(arg, iter.next(), from_pin)?,
-            "-multiply_by" => multiply_by = opt_arg(arg, iter.next(), multiply_by)?,
-            "-dont_scale" => dont_scale = opt_flg(arg, dont_scale)?,
-            "-no_design_rule" => no_design_rule = opt_flg(arg, no_design_rule)?,
-            "-clock" => clock = opt_arg(arg, iter.next(), clock)?,
-            "-clock_fall" => clock_fall = opt_flg(arg, clock_fall)?,
-            "-input_transition_rise" => {
-                input_transition_rise = opt_arg(arg, iter.next(), input_transition_rise)?
-            }
-            "-input_transition_fall" => {
-                input_transition_fall = opt_arg(arg, iter.next(), input_transition_fall)?
-            }
+            x if x.starts_with("-lib_cell") => lib_cell = opt_arg(arg, iter.next(), lib_cell)?,
+            x if x.starts_with("-rise") => rise = opt_flg(arg, rise)?,
+            x if x.starts_with("-fall") => fall = opt_flg(arg, fall)?,
+            x if x.starts_with("-min") => min = opt_flg(arg, min)?,
+            x if x.starts_with("-max") => max = opt_flg(arg, max)?,
+            x if x.starts_with("-library") => library = opt_arg(arg, iter.next(), library)?,
+            x if x.starts_with("-pin") => pin = opt_arg(arg, iter.next(), pin)?,
+            x if x.starts_with("-from_pin") => from_pin = opt_arg(arg, iter.next(), from_pin)?,
+            x if x.starts_with("-multiply_by") => multiply_by = opt_arg(arg, iter.next(), multiply_by)?,
+            x if x.starts_with("-dont_scale") => dont_scale = opt_flg(arg, dont_scale)?,
+            x if x.starts_with("-no_design_rule") => no_design_rule = opt_flg(arg, no_design_rule)?,
+            x if x.starts_with("-clock") => clock = opt_arg(arg, iter.next(), clock)?,
+            x if x.starts_with("-clock_fall") => clock_fall = opt_flg(arg, clock_fall)?,
+            x if x.starts_with("-input_transition_rise") => input_transition_rise = opt_arg(arg, iter.next(), input_transition_rise)?,
+            x if x.starts_with("-input_transition_fall") => input_transition_fall = opt_arg(arg, iter.next(), input_transition_fall)?,
             _ => port_list = pos_args1(Some(arg), port_list, &location)?,
         }
     }
@@ -2881,24 +2770,10 @@ impl Validate for SetFalsePath {
         self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.fall_from, "fall_from")?;
         self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.rise_to, "rise_to")?;
         self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.fall_to, "fall_to")?;
-        self.arg_supported_version(
-            version.within(SDC1_7, SDC2_1),
-            &self.rise_through,
-            "rise_through",
-        )?;
-        self.arg_supported_version(
-            version.within(SDC1_7, SDC2_1),
-            &self.fall_through,
-            "fall_through",
-        )?;
+        self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.rise_through, "rise_through")?;
+        self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.fall_through, "fall_through")?;
         self.arg_supported_version(version.within(SDC1_9, SDC2_1), &self.comment, "comment")?;
-        self.arg_comb3(
-            version.within(SDC1_1, SDC1_1),
-            &self.from,
-            &self.to,
-            &self.through,
-            |a, b, c| (a | b | c),
-        )?;
+        self.arg_comb3(version.within(SDC1_1, SDC1_1), &self.from, &self.to, &self.through, |a, b, c| (a | b | c))?;
         self.arg_comb7(
             version.within(SDC1_2, SDC2_1),
             &self.from,
@@ -2936,20 +2811,20 @@ fn set_false_path(args: Vec<Argument>, location: Location) -> Result<Command, Sd
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-setup" => setup = opt_flg(arg, setup)?,
-            "-hold" => hold = opt_flg(arg, hold)?,
-            "-rise" => rise = opt_flg(arg, rise)?,
-            "-fall" => fall = opt_flg(arg, fall)?,
-            "-from" => from = opt_arg(arg, iter.next(), from)?,
-            "-to" => to = opt_arg(arg, iter.next(), to)?,
-            "-through" => through = vec_arg(arg, iter.next(), through)?,
-            "-rise_from" => rise_from = opt_arg(arg, iter.next(), rise_from)?,
-            "-rise_to" => rise_to = opt_arg(arg, iter.next(), rise_to)?,
-            "-rise_through" => rise_through = vec_arg(arg, iter.next(), rise_through)?,
-            "-fall_from" => fall_from = opt_arg(arg, iter.next(), fall_from)?,
-            "-fall_to" => fall_to = opt_arg(arg, iter.next(), fall_to)?,
-            "-fall_through" => fall_through = vec_arg(arg, iter.next(), fall_through)?,
-            "-comment" => comment = opt_arg(arg, iter.next(), comment)?,
+            x if x.starts_with("-setup") => setup = opt_flg(arg, setup)?,
+            x if x.starts_with("-hold") => hold = opt_flg(arg, hold)?,
+            x if x.starts_with("-rise") => rise = opt_flg(arg, rise)?,
+            x if x.starts_with("-fall") => fall = opt_flg(arg, fall)?,
+            x if x.starts_with("-from") => from = opt_arg(arg, iter.next(), from)?,
+            x if x.starts_with("-to") => to = opt_arg(arg, iter.next(), to)?,
+            x if x.starts_with("-through") => through = vec_arg(arg, iter.next(), through)?,
+            x if x.starts_with("-rise_from") => rise_from = opt_arg(arg, iter.next(), rise_from)?,
+            x if x.starts_with("-rise_to") => rise_to = opt_arg(arg, iter.next(), rise_to)?,
+            x if x.starts_with("-rise_through") => rise_through = vec_arg(arg, iter.next(), rise_through)?,
+            x if x.starts_with("-fall_from") => fall_from = opt_arg(arg, iter.next(), fall_from)?,
+            x if x.starts_with("-fall_to") => fall_to = opt_arg(arg, iter.next(), fall_to)?,
+            x if x.starts_with("-fall_through") => fall_through = vec_arg(arg, iter.next(), fall_through)?,
+            x if x.starts_with("-comment") => comment = opt_arg(arg, iter.next(), comment)?,
             _ => return Err(SdcError::WrongArgument(arg)),
         }
     }
@@ -3014,11 +2889,7 @@ fn set_fanout_load(args: Vec<Argument>, location: Location) -> Result<Command, S
     let value = mandatory(value, "value", &location)?;
     let port_list = mandatory(port_list, "port_list", &location)?;
 
-    Ok(Command::SetFanoutLoad(SetFanoutLoad {
-        value,
-        port_list,
-        location,
-    }))
+    Ok(Command::SetFanoutLoad(SetFanoutLoad { value, port_list, location }))
 }
 
 /// set_hierarchy_separator
@@ -3056,10 +2927,7 @@ fn set_hierarchy_separator(args: Vec<Argument>, location: Location) -> Result<Co
 
     let separator = mandatory(separator, "separator", &location)?;
 
-    Ok(Command::SetHierarchySeparator(SetHierarchySeparator {
-        separator,
-        location,
-    }))
+    Ok(Command::SetHierarchySeparator(SetHierarchySeparator { separator, location }))
 }
 
 /// set_ideal_latency
@@ -3108,10 +2976,10 @@ fn set_ideal_latency(args: Vec<Argument>, location: Location) -> Result<Command,
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-rise" => rise = opt_flg(arg, rise)?,
-            "-fall" => fall = opt_flg(arg, fall)?,
-            "-min" => min = opt_flg(arg, min)?,
-            "-max" => max = opt_flg(arg, max)?,
+            x if x.starts_with("-rise") => rise = opt_flg(arg, rise)?,
+            x if x.starts_with("-fall") => fall = opt_flg(arg, fall)?,
+            x if x.starts_with("-min") => min = opt_flg(arg, min)?,
+            x if x.starts_with("-max") => max = opt_flg(arg, max)?,
             _ => (delay, object_list) = pos_args2(Some(arg), (delay, object_list), &location)?,
         }
     }
@@ -3164,7 +3032,7 @@ fn set_ideal_network(args: Vec<Argument>, location: Location) -> Result<Command,
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-no_propagate" => no_propagate = opt_flg(arg, no_propagate)?,
+            x if x.starts_with("-no_propagate") => no_propagate = opt_flg(arg, no_propagate)?,
             _ => object_list = pos_args1(Some(arg), object_list, &location)?,
         }
     }
@@ -3224,14 +3092,11 @@ fn set_ideal_transition(args: Vec<Argument>, location: Location) -> Result<Comma
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-rise" => rise = opt_flg(arg, rise)?,
-            "-fall" => fall = opt_flg(arg, fall)?,
-            "-min" => min = opt_flg(arg, min)?,
-            "-max" => max = opt_flg(arg, max)?,
-            _ => {
-                (transition_time, object_list) =
-                    pos_args2(Some(arg), (transition_time, object_list), &location)?
-            }
+            x if x.starts_with("-rise") => rise = opt_flg(arg, rise)?,
+            x if x.starts_with("-fall") => fall = opt_flg(arg, fall)?,
+            x if x.starts_with("-min") => min = opt_flg(arg, min)?,
+            x if x.starts_with("-max") => max = opt_flg(arg, max)?,
+            _ => (transition_time, object_list) = pos_args2(Some(arg), (transition_time, object_list), &location)?,
         }
     }
 
@@ -3280,14 +3145,8 @@ impl fmt::Display for SetInputDelay {
         text.push_str(&fmt_named_flg(self.min, "min"));
         text.push_str(&fmt_named_flg(self.max, "max"));
         text.push_str(&fmt_named_flg(self.add_delay, "add_delay"));
-        text.push_str(&fmt_named_flg(
-            self.network_latency_included,
-            "network_latency_included",
-        ));
-        text.push_str(&fmt_named_flg(
-            self.source_latency_included,
-            "source_latency_included",
-        ));
+        text.push_str(&fmt_named_flg(self.network_latency_included, "network_latency_included"));
+        text.push_str(&fmt_named_flg(self.source_latency_included, "source_latency_included"));
         text.push_str(&fmt_arg(&self.delay_value));
         text.push_str(&fmt_arg(&self.port_pin_list));
         text.fmt(f)
@@ -3297,21 +3156,9 @@ impl fmt::Display for SetInputDelay {
 impl Validate for SetInputDelay {
     fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
         self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
-        self.arg_supported_version(
-            version.within(SDC1_4, SDC2_1),
-            &self.network_latency_included,
-            "network_latency_included",
-        )?;
-        self.arg_supported_version(
-            version.within(SDC1_4, SDC2_1),
-            &self.source_latency_included,
-            "source_latency_included",
-        )?;
-        self.arg_supported_version(
-            version.within(SDC2_0, SDC2_1),
-            &self.reference_pin,
-            "reference_pin",
-        )?;
+        self.arg_supported_version(version.within(SDC1_4, SDC2_1), &self.network_latency_included, "network_latency_included")?;
+        self.arg_supported_version(version.within(SDC1_4, SDC2_1), &self.source_latency_included, "source_latency_included")?;
+        self.arg_supported_version(version.within(SDC2_0, SDC2_1), &self.reference_pin, "reference_pin")?;
         self.arg_comb3(
             version.within(SDC1_2, SDC2_1),
             &self.clock_fall,
@@ -3344,25 +3191,18 @@ fn set_input_delay(args: Vec<Argument>, location: Location) -> Result<Command, S
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-clock" => clock = opt_arg(arg, iter.next(), clock)?,
-            "-reference_pin" => reference_pin = opt_arg(arg, iter.next(), reference_pin)?,
-            "-clock_fall" => clock_fall = opt_flg(arg, clock_fall)?,
-            "-level_sensitive" => level_sensitive = opt_flg(arg, level_sensitive)?,
-            "-rise" => rise = opt_flg(arg, rise)?,
-            "-fall" => fall = opt_flg(arg, fall)?,
-            "-max" => max = opt_flg(arg, max)?,
-            "-min" => min = opt_flg(arg, min)?,
-            "-add_delay" => add_delay = opt_flg(arg, add_delay)?,
-            "-network_latency_included" => {
-                network_latency_included = opt_flg(arg, network_latency_included)?
-            }
-            "-source_latency_included" => {
-                source_latency_included = opt_flg(arg, source_latency_included)?
-            }
-            _ => {
-                (delay_value, port_pin_list) =
-                    pos_args2(Some(arg), (delay_value, port_pin_list), &location)?
-            }
+            x if x.starts_with("-clock") => clock = opt_arg(arg, iter.next(), clock)?,
+            x if x.starts_with("-reference_pin") => reference_pin = opt_arg(arg, iter.next(), reference_pin)?,
+            x if x.starts_with("-clock_fall") => clock_fall = opt_flg(arg, clock_fall)?,
+            x if x.starts_with("-level_sensitive") => level_sensitive = opt_flg(arg, level_sensitive)?,
+            x if x.starts_with("-rise") => rise = opt_flg(arg, rise)?,
+            x if x.starts_with("-fall") => fall = opt_flg(arg, fall)?,
+            x if x.starts_with("-max") => max = opt_flg(arg, max)?,
+            x if x.starts_with("-min") => min = opt_flg(arg, min)?,
+            x if x.starts_with("-add_delay") => add_delay = opt_flg(arg, add_delay)?,
+            x if x.starts_with("-network_latency_included") => network_latency_included = opt_flg(arg, network_latency_included)?,
+            x if x.starts_with("-source_latency_included") => source_latency_included = opt_flg(arg, source_latency_included)?,
+            _ => (delay_value, port_pin_list) = pos_args2(Some(arg), (delay_value, port_pin_list), &location)?,
         }
     }
 
@@ -3420,11 +3260,7 @@ impl Validate for SetInputTransition {
     fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
         self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
         self.arg_supported_version(version.within(SDC1_4, SDC2_1), &self.clock, "clock")?;
-        self.arg_supported_version(
-            version.within(SDC1_4, SDC2_1),
-            &self.clock_fall,
-            "clock_fall",
-        )
+        self.arg_supported_version(version.within(SDC1_4, SDC2_1), &self.clock_fall, "clock_fall")
     }
 
     fn location(&self) -> &Location {
@@ -3445,15 +3281,13 @@ fn set_input_transition(args: Vec<Argument>, location: Location) -> Result<Comma
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-rise" => rise = opt_flg(arg, rise)?,
-            "-fall" => fall = opt_flg(arg, fall)?,
-            "-min" => min = opt_flg(arg, min)?,
-            "-max" => max = opt_flg(arg, max)?,
-            "-clock" => clock = opt_arg(arg, iter.next(), clock)?,
-            "-clock_fall" => clock_fall = opt_flg(arg, clock_fall)?,
-            _ => {
-                (transition, port_list) = pos_args2(Some(arg), (transition, port_list), &location)?
-            }
+            x if x.starts_with("-rise") => rise = opt_flg(arg, rise)?,
+            x if x.starts_with("-fall") => fall = opt_flg(arg, fall)?,
+            x if x.starts_with("-min") => min = opt_flg(arg, min)?,
+            x if x.starts_with("-max") => max = opt_flg(arg, max)?,
+            x if x.starts_with("-clock") => clock = opt_arg(arg, iter.next(), clock)?,
+            x if x.starts_with("-clock_fall") => clock_fall = opt_flg(arg, clock_fall)?,
+            _ => (transition, port_list) = pos_args2(Some(arg), (transition, port_list), &location)?,
         }
     }
 
@@ -3498,26 +3332,20 @@ impl Validate for SetLevelShifterStrategy {
     }
 }
 
-fn set_level_shifter_strategy(
-    args: Vec<Argument>,
-    location: Location,
-) -> Result<Command, SdcError> {
+fn set_level_shifter_strategy(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut rule = None;
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-rule" => rule = opt_arg(arg, iter.next(), rule)?,
+            x if x.starts_with("-rule") => rule = opt_arg(arg, iter.next(), rule)?,
             _ => return Err(SdcError::WrongArgument(arg)),
         }
     }
 
     let rule = mandatory(rule, "rule", &location)?;
 
-    Ok(Command::SetLevelShifterStrategy(SetLevelShifterStrategy {
-        rule,
-        location,
-    }))
+    Ok(Command::SetLevelShifterStrategy(SetLevelShifterStrategy { rule, location }))
 }
 
 /// set_level_shifter_threshold
@@ -3547,31 +3375,22 @@ impl Validate for SetLevelShifterThreshold {
     }
 }
 
-fn set_level_shifter_threshold(
-    args: Vec<Argument>,
-    location: Location,
-) -> Result<Command, SdcError> {
+fn set_level_shifter_threshold(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut voltage = None;
     let mut percent = None;
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-voltage" => voltage = opt_arg(arg, iter.next(), voltage)?,
-            "-percent" => percent = opt_arg(arg, iter.next(), percent)?,
+            x if x.starts_with("-voltage") => voltage = opt_arg(arg, iter.next(), voltage)?,
+            x if x.starts_with("-percent") => percent = opt_arg(arg, iter.next(), percent)?,
             _ => return Err(SdcError::WrongArgument(arg)),
         }
     }
 
     let voltage = mandatory(voltage, "voltage", &location)?;
 
-    Ok(Command::SetLevelShifterThreshold(
-        SetLevelShifterThreshold {
-            voltage,
-            percent,
-            location,
-        },
-    ))
+    Ok(Command::SetLevelShifterThreshold(SetLevelShifterThreshold { voltage, percent, location }))
 }
 
 /// set_load
@@ -3623,11 +3442,11 @@ fn set_load(args: Vec<Argument>, location: Location) -> Result<Command, SdcError
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-min" => min = opt_flg(arg, min)?,
-            "-max" => max = opt_flg(arg, max)?,
-            "-subtract_pin_load" => subtract_pin_load = opt_flg(arg, subtract_pin_load)?,
-            "-pin_load" => pin_load = opt_flg(arg, pin_load)?,
-            "-wire_load" => wire_load = opt_flg(arg, wire_load)?,
+            x if x.starts_with("-min") => min = opt_flg(arg, min)?,
+            x if x.starts_with("-max") => max = opt_flg(arg, max)?,
+            x if x.starts_with("-subtract_pin_load") => subtract_pin_load = opt_flg(arg, subtract_pin_load)?,
+            x if x.starts_with("-pin_load") => pin_load = opt_flg(arg, pin_load)?,
+            x if x.starts_with("-wire_load") => wire_load = opt_flg(arg, wire_load)?,
             _ => (value, objects) = pos_args2(Some(arg), (value, objects), &location)?,
         }
     }
@@ -3684,10 +3503,7 @@ fn set_logic_dc(args: Vec<Argument>, location: Location) -> Result<Command, SdcE
 
     let port_list = mandatory(port_list, "port_list", &location)?;
 
-    Ok(Command::SetLogicDc(SetLogicDc {
-        port_list,
-        location,
-    }))
+    Ok(Command::SetLogicDc(SetLogicDc { port_list, location }))
 }
 
 /// set_logic_one
@@ -3727,10 +3543,7 @@ fn set_logic_one(args: Vec<Argument>, location: Location) -> Result<Command, Sdc
 
     let port_list = mandatory(port_list, "port_list", &location)?;
 
-    Ok(Command::SetLogicOne(SetLogicOne {
-        port_list,
-        location,
-    }))
+    Ok(Command::SetLogicOne(SetLogicOne { port_list, location }))
 }
 
 /// set_logic_zero
@@ -3770,10 +3583,7 @@ fn set_logic_zero(args: Vec<Argument>, location: Location) -> Result<Command, Sd
 
     let port_list = mandatory(port_list, "port_list", &location)?;
 
-    Ok(Command::SetLogicZero(SetLogicZero {
-        port_list,
-        location,
-    }))
+    Ok(Command::SetLogicZero(SetLogicZero { port_list, location }))
 }
 
 /// set_max_area
@@ -3813,10 +3623,7 @@ fn set_max_area(args: Vec<Argument>, location: Location) -> Result<Command, SdcE
 
     let area_value = mandatory(area_value, "area_value", &location)?;
 
-    Ok(Command::SetMaxArea(SetMaxArea {
-        area_value,
-        location,
-    }))
+    Ok(Command::SetMaxArea(SetMaxArea { area_value, location }))
 }
 
 /// set_max_capacitance
@@ -3901,10 +3708,7 @@ impl fmt::Display for SetMaxDelay {
         text.push_str(&fmt_named_opt_arg(&self.fall_from, "fall_from"));
         text.push_str(&fmt_named_opt_arg(&self.fall_to, "fall_to"));
         text.push_str(&fmt_named_vec_arg(&self.fall_through, "fall_through"));
-        text.push_str(&fmt_named_flg(
-            self.ignore_clock_latency,
-            "ignore_clock_latency",
-        ));
+        text.push_str(&fmt_named_flg(self.ignore_clock_latency, "ignore_clock_latency"));
         text.push_str(&fmt_named_opt_arg(&self.comment, "comment"));
         text.push_str(&fmt_arg(&self.delay_value));
         text.fmt(f)
@@ -3918,28 +3722,11 @@ impl Validate for SetMaxDelay {
         self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.fall_from, "fall_from")?;
         self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.rise_to, "rise_to")?;
         self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.fall_to, "fall_to")?;
-        self.arg_supported_version(
-            version.within(SDC1_7, SDC2_1),
-            &self.rise_through,
-            "rise_through",
-        )?;
-        self.arg_supported_version(
-            version.within(SDC1_7, SDC2_1),
-            &self.fall_through,
-            "fall_through",
-        )?;
+        self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.rise_through, "rise_through")?;
+        self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.fall_through, "fall_through")?;
         self.arg_supported_version(version.within(SDC1_9, SDC2_1), &self.comment, "comment")?;
-        self.arg_supported_version(
-            version.within(SDC2_1, SDC2_1),
-            &self.ignore_clock_latency,
-            "ignore_clock_latency",
-        )?;
-        self.arg_comb2(
-            version.within(SDC1_2, SDC2_1),
-            &self.rise,
-            &self.fall,
-            |a, b| !(a & b),
-        )
+        self.arg_supported_version(version.within(SDC2_1, SDC2_1), &self.ignore_clock_latency, "ignore_clock_latency")?;
+        self.arg_comb2(version.within(SDC1_2, SDC2_1), &self.rise, &self.fall, |a, b| !(a & b))
     }
 
     fn location(&self) -> &Location {
@@ -3966,19 +3753,19 @@ fn set_max_delay(args: Vec<Argument>, location: Location) -> Result<Command, Sdc
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-rise" => rise = opt_flg(arg, rise)?,
-            "-fall" => fall = opt_flg(arg, fall)?,
-            "-from" => from = opt_arg(arg, iter.next(), from)?,
-            "-to" => to = opt_arg(arg, iter.next(), to)?,
-            "-through" => through = vec_arg(arg, iter.next(), through)?,
-            "-rise_from" => rise_from = opt_arg(arg, iter.next(), rise_from)?,
-            "-rise_to" => rise_to = opt_arg(arg, iter.next(), rise_to)?,
-            "-rise_through" => rise_through = vec_arg(arg, iter.next(), rise_through)?,
-            "-fall_from" => fall_from = opt_arg(arg, iter.next(), fall_from)?,
-            "-fall_to" => fall_to = opt_arg(arg, iter.next(), fall_to)?,
-            "-fall_through" => fall_through = vec_arg(arg, iter.next(), fall_through)?,
-            "-ignore_clock_latency" => ignore_clock_latency = opt_flg(arg, ignore_clock_latency)?,
-            "-comment" => comment = opt_arg(arg, iter.next(), comment)?,
+            x if x.starts_with("-rise") => rise = opt_flg(arg, rise)?,
+            x if x.starts_with("-fall") => fall = opt_flg(arg, fall)?,
+            x if x.starts_with("-from") => from = opt_arg(arg, iter.next(), from)?,
+            x if x.starts_with("-to") => to = opt_arg(arg, iter.next(), to)?,
+            x if x.starts_with("-through") => through = vec_arg(arg, iter.next(), through)?,
+            x if x.starts_with("-rise_from") => rise_from = opt_arg(arg, iter.next(), rise_from)?,
+            x if x.starts_with("-rise_to") => rise_to = opt_arg(arg, iter.next(), rise_to)?,
+            x if x.starts_with("-rise_through") => rise_through = vec_arg(arg, iter.next(), rise_through)?,
+            x if x.starts_with("-fall_from") => fall_from = opt_arg(arg, iter.next(), fall_from)?,
+            x if x.starts_with("-fall_to") => fall_to = opt_arg(arg, iter.next(), fall_to)?,
+            x if x.starts_with("-fall_through") => fall_through = vec_arg(arg, iter.next(), fall_through)?,
+            x if x.starts_with("-ignore_clock_latency") => ignore_clock_latency = opt_flg(arg, ignore_clock_latency)?,
+            x if x.starts_with("-comment") => comment = opt_arg(arg, iter.next(), comment)?,
             _ => delay_value = pos_args1(Some(arg), delay_value, &location)?,
         }
     }
@@ -4044,11 +3831,7 @@ fn set_max_dynamic_power(args: Vec<Argument>, location: Location) -> Result<Comm
 
     let power = mandatory(power, "power", &location)?;
 
-    Ok(Command::SetMaxDynamicPower(SetMaxDynamicPower {
-        power,
-        unit,
-        location,
-    }))
+    Ok(Command::SetMaxDynamicPower(SetMaxDynamicPower { power, unit, location }))
 }
 
 /// set_max_fanout
@@ -4139,11 +3922,7 @@ fn set_max_leakage_power(args: Vec<Argument>, location: Location) -> Result<Comm
 
     let power = mandatory(power, "power", &location)?;
 
-    Ok(Command::SetMaxLeakagePower(SetMaxLeakagePower {
-        power,
-        unit,
-        location,
-    }))
+    Ok(Command::SetMaxLeakagePower(SetMaxLeakagePower { power, unit, location }))
 }
 
 /// set_max_time_borrow
@@ -4180,10 +3959,7 @@ fn set_max_time_borrow(args: Vec<Argument>, location: Location) -> Result<Comman
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            _ => {
-                (delay_value, object_list) =
-                    pos_args2(Some(arg), (delay_value, object_list), &location)?
-            }
+            _ => (delay_value, object_list) = pos_args2(Some(arg), (delay_value, object_list), &location)?,
         }
     }
 
@@ -4223,11 +3999,7 @@ impl fmt::Display for SetMaxTransition {
 impl Validate for SetMaxTransition {
     fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
         self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
-        self.arg_supported_version(
-            version.within(SDC1_5, SDC2_1),
-            &self.clock_path,
-            "clock_path",
-        )?;
+        self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.clock_path, "clock_path")?;
         self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.rise, "rise")?;
         self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.fall, "fall")
     }
@@ -4247,9 +4019,9 @@ fn set_max_transition(args: Vec<Argument>, location: Location) -> Result<Command
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-clock_path" => clock_path = opt_flg(arg, clock_path)?,
-            "-rise" => rise = opt_flg(arg, rise)?,
-            "-fall" => fall = opt_flg(arg, fall)?,
+            x if x.starts_with("-clock_path") => clock_path = opt_flg(arg, clock_path)?,
+            x if x.starts_with("-rise") => rise = opt_flg(arg, rise)?,
+            x if x.starts_with("-fall") => fall = opt_flg(arg, fall)?,
             _ => (value, object_list) = pos_args2(Some(arg), (value, object_list), &location)?,
         }
     }
@@ -4349,10 +4121,7 @@ impl fmt::Display for SetMinDelay {
         text.push_str(&fmt_named_opt_arg(&self.fall_from, "fall_from"));
         text.push_str(&fmt_named_opt_arg(&self.fall_to, "fall_to"));
         text.push_str(&fmt_named_vec_arg(&self.fall_through, "fall_through"));
-        text.push_str(&fmt_named_flg(
-            self.ignore_clock_latency,
-            "ignore_clock_latency",
-        ));
+        text.push_str(&fmt_named_flg(self.ignore_clock_latency, "ignore_clock_latency"));
         text.push_str(&fmt_named_opt_arg(&self.comment, "comment"));
         text.push_str(&fmt_arg(&self.delay_value));
         text.fmt(f)
@@ -4366,28 +4135,11 @@ impl Validate for SetMinDelay {
         self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.fall_from, "fall_from")?;
         self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.rise_to, "rise_to")?;
         self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.fall_to, "fall_to")?;
-        self.arg_supported_version(
-            version.within(SDC1_7, SDC2_1),
-            &self.rise_through,
-            "rise_through",
-        )?;
-        self.arg_supported_version(
-            version.within(SDC1_7, SDC2_1),
-            &self.fall_through,
-            "fall_through",
-        )?;
+        self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.rise_through, "rise_through")?;
+        self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.fall_through, "fall_through")?;
         self.arg_supported_version(version.within(SDC1_9, SDC2_1), &self.comment, "comment")?;
-        self.arg_supported_version(
-            version.within(SDC2_1, SDC2_1),
-            &self.ignore_clock_latency,
-            "ignore_clock_latency",
-        )?;
-        self.arg_comb2(
-            version.within(SDC1_2, SDC2_1),
-            &self.rise,
-            &self.fall,
-            |a, b| !(a & b),
-        )
+        self.arg_supported_version(version.within(SDC2_1, SDC2_1), &self.ignore_clock_latency, "ignore_clock_latency")?;
+        self.arg_comb2(version.within(SDC1_2, SDC2_1), &self.rise, &self.fall, |a, b| !(a & b))
     }
 
     fn location(&self) -> &Location {
@@ -4414,19 +4166,19 @@ fn set_min_delay(args: Vec<Argument>, location: Location) -> Result<Command, Sdc
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-rise" => rise = opt_flg(arg, rise)?,
-            "-fall" => fall = opt_flg(arg, fall)?,
-            "-from" => from = opt_arg(arg, iter.next(), from)?,
-            "-to" => to = opt_arg(arg, iter.next(), to)?,
-            "-through" => through = vec_arg(arg, iter.next(), through)?,
-            "-rise_from" => rise_from = opt_arg(arg, iter.next(), rise_from)?,
-            "-rise_to" => rise_to = opt_arg(arg, iter.next(), rise_to)?,
-            "-rise_through" => rise_through = vec_arg(arg, iter.next(), rise_through)?,
-            "-fall_from" => fall_from = opt_arg(arg, iter.next(), fall_from)?,
-            "-fall_to" => fall_to = opt_arg(arg, iter.next(), fall_to)?,
-            "-fall_through" => fall_through = vec_arg(arg, iter.next(), fall_through)?,
-            "-ignore_clock_latency" => ignore_clock_latency = opt_flg(arg, ignore_clock_latency)?,
-            "-comment" => comment = opt_arg(arg, iter.next(), comment)?,
+            x if x.starts_with("-rise") => rise = opt_flg(arg, rise)?,
+            x if x.starts_with("-fall") => fall = opt_flg(arg, fall)?,
+            x if x.starts_with("-from") => from = opt_arg(arg, iter.next(), from)?,
+            x if x.starts_with("-to") => to = opt_arg(arg, iter.next(), to)?,
+            x if x.starts_with("-through") => through = vec_arg(arg, iter.next(), through)?,
+            x if x.starts_with("-rise_from") => rise_from = opt_arg(arg, iter.next(), rise_from)?,
+            x if x.starts_with("-rise_to") => rise_to = opt_arg(arg, iter.next(), rise_to)?,
+            x if x.starts_with("-rise_through") => rise_through = vec_arg(arg, iter.next(), rise_through)?,
+            x if x.starts_with("-fall_from") => fall_from = opt_arg(arg, iter.next(), fall_from)?,
+            x if x.starts_with("-fall_to") => fall_to = opt_arg(arg, iter.next(), fall_to)?,
+            x if x.starts_with("-fall_through") => fall_through = vec_arg(arg, iter.next(), fall_through)?,
+            x if x.starts_with("-ignore_clock_latency") => ignore_clock_latency = opt_flg(arg, ignore_clock_latency)?,
+            x if x.starts_with("-comment") => comment = opt_arg(arg, iter.next(), comment)?,
             _ => delay_value = pos_args1(Some(arg), delay_value, &location)?,
         }
     }
@@ -4486,10 +4238,7 @@ fn set_min_porosity(args: Vec<Argument>, location: Location) -> Result<Command, 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            _ => {
-                (porosity_value, object_list) =
-                    pos_args2(Some(arg), (porosity_value, object_list), &location)?
-            }
+            _ => (porosity_value, object_list) = pos_args2(Some(arg), (porosity_value, object_list), &location)?,
         }
     }
 
@@ -4543,8 +4292,8 @@ fn set_min_pulse_width(args: Vec<Argument>, location: Location) -> Result<Comman
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-low" => low = opt_flg(arg, low)?,
-            "-high" => high = opt_flg(arg, high)?,
+            x if x.starts_with("-low") => low = opt_flg(arg, low)?,
+            x if x.starts_with("-high") => high = opt_flg(arg, high)?,
             _ => (value, object_list) = pos_args2(Some(arg), (value, object_list), &location)?,
         }
     }
@@ -4614,16 +4363,8 @@ impl Validate for SetMulticyclePath {
         self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.fall_from, "fall_from")?;
         self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.rise_to, "rise_to")?;
         self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.fall_to, "fall_to")?;
-        self.arg_supported_version(
-            version.within(SDC1_7, SDC2_1),
-            &self.rise_through,
-            "rise_through",
-        )?;
-        self.arg_supported_version(
-            version.within(SDC1_7, SDC2_1),
-            &self.fall_through,
-            "fall_through",
-        )?;
+        self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.rise_through, "rise_through")?;
+        self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.fall_through, "fall_through")?;
         self.arg_supported_version(version.within(SDC1_9, SDC2_1), &self.comment, "comment")
     }
 
@@ -4654,22 +4395,22 @@ fn set_multicycle_path(args: Vec<Argument>, location: Location) -> Result<Comman
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-setup" => setup = opt_flg(arg, setup)?,
-            "-hold" => hold = opt_flg(arg, hold)?,
-            "-rise" => rise = opt_flg(arg, rise)?,
-            "-fall" => fall = opt_flg(arg, fall)?,
-            "-start" => start = opt_flg(arg, start)?,
-            "-end" => end = opt_flg(arg, end)?,
-            "-from" => from = opt_arg(arg, iter.next(), from)?,
-            "-to" => to = opt_arg(arg, iter.next(), to)?,
-            "-through" => through = vec_arg(arg, iter.next(), through)?,
-            "-rise_from" => rise_from = opt_arg(arg, iter.next(), rise_from)?,
-            "-rise_to" => rise_to = opt_arg(arg, iter.next(), rise_to)?,
-            "-rise_through" => rise_through = vec_arg(arg, iter.next(), rise_through)?,
-            "-fall_from" => fall_from = opt_arg(arg, iter.next(), fall_from)?,
-            "-fall_to" => fall_to = opt_arg(arg, iter.next(), fall_to)?,
-            "-fall_through" => fall_through = vec_arg(arg, iter.next(), fall_through)?,
-            "-comment" => comment = opt_arg(arg, iter.next(), comment)?,
+            x if x.starts_with("-setup") => setup = opt_flg(arg, setup)?,
+            x if x.starts_with("-hold") => hold = opt_flg(arg, hold)?,
+            x if x.starts_with("-rise") => rise = opt_flg(arg, rise)?,
+            x if x.starts_with("-fall") => fall = opt_flg(arg, fall)?,
+            x if x.starts_with("-start") => start = opt_flg(arg, start)?,
+            x if x.starts_with("-end") => end = opt_flg(arg, end)?,
+            x if x.starts_with("-from") => from = opt_arg(arg, iter.next(), from)?,
+            x if x.starts_with("-to") => to = opt_arg(arg, iter.next(), to)?,
+            x if x.starts_with("-through") => through = vec_arg(arg, iter.next(), through)?,
+            x if x.starts_with("-rise_from") => rise_from = opt_arg(arg, iter.next(), rise_from)?,
+            x if x.starts_with("-rise_to") => rise_to = opt_arg(arg, iter.next(), rise_to)?,
+            x if x.starts_with("-rise_through") => rise_through = vec_arg(arg, iter.next(), rise_through)?,
+            x if x.starts_with("-fall_from") => fall_from = opt_arg(arg, iter.next(), fall_from)?,
+            x if x.starts_with("-fall_to") => fall_to = opt_arg(arg, iter.next(), fall_to)?,
+            x if x.starts_with("-fall_through") => fall_through = vec_arg(arg, iter.next(), fall_through)?,
+            x if x.starts_with("-comment") => comment = opt_arg(arg, iter.next(), comment)?,
             _ => path_multiplier = pos_args1(Some(arg), path_multiplier, &location)?,
         }
     }
@@ -4730,11 +4471,7 @@ impl fmt::Display for SetOperatingConditions {
 impl Validate for SetOperatingConditions {
     fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
         self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
-        self.arg_supported_version(
-            version.within(SDC1_5, SDC2_1),
-            &self.object_list,
-            "object_list",
-        )
+        self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.object_list, "object_list")
     }
 
     fn location(&self) -> &Location {
@@ -4755,13 +4492,13 @@ fn set_operating_conditions(args: Vec<Argument>, location: Location) -> Result<C
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-library" => library = opt_arg(arg, iter.next(), library)?,
-            "-analysis_type" => analysis_type = opt_arg(arg, iter.next(), analysis_type)?,
-            "-max" => max = opt_arg(arg, iter.next(), max)?,
-            "-min" => min = opt_arg(arg, iter.next(), min)?,
-            "-max_library" => max_library = opt_arg(arg, iter.next(), max_library)?,
-            "-min_library" => min_library = opt_arg(arg, iter.next(), min_library)?,
-            "-object_list" => object_list = opt_arg(arg, iter.next(), object_list)?,
+            x if x.starts_with("-library") => library = opt_arg(arg, iter.next(), library)?,
+            x if x.starts_with("-analysis_type") => analysis_type = opt_arg(arg, iter.next(), analysis_type)?,
+            x if x.starts_with("-max") => max = opt_arg(arg, iter.next(), max)?,
+            x if x.starts_with("-min") => min = opt_arg(arg, iter.next(), min)?,
+            x if x.starts_with("-max_library") => max_library = opt_arg(arg, iter.next(), max_library)?,
+            x if x.starts_with("-min_library") => min_library = opt_arg(arg, iter.next(), min_library)?,
+            x if x.starts_with("-object_list") => object_list = opt_arg(arg, iter.next(), object_list)?,
             _ => condition = pos_args1(Some(arg), condition, &location)?,
         }
     }
@@ -4810,14 +4547,8 @@ impl fmt::Display for SetOutputDelay {
         text.push_str(&fmt_named_flg(self.min, "min"));
         text.push_str(&fmt_named_flg(self.max, "max"));
         text.push_str(&fmt_named_flg(self.add_delay, "add_delay"));
-        text.push_str(&fmt_named_flg(
-            self.network_latency_included,
-            "network_latency_included",
-        ));
-        text.push_str(&fmt_named_flg(
-            self.source_latency_included,
-            "source_latency_included",
-        ));
+        text.push_str(&fmt_named_flg(self.network_latency_included, "network_latency_included"));
+        text.push_str(&fmt_named_flg(self.source_latency_included, "source_latency_included"));
         text.push_str(&fmt_arg(&self.delay_value));
         text.push_str(&fmt_arg(&self.port_pin_list));
         text.fmt(f)
@@ -4827,21 +4558,9 @@ impl fmt::Display for SetOutputDelay {
 impl Validate for SetOutputDelay {
     fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
         self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
-        self.arg_supported_version(
-            version.within(SDC1_4, SDC2_1),
-            &self.network_latency_included,
-            "network_latency_included",
-        )?;
-        self.arg_supported_version(
-            version.within(SDC1_4, SDC2_1),
-            &self.source_latency_included,
-            "source_latency_included",
-        )?;
-        self.arg_supported_version(
-            version.within(SDC2_0, SDC2_1),
-            &self.reference_pin,
-            "reference_pin",
-        )?;
+        self.arg_supported_version(version.within(SDC1_4, SDC2_1), &self.network_latency_included, "network_latency_included")?;
+        self.arg_supported_version(version.within(SDC1_4, SDC2_1), &self.source_latency_included, "source_latency_included")?;
+        self.arg_supported_version(version.within(SDC2_0, SDC2_1), &self.reference_pin, "reference_pin")?;
         self.arg_comb3(
             version.within(SDC1_2, SDC2_1),
             &self.clock_fall,
@@ -4874,25 +4593,18 @@ fn set_output_delay(args: Vec<Argument>, location: Location) -> Result<Command, 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-clock" => clock = opt_arg(arg, iter.next(), clock)?,
-            "-reference_pin" => reference_pin = opt_arg(arg, iter.next(), reference_pin)?,
-            "-clock_fall" => clock_fall = opt_flg(arg, clock_fall)?,
-            "-level_sensitive" => level_sensitive = opt_flg(arg, level_sensitive)?,
-            "-rise" => rise = opt_flg(arg, rise)?,
-            "-fall" => fall = opt_flg(arg, fall)?,
-            "-max" => max = opt_flg(arg, max)?,
-            "-min" => min = opt_flg(arg, min)?,
-            "-add_delay" => add_delay = opt_flg(arg, add_delay)?,
-            "-network_latency_included" => {
-                network_latency_included = opt_flg(arg, network_latency_included)?
-            }
-            "-source_latency_included" => {
-                source_latency_included = opt_flg(arg, source_latency_included)?
-            }
-            _ => {
-                (delay_value, port_pin_list) =
-                    pos_args2(Some(arg), (delay_value, port_pin_list), &location)?
-            }
+            x if x.starts_with("-clock") => clock = opt_arg(arg, iter.next(), clock)?,
+            x if x.starts_with("-reference_pin") => reference_pin = opt_arg(arg, iter.next(), reference_pin)?,
+            x if x.starts_with("-clock_fall") => clock_fall = opt_flg(arg, clock_fall)?,
+            x if x.starts_with("-level_sensitive") => level_sensitive = opt_flg(arg, level_sensitive)?,
+            x if x.starts_with("-rise") => rise = opt_flg(arg, rise)?,
+            x if x.starts_with("-fall") => fall = opt_flg(arg, fall)?,
+            x if x.starts_with("-max") => max = opt_flg(arg, max)?,
+            x if x.starts_with("-min") => min = opt_flg(arg, min)?,
+            x if x.starts_with("-add_delay") => add_delay = opt_flg(arg, add_delay)?,
+            x if x.starts_with("-network_latency_included") => network_latency_included = opt_flg(arg, network_latency_included)?,
+            x if x.starts_with("-source_latency_included") => source_latency_included = opt_flg(arg, source_latency_included)?,
+            _ => (delay_value, port_pin_list) = pos_args2(Some(arg), (delay_value, port_pin_list), &location)?,
         }
     }
 
@@ -4958,11 +4670,7 @@ fn set_port_fanout_number(args: Vec<Argument>, location: Location) -> Result<Com
     let value = mandatory(value, "value", &location)?;
     let port_list = mandatory(port_list, "port_list", &location)?;
 
-    Ok(Command::SetPortFanoutNumber(SetPortFanoutNumber {
-        value,
-        port_list,
-        location,
-    }))
+    Ok(Command::SetPortFanoutNumber(SetPortFanoutNumber { value, port_list, location }))
 }
 
 /// set_propagated_clock
@@ -5002,10 +4710,7 @@ fn set_propagated_clock(args: Vec<Argument>, location: Location) -> Result<Comma
 
     let object_list = mandatory(object_list, "object_list", &location)?;
 
-    Ok(Command::SetPropagatedClock(SetPropagatedClock {
-        object_list,
-        location,
-    }))
+    Ok(Command::SetPropagatedClock(SetPropagatedClock { object_list, location }))
 }
 
 /// set_resistance
@@ -5048,8 +4753,8 @@ fn set_resistance(args: Vec<Argument>, location: Location) -> Result<Command, Sd
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-min" => min = opt_flg(arg, min)?,
-            "-max" => max = opt_flg(arg, max)?,
+            x if x.starts_with("-min") => min = opt_flg(arg, min)?,
+            x if x.starts_with("-max") => max = opt_flg(arg, max)?,
             _ => (value, net_list) = pos_args2(Some(arg), (value, net_list), &location)?,
         }
     }
@@ -5131,14 +4836,14 @@ fn set_sense(args: Vec<Argument>, location: Location) -> Result<Command, SdcErro
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-type" => r#type = opt_arg(arg, iter.next(), r#type)?,
-            "-non_unate" => non_unate = opt_flg(arg, non_unate)?,
-            "-positive" => positive = opt_flg(arg, positive)?,
-            "-negative" => negative = opt_flg(arg, negative)?,
-            "-clock_leaf" => clock_leaf = opt_flg(arg, clock_leaf)?,
-            "-stop_propagation" => stop_propagation = opt_flg(arg, stop_propagation)?,
-            "-pulse" => pulse = opt_arg(arg, iter.next(), pulse)?,
-            "-clocks" => clocks = opt_arg(arg, iter.next(), clocks)?,
+            x if x.starts_with("-type") => r#type = opt_arg(arg, iter.next(), r#type)?,
+            x if x.starts_with("-non_unate") => non_unate = opt_flg(arg, non_unate)?,
+            x if x.starts_with("-positive") => positive = opt_flg(arg, positive)?,
+            x if x.starts_with("-negative") => negative = opt_flg(arg, negative)?,
+            x if x.starts_with("-clock_leaf") => clock_leaf = opt_flg(arg, clock_leaf)?,
+            x if x.starts_with("-stop_propagation") => stop_propagation = opt_flg(arg, stop_propagation)?,
+            x if x.starts_with("-pulse") => pulse = opt_arg(arg, iter.next(), pulse)?,
+            x if x.starts_with("-clocks") => clocks = opt_arg(arg, iter.next(), clocks)?,
             _ => pin_list = pos_args1(Some(arg), pin_list, &location)?,
         }
     }
@@ -5208,12 +4913,7 @@ impl Validate for SetTimingDerate {
         self.arg_supported_version(version.within(SDC2_1, SDC2_1), &self.r#static, "static")?;
         self.arg_supported_version(version.within(SDC2_1, SDC2_1), &self.dynamic, "dynamic")?;
         self.arg_supported_version(version.within(SDC2_1, SDC2_1), &self.increment, "increment")?;
-        self.arg_comb2(
-            version.within(SDC1_5, SDC2_1),
-            &self.early,
-            &self.late,
-            |a, b| (a & !b) | (b & !a),
-        )
+        self.arg_comb2(version.within(SDC1_5, SDC2_1), &self.early, &self.late, |a, b| (a & !b) | (b & !a))
     }
 
     fn location(&self) -> &Location {
@@ -5240,22 +4940,19 @@ fn set_timing_derate(args: Vec<Argument>, location: Location) -> Result<Command,
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-cell_delay" => cell_delay = opt_flg(arg, cell_delay)?,
-            "-cell_check" => cell_check = opt_flg(arg, cell_check)?,
-            "-net_delay" => net_delay = opt_flg(arg, net_delay)?,
-            "-data" => data = opt_flg(arg, data)?,
-            "-clock" => clock = opt_flg(arg, clock)?,
-            "-early" => early = opt_flg(arg, early)?,
-            "-late" => late = opt_flg(arg, late)?,
-            "-rise" => rise = opt_flg(arg, rise)?,
-            "-fall" => fall = opt_flg(arg, fall)?,
-            "-static" => r#static = opt_flg(arg, r#static)?,
-            "-dynamic" => dynamic = opt_flg(arg, dynamic)?,
-            "-increment" => increment = opt_flg(arg, increment)?,
-            _ => {
-                (derate_value, object_list) =
-                    pos_args2(Some(arg), (derate_value, object_list), &location)?
-            }
+            x if x.starts_with("-cell_delay") => cell_delay = opt_flg(arg, cell_delay)?,
+            x if x.starts_with("-cell_check") => cell_check = opt_flg(arg, cell_check)?,
+            x if x.starts_with("-net_delay") => net_delay = opt_flg(arg, net_delay)?,
+            x if x.starts_with("-data") => data = opt_flg(arg, data)?,
+            x if x.starts_with("-clock") => clock = opt_flg(arg, clock)?,
+            x if x.starts_with("-early") => early = opt_flg(arg, early)?,
+            x if x.starts_with("-late") => late = opt_flg(arg, late)?,
+            x if x.starts_with("-rise") => rise = opt_flg(arg, rise)?,
+            x if x.starts_with("-fall") => fall = opt_flg(arg, fall)?,
+            x if x.starts_with("-static") => r#static = opt_flg(arg, r#static)?,
+            x if x.starts_with("-dynamic") => dynamic = opt_flg(arg, dynamic)?,
+            x if x.starts_with("-increment") => increment = opt_flg(arg, increment)?,
+            _ => (derate_value, object_list) = pos_args2(Some(arg), (derate_value, object_list), &location)?,
         }
     }
 
@@ -5328,12 +5025,12 @@ fn set_units(args: Vec<Argument>, location: Location, alias: bool) -> Result<Com
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-capacitance" => capacitance = opt_arg(arg, iter.next(), capacitance)?,
-            "-resistance" => resistance = opt_arg(arg, iter.next(), resistance)?,
-            "-time" => time = opt_arg(arg, iter.next(), time)?,
-            "-voltage" => voltage = opt_arg(arg, iter.next(), voltage)?,
-            "-current" => current = opt_arg(arg, iter.next(), current)?,
-            "-power" => power = opt_arg(arg, iter.next(), power)?,
+            x if x.starts_with("-capacitance") => capacitance = opt_arg(arg, iter.next(), capacitance)?,
+            x if x.starts_with("-resistance") => resistance = opt_arg(arg, iter.next(), resistance)?,
+            x if x.starts_with("-time") => time = opt_arg(arg, iter.next(), time)?,
+            x if x.starts_with("-voltage") => voltage = opt_arg(arg, iter.next(), voltage)?,
+            x if x.starts_with("-current") => current = opt_arg(arg, iter.next(), current)?,
+            x if x.starts_with("-power") => power = opt_arg(arg, iter.next(), power)?,
             _ => return Err(SdcError::WrongArgument(arg)),
         }
     }
@@ -5387,8 +5084,8 @@ fn set_voltage(args: Vec<Argument>, location: Location) -> Result<Command, SdcEr
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-min" => min = opt_arg(arg, iter.next(), min)?,
-            "-object_list" => object_list = opt_arg(arg, iter.next(), object_list)?,
+            x if x.starts_with("-min") => min = opt_arg(arg, iter.next(), min)?,
+            x if x.starts_with("-object_list") => object_list = opt_arg(arg, iter.next(), object_list)?,
             _ => max_case_voltage = pos_args1(Some(arg), max_case_voltage, &location)?,
         }
     }
@@ -5428,10 +5125,7 @@ impl Validate for SetWireLoadMinBlockSize {
     }
 }
 
-fn set_wire_load_min_block_size(
-    args: Vec<Argument>,
-    location: Location,
-) -> Result<Command, SdcError> {
+fn set_wire_load_min_block_size(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut size = None;
 
     let mut iter = args.into_iter();
@@ -5443,10 +5137,7 @@ fn set_wire_load_min_block_size(
 
     let size = mandatory(size, "size", &location)?;
 
-    Ok(Command::SetWireLoadMinBlockSize(SetWireLoadMinBlockSize {
-        size,
-        location,
-    }))
+    Ok(Command::SetWireLoadMinBlockSize(SetWireLoadMinBlockSize { size, location }))
 }
 
 /// set_wire_load_mode
@@ -5486,10 +5177,7 @@ fn set_wire_load_mode(args: Vec<Argument>, location: Location) -> Result<Command
 
     let mode_name = mandatory(mode_name, "mode_name", &location)?;
 
-    Ok(Command::SetWireLoadMode(SetWireLoadMode {
-        mode_name,
-        location,
-    }))
+    Ok(Command::SetWireLoadMode(SetWireLoadMode { mode_name, location }))
 }
 
 /// set_wire_load_model
@@ -5535,10 +5223,10 @@ fn set_wire_load_model(args: Vec<Argument>, location: Location) -> Result<Comman
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-name" => name = opt_arg(arg, iter.next(), name)?,
-            "-library" => library = opt_arg(arg, iter.next(), library)?,
-            "-min" => min = opt_flg(arg, min)?,
-            "-max" => max = opt_flg(arg, max)?,
+            x if x.starts_with("-name") => name = opt_arg(arg, iter.next(), name)?,
+            x if x.starts_with("-library") => library = opt_arg(arg, iter.next(), library)?,
+            x if x.starts_with("-min") => min = opt_flg(arg, min)?,
+            x if x.starts_with("-max") => max = opt_flg(arg, max)?,
             _ => object_list = pos_args1(Some(arg), object_list, &location)?,
         }
     }
@@ -5589,10 +5277,7 @@ impl Validate for SetWireLoadSelectionGroup {
     }
 }
 
-fn set_wire_load_selection_group(
-    args: Vec<Argument>,
-    location: Location,
-) -> Result<Command, SdcError> {
+fn set_wire_load_selection_group(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut library = None;
     let mut min = false;
     let mut max = false;
@@ -5602,26 +5287,21 @@ fn set_wire_load_selection_group(
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
-            "-library" => library = opt_arg(arg, iter.next(), library)?,
-            "-min" => min = opt_flg(arg, min)?,
-            "-max" => max = opt_flg(arg, max)?,
-            _ => {
-                (group_name, object_list) =
-                    pos_args2(Some(arg), (group_name, object_list), &location)?
-            }
+            x if x.starts_with("-library") => library = opt_arg(arg, iter.next(), library)?,
+            x if x.starts_with("-min") => min = opt_flg(arg, min)?,
+            x if x.starts_with("-max") => max = opt_flg(arg, max)?,
+            _ => (group_name, object_list) = pos_args2(Some(arg), (group_name, object_list), &location)?,
         }
     }
 
     let group_name = mandatory(group_name, "group_name", &location)?;
 
-    Ok(Command::SetWireLoadSelectionGroup(
-        SetWireLoadSelectionGroup {
-            library,
-            min,
-            max,
-            group_name,
-            object_list,
-            location,
-        },
-    ))
+    Ok(Command::SetWireLoadSelectionGroup(SetWireLoadSelectionGroup {
+        library,
+        min,
+        max,
+        group_name,
+        object_list,
+        location,
+    }))
 }

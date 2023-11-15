@@ -44,11 +44,7 @@ set sdc_version 2.1
 
 # comment
 "##,
-        vec![
-            "#--------------\n".to_string(),
-            "# header\n".to_string(),
-            "#--------------\n".to_string(),
-        ],
+        vec!["#--------------\n".to_string(), "# header\n".to_string(), "#--------------\n".to_string()],
     );
 }
 
@@ -70,18 +66,9 @@ fn version() {
 #[test]
 fn format() {
     check_format("all_clocks", "all_clocks");
-    check_format(
-        "all_inputs -clock A -level_sensitive",
-        "all_inputs -level_sensitive -clock A",
-    );
-    check_format(
-        "all_outputs -clock A -edge_triggered",
-        "all_outputs -edge_triggered -clock A",
-    );
-    check_format(
-        "all_registers -clock A -edge_triggered",
-        "all_registers -clock A -edge_triggered",
-    );
+    check_format("all_inputs -clock A -level_sensitive", "all_inputs -level_sensitive -clock A");
+    check_format("all_outputs -clock A -edge_triggered", "all_outputs -edge_triggered -clock A");
+    check_format("all_registers -clock A -edge_triggered", "all_registers -clock A -edge_triggered");
     check_format("current_instance   A  ", "current_instance A");
     check_format("expr A B C ", "expr A B C");
     check_format("list A B C ", "list A B C");

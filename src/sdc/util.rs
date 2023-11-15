@@ -1,10 +1,6 @@
 use crate::sdc::{Argument, Location, SdcError, SdcVersion};
 
-pub(crate) fn opt_arg(
-    name: Argument,
-    arg: Option<Argument>,
-    tgt: Option<Argument>,
-) -> Result<Option<Argument>, SdcError> {
+pub(crate) fn opt_arg(name: Argument, arg: Option<Argument>, tgt: Option<Argument>) -> Result<Option<Argument>, SdcError> {
     if arg.is_none() {
         return Err(SdcError::MissingOptArgument(name));
     }
@@ -21,11 +17,7 @@ pub(crate) fn opt_flg(name: Argument, tgt: bool) -> Result<bool, SdcError> {
     }
 }
 
-pub(crate) fn vec_arg(
-    name: Argument,
-    arg: Option<Argument>,
-    mut tgt: Vec<Argument>,
-) -> Result<Vec<Argument>, SdcError> {
+pub(crate) fn vec_arg(name: Argument, arg: Option<Argument>, mut tgt: Vec<Argument>) -> Result<Vec<Argument>, SdcError> {
     if let Some(arg) = arg {
         tgt.push(arg);
         Ok(tgt)
@@ -34,11 +26,7 @@ pub(crate) fn vec_arg(
     }
 }
 
-pub(crate) fn pos_args1(
-    arg: Option<Argument>,
-    tgt: Option<Argument>,
-    location: &Location,
-) -> Result<Option<Argument>, SdcError> {
+pub(crate) fn pos_args1(arg: Option<Argument>, tgt: Option<Argument>, location: &Location) -> Result<Option<Argument>, SdcError> {
     if arg.is_none() {
         return Err(SdcError::MissingPosArgument(location.clone()));
     }
@@ -63,15 +51,8 @@ pub(crate) fn pos_args2(
     }
 }
 
-pub(crate) fn mandatory(
-    arg: Option<Argument>,
-    name: &str,
-    location: &Location,
-) -> Result<Argument, SdcError> {
-    arg.ok_or(SdcError::MissingMandatoryArgument(
-        name.into(),
-        location.clone(),
-    ))
+pub(crate) fn mandatory(arg: Option<Argument>, name: &str, location: &Location) -> Result<Argument, SdcError> {
+    arg.ok_or(SdcError::MissingMandatoryArgument(name.into(), location.clone()))
 }
 
 pub(crate) fn fmt_arg(x: &Argument) -> String {
@@ -141,59 +122,35 @@ pub(crate) trait Validate {
         if cond.0 {
             Ok(())
         } else {
-            Err(SdcError::CmdUnsupportedVersion(
-                cond.1,
-                self.location().clone(),
-            ))
+            Err(SdcError::CmdUnsupportedVersion(cond.1, self.location().clone()))
         }
     }
 
-    fn alias_supported_version(
-        &self,
-        cond: (bool, SdcVersion),
-        is_alias: bool,
-    ) -> Result<(), SdcError> {
+    fn alias_supported_version(&self, cond: (bool, SdcVersion), is_alias: bool) -> Result<(), SdcError> {
         if is_alias {
             if cond.0 {
                 Ok(())
             } else {
-                Err(SdcError::CmdUnsupportedVersion(
-                    cond.1,
-                    self.location().clone(),
-                ))
+                Err(SdcError::CmdUnsupportedVersion(cond.1, self.location().clone()))
             }
         } else {
             Ok(())
         }
     }
 
-    fn arg_supported_version<T: Exist>(
-        &self,
-        cond: (bool, SdcVersion),
-        arg: &T,
-        name: &str,
-    ) -> Result<(), SdcError> {
+    fn arg_supported_version<T: Exist>(&self, cond: (bool, SdcVersion), arg: &T, name: &str) -> Result<(), SdcError> {
         if arg.exist() {
             if cond.0 {
                 Ok(())
             } else {
-                Err(SdcError::ArgUnsupportedVersion(
-                    cond.1,
-                    self.location().clone(),
-                    name.into(),
-                ))
+                Err(SdcError::ArgUnsupportedVersion(cond.1, self.location().clone(), name.into()))
             }
         } else {
             Ok(())
         }
     }
 
-    fn arg_comb1<A: Exist, T: Fn(bool) -> bool>(
-        &self,
-        cond: (bool, SdcVersion),
-        a: &A,
-        func: T,
-    ) -> Result<(), SdcError> {
+    fn arg_comb1<A: Exist, T: Fn(bool) -> bool>(&self, cond: (bool, SdcVersion), a: &A, func: T) -> Result<(), SdcError> {
         if cond.0 {
             if func(a.exist()) {
                 Ok(())
@@ -205,13 +162,7 @@ pub(crate) trait Validate {
         }
     }
 
-    fn arg_comb2<A: Exist, B: Exist, T: Fn(bool, bool) -> bool>(
-        &self,
-        cond: (bool, SdcVersion),
-        a: &A,
-        b: &B,
-        func: T,
-    ) -> Result<(), SdcError> {
+    fn arg_comb2<A: Exist, B: Exist, T: Fn(bool, bool) -> bool>(&self, cond: (bool, SdcVersion), a: &A, b: &B, func: T) -> Result<(), SdcError> {
         if cond.0 {
             if func(a.exist(), b.exist()) {
                 Ok(())
@@ -262,14 +213,7 @@ pub(crate) trait Validate {
         }
     }
 
-    fn arg_comb5<
-        A: Exist,
-        B: Exist,
-        C: Exist,
-        D: Exist,
-        E: Exist,
-        T: Fn(bool, bool, bool, bool, bool) -> bool,
-    >(
+    fn arg_comb5<A: Exist, B: Exist, C: Exist, D: Exist, E: Exist, T: Fn(bool, bool, bool, bool, bool) -> bool>(
         &self,
         cond: (bool, SdcVersion),
         a: &A,
@@ -290,15 +234,7 @@ pub(crate) trait Validate {
         }
     }
 
-    fn arg_comb6<
-        A: Exist,
-        B: Exist,
-        C: Exist,
-        D: Exist,
-        E: Exist,
-        F: Exist,
-        T: Fn(bool, bool, bool, bool, bool, bool) -> bool,
-    >(
+    fn arg_comb6<A: Exist, B: Exist, C: Exist, D: Exist, E: Exist, F: Exist, T: Fn(bool, bool, bool, bool, bool, bool) -> bool>(
         &self,
         cond: (bool, SdcVersion),
         a: &A,
@@ -310,14 +246,7 @@ pub(crate) trait Validate {
         func: T,
     ) -> Result<(), SdcError> {
         if cond.0 {
-            if func(
-                a.exist(),
-                b.exist(),
-                c.exist(),
-                d.exist(),
-                e.exist(),
-                f.exist(),
-            ) {
+            if func(a.exist(), b.exist(), c.exist(), d.exist(), e.exist(), f.exist()) {
                 Ok(())
             } else {
                 Err(SdcError::ArgumentCombination(self.location().clone()))
@@ -327,16 +256,7 @@ pub(crate) trait Validate {
         }
     }
 
-    fn arg_comb7<
-        A: Exist,
-        B: Exist,
-        C: Exist,
-        D: Exist,
-        E: Exist,
-        F: Exist,
-        G: Exist,
-        T: Fn(bool, bool, bool, bool, bool, bool, bool) -> bool,
-    >(
+    fn arg_comb7<A: Exist, B: Exist, C: Exist, D: Exist, E: Exist, F: Exist, G: Exist, T: Fn(bool, bool, bool, bool, bool, bool, bool) -> bool>(
         &self,
         cond: (bool, SdcVersion),
         a: &A,
@@ -349,15 +269,7 @@ pub(crate) trait Validate {
         func: T,
     ) -> Result<(), SdcError> {
         if cond.0 {
-            if func(
-                a.exist(),
-                b.exist(),
-                c.exist(),
-                d.exist(),
-                e.exist(),
-                f.exist(),
-                g.exist(),
-            ) {
+            if func(a.exist(), b.exist(), c.exist(), d.exist(), e.exist(), f.exist(), g.exist()) {
                 Ok(())
             } else {
                 Err(SdcError::ArgumentCombination(self.location().clone()))

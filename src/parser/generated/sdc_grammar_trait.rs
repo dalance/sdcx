@@ -791,8 +791,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         let term_string_group = term_string_group.token()?.clone();
         let term_string_group_built = TermStringGroup { term_string_group };
         // Calling user action here
-        self.user_grammar
-            .term_string_group(&term_string_group_built)?;
+        self.user_grammar.term_string_group(&term_string_group_built)?;
         self.push(ASTType::TermStringGroup(term_string_group_built), context);
         Ok(())
     }
@@ -834,23 +833,14 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
     /// `TermBackslashLineBreak: /\\(\r\n|\r|\n)/;`
     ///
     #[parol_runtime::function_name::named]
-    fn term_backslash_line_break(
-        &mut self,
-        term_backslash_line_break: &ParseTreeType<'t>,
-    ) -> Result<()> {
+    fn term_backslash_line_break(&mut self, term_backslash_line_break: &ParseTreeType<'t>) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let term_backslash_line_break = term_backslash_line_break.token()?.clone();
-        let term_backslash_line_break_built = TermBackslashLineBreak {
-            term_backslash_line_break,
-        };
+        let term_backslash_line_break_built = TermBackslashLineBreak { term_backslash_line_break };
         // Calling user action here
-        self.user_grammar
-            .term_backslash_line_break(&term_backslash_line_break_built)?;
-        self.push(
-            ASTType::TermBackslashLineBreak(term_backslash_line_break_built),
-            context,
-        );
+        self.user_grammar.term_backslash_line_break(&term_backslash_line_break_built)?;
+        self.push(ASTType::TermBackslashLineBreak(term_backslash_line_break_built), context);
         Ok(())
     }
 
@@ -891,23 +881,14 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
     /// `TermBraceGroupContent: <BraceGroup>/[^}]*/;`
     ///
     #[parol_runtime::function_name::named]
-    fn term_brace_group_content(
-        &mut self,
-        term_brace_group_content: &ParseTreeType<'t>,
-    ) -> Result<()> {
+    fn term_brace_group_content(&mut self, term_brace_group_content: &ParseTreeType<'t>) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let term_brace_group_content = term_brace_group_content.token()?.clone();
-        let term_brace_group_content_built = TermBraceGroupContent {
-            term_brace_group_content,
-        };
+        let term_brace_group_content_built = TermBraceGroupContent { term_brace_group_content };
         // Calling user action here
-        self.user_grammar
-            .term_brace_group_content(&term_brace_group_content_built)?;
-        self.push(
-            ASTType::TermBraceGroupContent(term_brace_group_content_built),
-            context,
-        );
+        self.user_grammar.term_brace_group_content(&term_brace_group_content_built)?;
+        self.push(ASTType::TermBraceGroupContent(term_brace_group_content_built), context);
         Ok(())
     }
 
@@ -925,8 +906,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let term_r_brace = pop_item!(self, term_r_brace, TermRBrace, context);
-        let term_brace_group_group =
-            pop_item!(self, term_brace_group_group, TermBraceGroupGroup, context);
+        let term_brace_group_group = pop_item!(self, term_brace_group_group, TermBraceGroupGroup, context);
         let term_l_brace = pop_item!(self, term_l_brace, TermLBrace, context);
         let term_brace_group_built = TermBraceGroup {
             term_l_brace: Box::new(term_l_brace),
@@ -934,8 +914,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
             term_r_brace: Box::new(term_r_brace),
         };
         // Calling user action here
-        self.user_grammar
-            .term_brace_group(&term_brace_group_built)?;
+        self.user_grammar.term_brace_group(&term_brace_group_built)?;
         self.push(ASTType::TermBraceGroup(term_brace_group_built), context);
         Ok(())
     }
@@ -952,12 +931,8 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         let term_brace_group_group_0_built = TermBraceGroupGroupTermBraceGroup {
             term_brace_group: Box::new(term_brace_group),
         };
-        let term_brace_group_group_0_built =
-            TermBraceGroupGroup::TermBraceGroup(term_brace_group_group_0_built);
-        self.push(
-            ASTType::TermBraceGroupGroup(term_brace_group_group_0_built),
-            context,
-        );
+        let term_brace_group_group_0_built = TermBraceGroupGroup::TermBraceGroup(term_brace_group_group_0_built);
+        self.push(ASTType::TermBraceGroupGroup(term_brace_group_group_0_built), context);
         Ok(())
     }
 
@@ -966,27 +941,15 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
     /// `TermBraceGroupGroup: TermBraceGroupContent;`
     ///
     #[parol_runtime::function_name::named]
-    fn term_brace_group_group_1(
-        &mut self,
-        _term_brace_group_content: &ParseTreeType<'t>,
-    ) -> Result<()> {
+    fn term_brace_group_group_1(&mut self, _term_brace_group_content: &ParseTreeType<'t>) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let term_brace_group_content = pop_item!(
-            self,
-            term_brace_group_content,
-            TermBraceGroupContent,
-            context
-        );
+        let term_brace_group_content = pop_item!(self, term_brace_group_content, TermBraceGroupContent, context);
         let term_brace_group_group_1_built = TermBraceGroupGroupTermBraceGroupContent {
             term_brace_group_content: Box::new(term_brace_group_content),
         };
-        let term_brace_group_group_1_built =
-            TermBraceGroupGroup::TermBraceGroupContent(term_brace_group_group_1_built);
-        self.push(
-            ASTType::TermBraceGroupGroup(term_brace_group_group_1_built),
-            context,
-        );
+        let term_brace_group_group_1_built = TermBraceGroupGroup::TermBraceGroupContent(term_brace_group_group_1_built);
+        self.push(ASTType::TermBraceGroupGroup(term_brace_group_group_1_built), context);
         Ok(())
     }
 
@@ -1033,23 +996,17 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
     /// `TokenBraceGroup: TermBraceGroup TokenBraceGroupOpt /* Option */;`
     ///
     #[parol_runtime::function_name::named]
-    fn token_brace_group(
-        &mut self,
-        _term_brace_group: &ParseTreeType<'t>,
-        _token_brace_group_opt: &ParseTreeType<'t>,
-    ) -> Result<()> {
+    fn token_brace_group(&mut self, _term_brace_group: &ParseTreeType<'t>, _token_brace_group_opt: &ParseTreeType<'t>) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let token_brace_group_opt =
-            pop_item!(self, token_brace_group_opt, TokenBraceGroupOpt, context);
+        let token_brace_group_opt = pop_item!(self, token_brace_group_opt, TokenBraceGroupOpt, context);
         let term_brace_group = pop_item!(self, term_brace_group, TermBraceGroup, context);
         let token_brace_group_built = TokenBraceGroup {
             term_brace_group: Box::new(term_brace_group),
             token_brace_group_opt,
         };
         // Calling user action here
-        self.user_grammar
-            .token_brace_group(&token_brace_group_built)?;
+        self.user_grammar.token_brace_group(&token_brace_group_built)?;
         self.push(ASTType::TokenBraceGroup(token_brace_group_built), context);
         Ok(())
     }
@@ -1059,25 +1016,14 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
     /// `TokenBraceGroupOpt /* Option<T>::Some */: TermBackslashLineBreak;`
     ///
     #[parol_runtime::function_name::named]
-    fn token_brace_group_opt_0(
-        &mut self,
-        _term_backslash_line_break: &ParseTreeType<'t>,
-    ) -> Result<()> {
+    fn token_brace_group_opt_0(&mut self, _term_backslash_line_break: &ParseTreeType<'t>) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let term_backslash_line_break = pop_item!(
-            self,
-            term_backslash_line_break,
-            TermBackslashLineBreak,
-            context
-        );
+        let term_backslash_line_break = pop_item!(self, term_backslash_line_break, TermBackslashLineBreak, context);
         let token_brace_group_opt_0_built = TokenBraceGroupOpt {
             term_backslash_line_break: Box::new(term_backslash_line_break),
         };
-        self.push(
-            ASTType::TokenBraceGroupOpt(Some(Box::new(token_brace_group_opt_0_built))),
-            context,
-        );
+        self.push(ASTType::TokenBraceGroupOpt(Some(Box::new(token_brace_group_opt_0_built))), context);
         Ok(())
     }
 
@@ -1098,23 +1044,17 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
     /// `TokenStringGroup: TermStringGroup TokenStringGroupOpt /* Option */;`
     ///
     #[parol_runtime::function_name::named]
-    fn token_string_group(
-        &mut self,
-        _term_string_group: &ParseTreeType<'t>,
-        _token_string_group_opt: &ParseTreeType<'t>,
-    ) -> Result<()> {
+    fn token_string_group(&mut self, _term_string_group: &ParseTreeType<'t>, _token_string_group_opt: &ParseTreeType<'t>) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let token_string_group_opt =
-            pop_item!(self, token_string_group_opt, TokenStringGroupOpt, context);
+        let token_string_group_opt = pop_item!(self, token_string_group_opt, TokenStringGroupOpt, context);
         let term_string_group = pop_item!(self, term_string_group, TermStringGroup, context);
         let token_string_group_built = TokenStringGroup {
             term_string_group: Box::new(term_string_group),
             token_string_group_opt,
         };
         // Calling user action here
-        self.user_grammar
-            .token_string_group(&token_string_group_built)?;
+        self.user_grammar.token_string_group(&token_string_group_built)?;
         self.push(ASTType::TokenStringGroup(token_string_group_built), context);
         Ok(())
     }
@@ -1124,25 +1064,14 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
     /// `TokenStringGroupOpt /* Option<T>::Some */: TermBackslashLineBreak;`
     ///
     #[parol_runtime::function_name::named]
-    fn token_string_group_opt_0(
-        &mut self,
-        _term_backslash_line_break: &ParseTreeType<'t>,
-    ) -> Result<()> {
+    fn token_string_group_opt_0(&mut self, _term_backslash_line_break: &ParseTreeType<'t>) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let term_backslash_line_break = pop_item!(
-            self,
-            term_backslash_line_break,
-            TermBackslashLineBreak,
-            context
-        );
+        let term_backslash_line_break = pop_item!(self, term_backslash_line_break, TermBackslashLineBreak, context);
         let token_string_group_opt_0_built = TokenStringGroupOpt {
             term_backslash_line_break: Box::new(term_backslash_line_break),
         };
-        self.push(
-            ASTType::TokenStringGroupOpt(Some(Box::new(token_string_group_opt_0_built))),
-            context,
-        );
+        self.push(ASTType::TokenStringGroupOpt(Some(Box::new(token_string_group_opt_0_built))), context);
         Ok(())
     }
 
@@ -1163,11 +1092,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
     /// `TokenLBracket: TermLBracket TokenLBracketOpt /* Option */;`
     ///
     #[parol_runtime::function_name::named]
-    fn token_l_bracket(
-        &mut self,
-        _term_l_bracket: &ParseTreeType<'t>,
-        _token_l_bracket_opt: &ParseTreeType<'t>,
-    ) -> Result<()> {
+    fn token_l_bracket(&mut self, _term_l_bracket: &ParseTreeType<'t>, _token_l_bracket_opt: &ParseTreeType<'t>) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let token_l_bracket_opt = pop_item!(self, token_l_bracket_opt, TokenLBracketOpt, context);
@@ -1187,25 +1112,14 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
     /// `TokenLBracketOpt /* Option<T>::Some */: TermBackslashLineBreak;`
     ///
     #[parol_runtime::function_name::named]
-    fn token_l_bracket_opt_0(
-        &mut self,
-        _term_backslash_line_break: &ParseTreeType<'t>,
-    ) -> Result<()> {
+    fn token_l_bracket_opt_0(&mut self, _term_backslash_line_break: &ParseTreeType<'t>) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let term_backslash_line_break = pop_item!(
-            self,
-            term_backslash_line_break,
-            TermBackslashLineBreak,
-            context
-        );
+        let term_backslash_line_break = pop_item!(self, term_backslash_line_break, TermBackslashLineBreak, context);
         let token_l_bracket_opt_0_built = TokenLBracketOpt {
             term_backslash_line_break: Box::new(term_backslash_line_break),
         };
-        self.push(
-            ASTType::TokenLBracketOpt(Some(Box::new(token_l_bracket_opt_0_built))),
-            context,
-        );
+        self.push(ASTType::TokenLBracketOpt(Some(Box::new(token_l_bracket_opt_0_built))), context);
         Ok(())
     }
 
@@ -1226,11 +1140,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
     /// `TokenRBracket: TermRBracket TokenRBracketOpt /* Option */;`
     ///
     #[parol_runtime::function_name::named]
-    fn token_r_bracket(
-        &mut self,
-        _term_r_bracket: &ParseTreeType<'t>,
-        _token_r_bracket_opt: &ParseTreeType<'t>,
-    ) -> Result<()> {
+    fn token_r_bracket(&mut self, _term_r_bracket: &ParseTreeType<'t>, _token_r_bracket_opt: &ParseTreeType<'t>) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let token_r_bracket_opt = pop_item!(self, token_r_bracket_opt, TokenRBracketOpt, context);
@@ -1250,25 +1160,14 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
     /// `TokenRBracketOpt /* Option<T>::Some */: TermBackslashLineBreak;`
     ///
     #[parol_runtime::function_name::named]
-    fn token_r_bracket_opt_0(
-        &mut self,
-        _term_backslash_line_break: &ParseTreeType<'t>,
-    ) -> Result<()> {
+    fn token_r_bracket_opt_0(&mut self, _term_backslash_line_break: &ParseTreeType<'t>) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let term_backslash_line_break = pop_item!(
-            self,
-            term_backslash_line_break,
-            TermBackslashLineBreak,
-            context
-        );
+        let term_backslash_line_break = pop_item!(self, term_backslash_line_break, TermBackslashLineBreak, context);
         let token_r_bracket_opt_0_built = TokenRBracketOpt {
             term_backslash_line_break: Box::new(term_backslash_line_break),
         };
-        self.push(
-            ASTType::TokenRBracketOpt(Some(Box::new(token_r_bracket_opt_0_built))),
-            context,
-        );
+        self.push(ASTType::TokenRBracketOpt(Some(Box::new(token_r_bracket_opt_0_built))), context);
         Ok(())
     }
 
@@ -1289,11 +1188,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
     /// `TokenWord: TermWord TokenWordOpt /* Option */;`
     ///
     #[parol_runtime::function_name::named]
-    fn token_word(
-        &mut self,
-        _term_word: &ParseTreeType<'t>,
-        _token_word_opt: &ParseTreeType<'t>,
-    ) -> Result<()> {
+    fn token_word(&mut self, _term_word: &ParseTreeType<'t>, _token_word_opt: &ParseTreeType<'t>) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let token_word_opt = pop_item!(self, token_word_opt, TokenWordOpt, context);
@@ -1316,19 +1211,11 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
     fn token_word_opt_0(&mut self, _term_backslash_line_break: &ParseTreeType<'t>) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let term_backslash_line_break = pop_item!(
-            self,
-            term_backslash_line_break,
-            TermBackslashLineBreak,
-            context
-        );
+        let term_backslash_line_break = pop_item!(self, term_backslash_line_break, TermBackslashLineBreak, context);
         let token_word_opt_0_built = TokenWordOpt {
             term_backslash_line_break: Box::new(term_backslash_line_break),
         };
-        self.push(
-            ASTType::TokenWordOpt(Some(Box::new(token_word_opt_0_built))),
-            context,
-        );
+        self.push(ASTType::TokenWordOpt(Some(Box::new(token_word_opt_0_built))), context);
         Ok(())
     }
 
@@ -1442,12 +1329,8 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
             token_r_bracket: Box::new(token_r_bracket),
         };
         // Calling user action here
-        self.user_grammar
-            .command_replacement(&command_replacement_built)?;
-        self.push(
-            ASTType::CommandReplacement(command_replacement_built),
-            context,
-        );
+        self.user_grammar.command_replacement(&command_replacement_built)?;
+        self.push(ASTType::CommandReplacement(command_replacement_built), context);
         Ok(())
     }
 
@@ -1456,11 +1339,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
     /// `Command: TokenWord CommandList /* Vec */;`
     ///
     #[parol_runtime::function_name::named]
-    fn command(
-        &mut self,
-        _token_word: &ParseTreeType<'t>,
-        _command_list: &ParseTreeType<'t>,
-    ) -> Result<()> {
+    fn command(&mut self, _token_word: &ParseTreeType<'t>, _command_list: &ParseTreeType<'t>) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let command_list = pop_and_reverse_item!(self, command_list, CommandList, context);
@@ -1480,11 +1359,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
     /// `CommandList /* Vec<T>::Push */: Argument CommandList;`
     ///
     #[parol_runtime::function_name::named]
-    fn command_list_0(
-        &mut self,
-        _argument: &ParseTreeType<'t>,
-        _command_list: &ParseTreeType<'t>,
-    ) -> Result<()> {
+    fn command_list_0(&mut self, _argument: &ParseTreeType<'t>, _command_list: &ParseTreeType<'t>) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let mut command_list = pop_item!(self, command_list, CommandList, context);
@@ -1516,11 +1391,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
     /// `CommandLine: Command TokenEnd;`
     ///
     #[parol_runtime::function_name::named]
-    fn command_line(
-        &mut self,
-        _command: &ParseTreeType<'t>,
-        _token_end: &ParseTreeType<'t>,
-    ) -> Result<()> {
+    fn command_line(&mut self, _command: &ParseTreeType<'t>, _token_end: &ParseTreeType<'t>) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let token_end = pop_item!(self, token_end, TokenEnd, context);
@@ -1556,11 +1427,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
     /// `SourceList /* Vec<T>::Push */: SourceListGroup SourceList;`
     ///
     #[parol_runtime::function_name::named]
-    fn source_list_0(
-        &mut self,
-        _source_list_group: &ParseTreeType<'t>,
-        _source_list: &ParseTreeType<'t>,
-    ) -> Result<()> {
+    fn source_list_0(&mut self, _source_list_group: &ParseTreeType<'t>, _source_list: &ParseTreeType<'t>) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let mut source_list = pop_item!(self, source_list, SourceList, context);
@@ -1643,11 +1510,7 @@ impl<'t> UserActionsTrait<'t> for SdcGrammarAuto<'t, '_> {
     ///
     /// This function is implemented automatically for the user's item SdcGrammar.
     ///
-    fn call_semantic_action_for_production_number(
-        &mut self,
-        prod_num: usize,
-        children: &[ParseTreeType<'t>],
-    ) -> Result<()> {
+    fn call_semantic_action_for_production_number(&mut self, prod_num: usize, children: &[ParseTreeType<'t>]) -> Result<()> {
         match prod_num {
             0 => self.term_l_bracket(&children[0]),
             1 => self.term_r_bracket(&children[0]),
@@ -1695,11 +1558,7 @@ impl<'t> UserActionsTrait<'t> for SdcGrammarAuto<'t, '_> {
             43 => self.source_list_group_1(&children[0]),
             44 => self.source_list_group_2(&children[0]),
             45 => self.source_list_1(),
-            _ => Err(ParserError::InternalError(format!(
-                "Unhandled production number: {}",
-                prod_num
-            ))
-            .into()),
+            _ => Err(ParserError::InternalError(format!("Unhandled production number: {}", prod_num)).into()),
         }
     }
 
