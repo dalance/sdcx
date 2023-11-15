@@ -88,7 +88,11 @@ const SCANNER_1: (&[&str; 5], &[TerminalIndex; 3]) = (
         /*  3 */ UNMATCHABLE_TOKEN,
         /*  4 */ UNMATCHABLE_TOKEN,
     ],
-    &[7 /* TermLBrace */, 8 /* TermRBrace */, 15 /* TermBraceGroupContent */],
+    &[
+        7,  /* TermLBrace */
+        8,  /* TermRBrace */
+        15, /* TermBraceGroupContent */
+    ],
 );
 
 const MAX_K: usize = 1;
@@ -132,7 +136,12 @@ pub const LOOKAHEAD_AUTOMATA: &[LookaheadDFA; 32] = &[
     /* 0 - "Argument" */
     LookaheadDFA {
         prod0: -1,
-        transitions: &[Trans(0, 5, 4, 34), Trans(0, 7, 3, 33), Trans(0, 9, 2, 32), Trans(0, 14, 1, 31)],
+        transitions: &[
+            Trans(0, 5, 4, 34),
+            Trans(0, 7, 3, 33),
+            Trans(0, 9, 2, 32),
+            Trans(0, 14, 1, 31),
+        ],
         k: 1,
     },
     /* 1 - "Command" */
@@ -188,7 +197,12 @@ pub const LOOKAHEAD_AUTOMATA: &[LookaheadDFA; 32] = &[
     /* 7 - "SourceListGroup" */
     LookaheadDFA {
         prod0: -1,
-        transitions: &[Trans(0, 10, 3, 44), Trans(0, 11, 2, 43), Trans(0, 13, 2, 43), Trans(0, 14, 1, 42)],
+        transitions: &[
+            Trans(0, 10, 3, 44),
+            Trans(0, 11, 2, 43),
+            Trans(0, 13, 2, 43),
+            Trans(0, 14, 1, 42),
+        ],
         k: 1,
     },
     /* 8 - "TermBackslashLineBreak" */
@@ -432,7 +446,13 @@ pub const PRODUCTIONS: &[Production; 46] = &[
     // 11 - TermBraceGroup: TermLBrace Push(1) TermBraceGroupGroup TermRBrace Pop;
     Production {
         lhs: 9,
-        production: &[ParseType::Pop, ParseType::N(16), ParseType::N(11), ParseType::Push(1), ParseType::N(13)],
+        production: &[
+            ParseType::Pop,
+            ParseType::N(16),
+            ParseType::N(11),
+            ParseType::Push(1),
+            ParseType::N(13),
+        ],
     },
     // 12 - TermBraceGroupGroup: TermBraceGroup;
     Production {
@@ -465,7 +485,10 @@ pub const PRODUCTIONS: &[Production; 46] = &[
         production: &[ParseType::N(8)],
     },
     // 18 - TokenBraceGroupOpt: ;
-    Production { lhs: 22, production: &[] },
+    Production {
+        lhs: 22,
+        production: &[],
+    },
     // 19 - TokenStringGroup: TermStringGroup TokenStringGroupOpt /* Option */;
     Production {
         lhs: 28,
@@ -477,7 +500,10 @@ pub const PRODUCTIONS: &[Production; 46] = &[
         production: &[ParseType::N(8)],
     },
     // 21 - TokenStringGroupOpt: ;
-    Production { lhs: 29, production: &[] },
+    Production {
+        lhs: 29,
+        production: &[],
+    },
     // 22 - TokenLBracket: TermLBracket TokenLBracketOpt /* Option */;
     Production {
         lhs: 24,
@@ -489,7 +515,10 @@ pub const PRODUCTIONS: &[Production; 46] = &[
         production: &[ParseType::N(8)],
     },
     // 24 - TokenLBracketOpt: ;
-    Production { lhs: 25, production: &[] },
+    Production {
+        lhs: 25,
+        production: &[],
+    },
     // 25 - TokenRBracket: TermRBracket TokenRBracketOpt /* Option */;
     Production {
         lhs: 26,
@@ -501,7 +530,10 @@ pub const PRODUCTIONS: &[Production; 46] = &[
         production: &[ParseType::N(8)],
     },
     // 27 - TokenRBracketOpt: ;
-    Production { lhs: 27, production: &[] },
+    Production {
+        lhs: 27,
+        production: &[],
+    },
     // 28 - TokenWord: TermWord TokenWordOpt /* Option */;
     Production {
         lhs: 30,
@@ -513,7 +545,10 @@ pub const PRODUCTIONS: &[Production; 46] = &[
         production: &[ParseType::N(8)],
     },
     // 30 - TokenWordOpt: ;
-    Production { lhs: 31, production: &[] },
+    Production {
+        lhs: 31,
+        production: &[],
+    },
     // 31 - Argument: TokenWord;
     Production {
         lhs: 0,
@@ -550,7 +585,10 @@ pub const PRODUCTIONS: &[Production; 46] = &[
         production: &[ParseType::N(3), ParseType::N(0)],
     },
     // 38 - CommandList: ;
-    Production { lhs: 3, production: &[] },
+    Production {
+        lhs: 3,
+        production: &[],
+    },
     // 39 - CommandLine: Command TokenEnd;
     Production {
         lhs: 2,
@@ -582,24 +620,46 @@ pub const PRODUCTIONS: &[Production; 46] = &[
         production: &[ParseType::N(12)],
     },
     // 45 - SourceList: ;
-    Production { lhs: 6, production: &[] },
+    Production {
+        lhs: 6,
+        production: &[],
+    },
 ];
 
 static TOKENIZERS: Lazy<Vec<(&'static str, Tokenizer)>> = Lazy::new(|| {
     vec![
-        ("INITIAL", Tokenizer::build(TERMINALS, SCANNER_0.0, SCANNER_0.1).unwrap()),
-        ("BraceGroup", Tokenizer::build(TERMINALS, SCANNER_1.0, SCANNER_1.1).unwrap()),
+        (
+            "INITIAL",
+            Tokenizer::build(TERMINALS, SCANNER_0.0, SCANNER_0.1).unwrap(),
+        ),
+        (
+            "BraceGroup",
+            Tokenizer::build(TERMINALS, SCANNER_1.0, SCANNER_1.1).unwrap(),
+        ),
     ]
 });
 
-pub fn parse<'t, T>(input: &'t str, file_name: T, user_actions: &mut SdcGrammar<'t>) -> Result<ParseTree<'t>, ParolError>
+pub fn parse<'t, T>(
+    input: &'t str,
+    file_name: T,
+    user_actions: &mut SdcGrammar<'t>,
+) -> Result<ParseTree<'t>, ParolError>
 where
     T: AsRef<Path>,
 {
-    let mut llk_parser = LLKParser::new(5, LOOKAHEAD_AUTOMATA, PRODUCTIONS, TERMINAL_NAMES, NON_TERMINALS);
+    let mut llk_parser = LLKParser::new(
+        5,
+        LOOKAHEAD_AUTOMATA,
+        PRODUCTIONS,
+        TERMINAL_NAMES,
+        NON_TERMINALS,
+    );
     llk_parser.trim_parse_tree();
     // Initialize wrapper
     let mut user_actions = SdcGrammarAuto::new(user_actions);
 
-    llk_parser.parse(TokenStream::new(input, file_name, &TOKENIZERS, MAX_K).unwrap(), &mut user_actions)
+    llk_parser.parse(
+        TokenStream::new(input, file_name, &TOKENIZERS, MAX_K).unwrap(),
+        &mut user_actions,
+    )
 }

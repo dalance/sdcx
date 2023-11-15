@@ -45,6 +45,9 @@ fn main() {
         }
 
         let elapsed_time = now.elapsed();
-        println!("cargo:warning=parol build time: {} milliseconds", elapsed_time.as_millis());
+        println!(
+            "cargo:warning=parol build time: {} milliseconds",
+            elapsed_time.as_millis()
+        );
     }
 }

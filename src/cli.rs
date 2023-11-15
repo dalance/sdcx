@@ -40,7 +40,11 @@ enum SubCommands {
 // ---------------------------------------------------------------------------------------------------------------------
 
 fn format(opt: &Opt) -> Result<()> {
-    let SubCommands::Fmt { ref file, output: _ } = opt.subcommand else {
+    let SubCommands::Fmt {
+        ref file,
+        output: _,
+    } = opt.subcommand
+    else {
         return Ok(());
     };
 

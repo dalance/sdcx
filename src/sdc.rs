@@ -80,7 +80,9 @@ impl TryFrom<&grammar::Source<'_>> for Sdc {
                                     "1.9" => sdc.version = Some(SdcVersion::SDC1_9),
                                     "2.0" => sdc.version = Some(SdcVersion::SDC2_0),
                                     "2.1" => sdc.version = Some(SdcVersion::SDC2_1),
-                                    _ => return Err(SdcError::UnknownVersion(x.location().clone())),
+                                    _ => {
+                                        return Err(SdcError::UnknownVersion(x.location().clone()))
+                                    }
                                 }
                             } else {
                                 return Err(SdcError::SdcVersionPlacement(x.location().clone()));
