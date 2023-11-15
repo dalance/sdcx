@@ -1,6 +1,7 @@
 use crate::parser::sdc_grammar_trait as grammar;
 use crate::sdc::util::*;
-use crate::sdc::{Argument, Location, SdcError, SdcVersion, Validate};
+use crate::sdc::SdcVersion::*;
+use crate::sdc::{Argument, Location, SdcError, SdcVersion};
 use std::fmt;
 
 /// SDC command
@@ -31,6 +32,7 @@ pub enum Command {
     SetClockGatingCheck(SetClockGatingCheck),
     SetClockGroups(SetClockGroups),
     SetClockLatency(SetClockLatency),
+    SetClockSense(SetClockSense),
     SetClockTransition(SetClockTransition),
     SetClockUncertainty(SetClockUncertainty),
     SetDataCheck(SetDataCheck),
@@ -61,6 +63,7 @@ pub enum Command {
     SetMaxTransition(SetMaxTransition),
     SetMinCapacitance(SetMinCapacitance),
     SetMinDelay(SetMinDelay),
+    SetMinPorosity(SetMinPorosity),
     SetMinPulseWidth(SetMinPulseWidth),
     SetMulticyclePath(SetMulticyclePath),
     SetOperatingConditions(SetOperatingConditions),
@@ -106,6 +109,7 @@ impl Command {
             Command::SetClockGatingCheck(x) => &x.location,
             Command::SetClockGroups(x) => &x.location,
             Command::SetClockLatency(x) => &x.location,
+            Command::SetClockSense(x) => &x.location,
             Command::SetClockTransition(x) => &x.location,
             Command::SetClockUncertainty(x) => &x.location,
             Command::SetDataCheck(x) => &x.location,
@@ -136,6 +140,7 @@ impl Command {
             Command::SetMaxTransition(x) => &x.location,
             Command::SetMinCapacitance(x) => &x.location,
             Command::SetMinDelay(x) => &x.location,
+            Command::SetMinPorosity(x) => &x.location,
             Command::SetMinPulseWidth(x) => &x.location,
             Command::SetMulticyclePath(x) => &x.location,
             Command::SetOperatingConditions(x) => &x.location,
@@ -183,6 +188,7 @@ impl fmt::Display for Command {
             Command::SetClockGatingCheck(x) => x.fmt(f),
             Command::SetClockGroups(x) => x.fmt(f),
             Command::SetClockLatency(x) => x.fmt(f),
+            Command::SetClockSense(x) => x.fmt(f),
             Command::SetClockTransition(x) => x.fmt(f),
             Command::SetClockUncertainty(x) => x.fmt(f),
             Command::SetDataCheck(x) => x.fmt(f),
@@ -213,6 +219,7 @@ impl fmt::Display for Command {
             Command::SetMaxTransition(x) => x.fmt(f),
             Command::SetMinCapacitance(x) => x.fmt(f),
             Command::SetMinDelay(x) => x.fmt(f),
+            Command::SetMinPorosity(x) => x.fmt(f),
             Command::SetMinPulseWidth(x) => x.fmt(f),
             Command::SetMulticyclePath(x) => x.fmt(f),
             Command::SetOperatingConditions(x) => x.fmt(f),
@@ -233,7 +240,7 @@ impl fmt::Display for Command {
 }
 
 impl Validate for Command {
-    fn validate(&self, version: SdcVersion) -> bool {
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
         match self {
             Command::AllClocks(x) => x.validate(version),
             Command::AllInputs(x) => x.validate(version),
@@ -260,6 +267,7 @@ impl Validate for Command {
             Command::SetClockGatingCheck(x) => x.validate(version),
             Command::SetClockGroups(x) => x.validate(version),
             Command::SetClockLatency(x) => x.validate(version),
+            Command::SetClockSense(x) => x.validate(version),
             Command::SetClockTransition(x) => x.validate(version),
             Command::SetClockUncertainty(x) => x.validate(version),
             Command::SetDataCheck(x) => x.validate(version),
@@ -290,6 +298,7 @@ impl Validate for Command {
             Command::SetMaxTransition(x) => x.validate(version),
             Command::SetMinCapacitance(x) => x.validate(version),
             Command::SetMinDelay(x) => x.validate(version),
+            Command::SetMinPorosity(x) => x.validate(version),
             Command::SetMinPulseWidth(x) => x.validate(version),
             Command::SetMulticyclePath(x) => x.validate(version),
             Command::SetOperatingConditions(x) => x.validate(version),
@@ -305,6 +314,83 @@ impl Validate for Command {
             Command::SetWireLoadMode(x) => x.validate(version),
             Command::SetWireLoadModel(x) => x.validate(version),
             Command::SetWireLoadSelectionGroup(x) => x.validate(version),
+        }
+    }
+
+    fn location(&self) -> &Location {
+        match self {
+            Command::AllClocks(x) => x.location(),
+            Command::AllInputs(x) => x.location(),
+            Command::AllOutputs(x) => x.location(),
+            Command::AllRegisters(x) => x.location(),
+            Command::CreateClock(x) => x.location(),
+            Command::CreateGeneratedClock(x) => x.location(),
+            Command::CreateVoltageArea(x) => x.location(),
+            Command::CurrentDesign(x) => x.location(),
+            Command::CurrentInstance(x) => x.location(),
+            Command::Expr(x) => x.location(),
+            Command::GetCells(x) => x.location(),
+            Command::GetClocks(x) => x.location(),
+            Command::GetLibCells(x) => x.location(),
+            Command::GetLibPins(x) => x.location(),
+            Command::GetLibs(x) => x.location(),
+            Command::GetNets(x) => x.location(),
+            Command::GetPins(x) => x.location(),
+            Command::GetPorts(x) => x.location(),
+            Command::GroupPath(x) => x.location(),
+            Command::List(x) => x.location(),
+            Command::Set(x) => x.location(),
+            Command::SetCaseAnalysis(x) => x.location(),
+            Command::SetClockGatingCheck(x) => x.location(),
+            Command::SetClockGroups(x) => x.location(),
+            Command::SetClockLatency(x) => x.location(),
+            Command::SetClockSense(x) => x.location(),
+            Command::SetClockTransition(x) => x.location(),
+            Command::SetClockUncertainty(x) => x.location(),
+            Command::SetDataCheck(x) => x.location(),
+            Command::SetDisableTiming(x) => x.location(),
+            Command::SetDrive(x) => x.location(),
+            Command::SetDrivingCell(x) => x.location(),
+            Command::SetFalsePath(x) => x.location(),
+            Command::SetFanoutLoad(x) => x.location(),
+            Command::SetHierarchySeparator(x) => x.location(),
+            Command::SetIdealLatency(x) => x.location(),
+            Command::SetIdealNetwork(x) => x.location(),
+            Command::SetIdealTransition(x) => x.location(),
+            Command::SetInputDelay(x) => x.location(),
+            Command::SetInputTransition(x) => x.location(),
+            Command::SetLevelShifterStrategy(x) => x.location(),
+            Command::SetLevelShifterThreshold(x) => x.location(),
+            Command::SetLoad(x) => x.location(),
+            Command::SetLogicDc(x) => x.location(),
+            Command::SetLogicOne(x) => x.location(),
+            Command::SetLogicZero(x) => x.location(),
+            Command::SetMaxArea(x) => x.location(),
+            Command::SetMaxCapacitance(x) => x.location(),
+            Command::SetMaxDelay(x) => x.location(),
+            Command::SetMaxDynamicPower(x) => x.location(),
+            Command::SetMaxFanout(x) => x.location(),
+            Command::SetMaxLeakagePower(x) => x.location(),
+            Command::SetMaxTimeBorrow(x) => x.location(),
+            Command::SetMaxTransition(x) => x.location(),
+            Command::SetMinCapacitance(x) => x.location(),
+            Command::SetMinDelay(x) => x.location(),
+            Command::SetMinPorosity(x) => x.location(),
+            Command::SetMinPulseWidth(x) => x.location(),
+            Command::SetMulticyclePath(x) => x.location(),
+            Command::SetOperatingConditions(x) => x.location(),
+            Command::SetOutputDelay(x) => x.location(),
+            Command::SetPortFanoutNumber(x) => x.location(),
+            Command::SetPropagatedClock(x) => x.location(),
+            Command::SetResistance(x) => x.location(),
+            Command::SetSense(x) => x.location(),
+            Command::SetTimingDerate(x) => x.location(),
+            Command::SetUnits(x) => x.location(),
+            Command::SetVoltage(x) => x.location(),
+            Command::SetWireLoadMinBlockSize(x) => x.location(),
+            Command::SetWireLoadMode(x) => x.location(),
+            Command::SetWireLoadModel(x) => x.location(),
+            Command::SetWireLoadSelectionGroup(x) => x.location(),
         }
     }
 }
@@ -338,6 +424,7 @@ impl TryFrom<&grammar::Command<'_>> for Command {
             "current_design" => current_design(args, loc),
             "current_instance" => current_instance(args, loc),
             "expr" => expr(args, loc),
+            "get_cell" => get_cells(args, loc), // alias
             "get_cells" => get_cells(args, loc),
             "get_clocks" => get_clocks(args, loc),
             "get_lib_cells" => get_lib_cells(args, loc),
@@ -353,6 +440,7 @@ impl TryFrom<&grammar::Command<'_>> for Command {
             "set_clock_gating_check" => set_clock_gating_check(args, loc),
             "set_clock_groups" => set_clock_groups(args, loc),
             "set_clock_latency" => set_clock_latency(args, loc),
+            "set_clock_sense" => set_clock_sense(args, loc),
             "set_clock_transition" => set_clock_transition(args, loc),
             "set_clock_uncertainty" => set_clock_uncertainty(args, loc),
             "set_data_check" => set_data_check(args, loc),
@@ -383,6 +471,7 @@ impl TryFrom<&grammar::Command<'_>> for Command {
             "set_max_transition" => set_max_transition(args, loc),
             "set_min_capacitance" => set_min_capacitance(args, loc),
             "set_min_delay" => set_min_delay(args, loc),
+            "set_min_porosity" => set_min_porosity(args, loc),
             "set_min_pulse_width" => set_min_pulse_width(args, loc),
             "set_multicycle_path" => set_multicycle_path(args, loc),
             "set_operating_conditions" => set_operating_conditions(args, loc),
@@ -417,8 +506,12 @@ impl fmt::Display for AllClocks {
 }
 
 impl Validate for AllClocks {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -450,9 +543,18 @@ impl fmt::Display for AllInputs {
 }
 
 impl Validate for AllInputs {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
-            && check2(&self.level_sensitive, &self.edge_triggered, |a, b| !(a & b))
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
+        self.arg_comb2(
+            version.within(SDC1_1, SDC2_1),
+            &self.level_sensitive,
+            &self.edge_triggered,
+            |a, b| !(a & b),
+        )
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -499,9 +601,18 @@ impl fmt::Display for AllOutputs {
 }
 
 impl Validate for AllOutputs {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
-            && check2(&self.level_sensitive, &self.edge_triggered, |a, b| !(a & b))
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
+        self.arg_comb2(
+            version.within(SDC1_2, SDC2_1),
+            &self.level_sensitive,
+            &self.edge_triggered,
+            |a, b| !(a & b),
+        )
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -532,7 +643,6 @@ fn all_outputs(args: Vec<Argument>, location: Location) -> Result<Command, SdcEr
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct AllRegisters {
     pub no_hierarchy: bool,
-    pub hsc: Option<Argument>,
     pub clock: Option<Argument>,
     pub rise_clock: Option<Argument>,
     pub fall_clock: Option<Argument>,
@@ -552,7 +662,6 @@ impl fmt::Display for AllRegisters {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut text = "all_registers".to_string();
         text.push_str(&fmt_named_flg(self.no_hierarchy, "no_hierarchy"));
-        text.push_str(&fmt_named_opt_arg(&self.hsc, "hsc"));
         text.push_str(&fmt_named_opt_arg(&self.clock, "clock"));
         text.push_str(&fmt_named_opt_arg(&self.rise_clock, "rise_clock"));
         text.push_str(&fmt_named_opt_arg(&self.fall_clock, "fall_clock"));
@@ -569,14 +678,17 @@ impl fmt::Display for AllRegisters {
 }
 
 impl Validate for AllRegisters {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_7)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_7, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
 fn all_registers(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut no_hierarchy = false;
-    let mut hsc = None;
     let mut clock = None;
     let mut rise_clock = None;
     let mut fall_clock = None;
@@ -594,7 +706,6 @@ fn all_registers(args: Vec<Argument>, location: Location) -> Result<Command, Sdc
     while let Some(arg) = iter.next() {
         match arg.as_str() {
             "-no_hierarchy" => no_hierarchy = opt_flg(arg, no_hierarchy)?,
-            "-hsc" => hsc = opt_arg(arg, iter.next(), hsc)?,
             "-clock" => clock = opt_arg(arg, iter.next(), clock)?,
             "-rise_clock" => rise_clock = opt_arg(arg, iter.next(), rise_clock)?,
             "-fall_clock" => fall_clock = opt_arg(arg, iter.next(), fall_clock)?,
@@ -613,7 +724,6 @@ fn all_registers(args: Vec<Argument>, location: Location) -> Result<Command, Sdc
 
     Ok(Command::AllRegisters(AllRegisters {
         no_hierarchy,
-        hsc,
         clock,
         rise_clock,
         fall_clock,
@@ -656,9 +766,20 @@ impl fmt::Display for CreateClock {
 }
 
 impl Validate for CreateClock {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
-            && check2(&self.name, &self.source_objects, |a, b| a | b)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
+        self.arg_supported_version(version.within(SDC1_4, SDC2_1), &self.add, "add")?;
+        self.arg_supported_version(version.within(SDC1_9, SDC2_1), &self.comment, "comment")?;
+        self.arg_comb2(
+            version.within(SDC1_2, SDC2_1),
+            &self.name,
+            &self.source_objects,
+            |a, b| a | b,
+        )
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -735,9 +856,30 @@ impl fmt::Display for CreateGeneratedClock {
 }
 
 impl Validate for CreateGeneratedClock {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_3)
-            && check2(&self.multiply_by, &self.divide_by, |a, b| !(a & b))
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_3, SDC2_1))?;
+        self.arg_supported_version(version.within(SDC1_4, SDC2_1), &self.add, "add")?;
+        self.arg_supported_version(
+            version.within(SDC1_4, SDC2_1),
+            &self.master_clock,
+            "master_clock",
+        )?;
+        self.arg_supported_version(
+            version.within(SDC1_7, SDC2_0),
+            &self.combinational,
+            "combinational",
+        )?;
+        self.arg_supported_version(version.within(SDC1_9, SDC2_1), &self.comment, "comment")?;
+        self.arg_comb2(
+            version.within(SDC1_3, SDC2_1),
+            &self.multiply_by,
+            &self.divide_by,
+            |a, b| !(a & b),
+        )
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -820,8 +962,12 @@ impl fmt::Display for CreateVoltageArea {
 }
 
 impl Validate for CreateVoltageArea {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_6)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_6, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -870,8 +1016,12 @@ impl fmt::Display for CurrentDesign {
 }
 
 impl Validate for CurrentDesign {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -899,8 +1049,12 @@ impl fmt::Display for CurrentInstance {
 }
 
 impl Validate for CurrentInstance {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -936,8 +1090,12 @@ impl fmt::Display for Expr {
 }
 
 impl Validate for Expr {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -961,6 +1119,7 @@ pub struct GetCells {
     pub hierarchical: bool,
     pub regexp: bool,
     pub nocase: bool,
+    pub hsc: Option<Argument>,
     pub of_objects: Option<Argument>,
     pub patterns: Option<Argument>,
     location: Location,
@@ -972,6 +1131,7 @@ impl fmt::Display for GetCells {
         text.push_str(&fmt_named_flg(self.hierarchical, "hierarchical"));
         text.push_str(&fmt_named_flg(self.regexp, "regexp"));
         text.push_str(&fmt_named_flg(self.nocase, "nocase"));
+        text.push_str(&fmt_named_opt_arg(&self.hsc, "hsc"));
         text.push_str(&fmt_named_opt_arg(&self.of_objects, "of_objects"));
         text.push_str(&fmt_opt_arg(&self.patterns));
         text.fmt(f)
@@ -979,11 +1139,34 @@ impl fmt::Display for GetCells {
 }
 
 impl Validate for GetCells {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
-            && check2(&self.patterns, &self.of_objects, |a, b| {
-                (a & !b) | (b & !a) | !a
-            })
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
+        self.arg_supported_version(version.within(SDC1_2, SDC2_1), &self.hsc, "hsc")?;
+        self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.regexp, "regexp")?;
+        self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.nocase, "nocase")?;
+        self.arg_comb3(
+            version.within(SDC1_1, SDC1_1),
+            &self.patterns,
+            &self.of_objects,
+            &self.hierarchical,
+            |a, b, c| (a & !b) | (b & !a & !c),
+        )?;
+        self.arg_comb2(
+            version.within(SDC1_2, SDC1_4),
+            &self.patterns,
+            &self.of_objects,
+            |a, b| (a & !b) | (b & !a),
+        )?;
+        self.arg_comb2(
+            version.within(SDC1_5, SDC2_1),
+            &self.patterns,
+            &self.of_objects,
+            |a, b| (a & !b) | (b & !a) | !a,
+        )
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -991,6 +1174,7 @@ fn get_cells(args: Vec<Argument>, location: Location) -> Result<Command, SdcErro
     let mut hierarchical = false;
     let mut regexp = false;
     let mut nocase = false;
+    let mut hsc = None;
     let mut of_objects = None;
     let mut patterns = None;
 
@@ -1000,6 +1184,7 @@ fn get_cells(args: Vec<Argument>, location: Location) -> Result<Command, SdcErro
             "-hierarchical" => hierarchical = opt_flg(arg, hierarchical)?,
             "-regexp" => regexp = opt_flg(arg, regexp)?,
             "-nocase" => nocase = opt_flg(arg, nocase)?,
+            "-hsc" => hsc = opt_arg(arg, iter.next(), hsc)?,
             "-of_objects" => of_objects = opt_arg(arg, iter.next(), of_objects)?,
             _ => patterns = pos_args1(Some(arg), patterns)?,
         }
@@ -1009,6 +1194,7 @@ fn get_cells(args: Vec<Argument>, location: Location) -> Result<Command, SdcErro
         hierarchical,
         regexp,
         nocase,
+        hsc,
         of_objects,
         patterns,
         location,
@@ -1020,7 +1206,7 @@ fn get_cells(args: Vec<Argument>, location: Location) -> Result<Command, SdcErro
 pub struct GetClocks {
     pub regexp: bool,
     pub nocase: bool,
-    pub patterns: Argument,
+    pub patterns: Option<Argument>,
     location: Location,
 }
 
@@ -1029,14 +1215,21 @@ impl fmt::Display for GetClocks {
         let mut text = "get_clocks".to_string();
         text.push_str(&fmt_named_flg(self.regexp, "regexp"));
         text.push_str(&fmt_named_flg(self.nocase, "nocase"));
-        text.push_str(&fmt_arg(&self.patterns));
+        text.push_str(&fmt_opt_arg(&self.patterns));
         text.fmt(f)
     }
 }
 
 impl Validate for GetClocks {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
+        self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.regexp, "regexp")?;
+        self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.nocase, "nocase")?;
+        self.arg_comb1(version.within(SDC1_1, SDC1_4), &self.patterns, |a| a)
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -1053,8 +1246,6 @@ fn get_clocks(args: Vec<Argument>, location: Location) -> Result<Command, SdcErr
             _ => patterns = pos_args1(Some(arg), patterns)?,
         }
     }
-
-    let patterns = mandatory(patterns, "patterns")?;
 
     Ok(Command::GetClocks(GetClocks {
         regexp,
@@ -1086,8 +1277,15 @@ impl fmt::Display for GetLibCells {
 }
 
 impl Validate for GetLibCells {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
+        self.arg_supported_version(version.within(SDC1_2, SDC2_1), &self.hsc, "hsc")?;
+        self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.regexp, "regexp")?;
+        self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.nocase, "nocase")
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -1122,6 +1320,7 @@ fn get_lib_cells(args: Vec<Argument>, location: Location) -> Result<Command, Sdc
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct GetLibPins {
     pub regexp: bool,
+    pub hsc: bool,
     pub nocase: bool,
     pub patterns: Argument,
     location: Location,
@@ -1131,6 +1330,7 @@ impl fmt::Display for GetLibPins {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut text = "get_lib_pins".to_string();
         text.push_str(&fmt_named_flg(self.regexp, "regexp"));
+        text.push_str(&fmt_named_flg(self.hsc, "hsc"));
         text.push_str(&fmt_named_flg(self.nocase, "nocase"));
         text.push_str(&fmt_arg(&self.patterns));
         text.fmt(f)
@@ -1138,13 +1338,21 @@ impl fmt::Display for GetLibPins {
 }
 
 impl Validate for GetLibPins {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
+        self.arg_supported_version(version.within(SDC1_2, SDC2_1), &self.hsc, "hsc")?;
+        self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.regexp, "regexp")?;
+        self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.nocase, "nocase")
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
 fn get_lib_pins(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut regexp = false;
+    let mut hsc = false;
     let mut nocase = false;
     let mut patterns = None;
 
@@ -1152,6 +1360,7 @@ fn get_lib_pins(args: Vec<Argument>, location: Location) -> Result<Command, SdcE
     while let Some(arg) = iter.next() {
         match arg.as_str() {
             "-regexp" => regexp = opt_flg(arg, regexp)?,
+            "-hsc" => hsc = opt_flg(arg, hsc)?,
             "-nocase" => nocase = opt_flg(arg, nocase)?,
             _ => patterns = pos_args1(Some(arg), patterns)?,
         }
@@ -1161,6 +1370,7 @@ fn get_lib_pins(args: Vec<Argument>, location: Location) -> Result<Command, SdcE
 
     Ok(Command::GetLibPins(GetLibPins {
         regexp,
+        hsc,
         nocase,
         patterns,
         location,
@@ -1172,7 +1382,7 @@ fn get_lib_pins(args: Vec<Argument>, location: Location) -> Result<Command, SdcE
 pub struct GetLibs {
     pub regexp: bool,
     pub nocase: bool,
-    pub patterns: Argument,
+    pub patterns: Option<Argument>,
     location: Location,
 }
 
@@ -1181,14 +1391,21 @@ impl fmt::Display for GetLibs {
         let mut text = "get_libs".to_string();
         text.push_str(&fmt_named_flg(self.regexp, "regexp"));
         text.push_str(&fmt_named_flg(self.nocase, "nocase"));
-        text.push_str(&fmt_arg(&self.patterns));
+        text.push_str(&fmt_opt_arg(&self.patterns));
         text.fmt(f)
     }
 }
 
 impl Validate for GetLibs {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
+        self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.regexp, "regexp")?;
+        self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.nocase, "nocase")?;
+        self.arg_comb1(version.within(SDC1_1, SDC1_4), &self.patterns, |a| a)
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -1205,8 +1422,6 @@ fn get_libs(args: Vec<Argument>, location: Location) -> Result<Command, SdcError
             _ => patterns = pos_args1(Some(arg), patterns)?,
         }
     }
-
-    let patterns = mandatory(patterns, "patterns")?;
 
     Ok(Command::GetLibs(GetLibs {
         regexp,
@@ -1242,11 +1457,27 @@ impl fmt::Display for GetNets {
 }
 
 impl Validate for GetNets {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
-            && check2(&self.patterns, &self.of_objects, |a, b| {
-                (a & !b) | (b & !a) | !a
-            })
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
+        self.arg_supported_version(version.within(SDC1_2, SDC2_1), &self.hsc, "hsc")?;
+        self.arg_supported_version(
+            version.within(SDC1_5, SDC2_1),
+            &self.of_objects,
+            "of_objects",
+        )?;
+        self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.regexp, "regexp")?;
+        self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.nocase, "nocase")?;
+        self.arg_comb1(version.within(SDC1_1, SDC1_4), &self.patterns, |a| a)?;
+        self.arg_comb2(
+            version.within(SDC1_5, SDC2_1),
+            &self.patterns,
+            &self.of_objects,
+            |a, b| (a & !b) | (b & !a) | !a,
+        )
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -1288,7 +1519,6 @@ pub struct GetPins {
     pub hsc: Option<Argument>,
     pub regexp: bool,
     pub nocase: bool,
-    pub of_objects: Option<Argument>,
     pub patterns: Option<Argument>,
     location: Location,
 }
@@ -1300,18 +1530,22 @@ impl fmt::Display for GetPins {
         text.push_str(&fmt_named_opt_arg(&self.hsc, "hsc"));
         text.push_str(&fmt_named_flg(self.regexp, "regexp"));
         text.push_str(&fmt_named_flg(self.nocase, "nocase"));
-        text.push_str(&fmt_named_opt_arg(&self.of_objects, "of_objects"));
         text.push_str(&fmt_opt_arg(&self.patterns));
         text.fmt(f)
     }
 }
 
 impl Validate for GetPins {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
-            && check2(&self.patterns, &self.of_objects, |a, b| {
-                (a & !b) | (b & !a) | !a
-            })
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
+        self.arg_supported_version(version.within(SDC1_2, SDC2_1), &self.hsc, "hsc")?;
+        self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.regexp, "regexp")?;
+        self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.nocase, "nocase")?;
+        self.arg_comb1(version.within(SDC1_1, SDC1_4), &self.patterns, |a| a)
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -1320,7 +1554,6 @@ fn get_pins(args: Vec<Argument>, location: Location) -> Result<Command, SdcError
     let mut hsc = None;
     let mut regexp = false;
     let mut nocase = false;
-    let mut of_objects = None;
     let mut patterns = None;
 
     let mut iter = args.into_iter();
@@ -1330,7 +1563,6 @@ fn get_pins(args: Vec<Argument>, location: Location) -> Result<Command, SdcError
             "-hsc" => hsc = opt_arg(arg, iter.next(), hsc)?,
             "-regexp" => regexp = opt_flg(arg, regexp)?,
             "-nocase" => nocase = opt_flg(arg, nocase)?,
-            "-of_objects" => of_objects = opt_arg(arg, iter.next(), of_objects)?,
             _ => patterns = pos_args1(Some(arg), patterns)?,
         }
     }
@@ -1340,7 +1572,6 @@ fn get_pins(args: Vec<Argument>, location: Location) -> Result<Command, SdcError
         hsc,
         regexp,
         nocase,
-        of_objects,
         patterns,
         location,
     }))
@@ -1349,47 +1580,56 @@ fn get_pins(args: Vec<Argument>, location: Location) -> Result<Command, SdcError
 /// get_ports
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct GetPorts {
+    pub hierarchical: bool,
     pub regexp: bool,
-    pub nocase: bool,
-    pub patterns: Argument,
+    pub patterns: Option<Argument>,
     location: Location,
 }
 
 impl fmt::Display for GetPorts {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut text = "get_ports".to_string();
+        text.push_str(&fmt_named_flg(self.hierarchical, "hierarchical"));
         text.push_str(&fmt_named_flg(self.regexp, "regexp"));
-        text.push_str(&fmt_named_flg(self.nocase, "nocase"));
-        text.push_str(&fmt_arg(&self.patterns));
+        text.push_str(&fmt_opt_arg(&self.patterns));
         text.fmt(f)
     }
 }
 
 impl Validate for GetPorts {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
+        self.arg_supported_version(
+            version.within(SDC1_5, SDC2_1),
+            &self.hierarchical,
+            "hierarchical",
+        )?;
+        self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.regexp, "regexp")?;
+        self.arg_comb1(version.within(SDC1_1, SDC1_4), &self.patterns, |a| a)
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
 fn get_ports(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
+    let mut hierarchical = false;
     let mut regexp = false;
-    let mut nocase = false;
     let mut patterns = None;
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
         match arg.as_str() {
+            "-hierarchical" => hierarchical = opt_flg(arg, hierarchical)?,
             "-regexp" => regexp = opt_flg(arg, regexp)?,
-            "-nocase" => nocase = opt_flg(arg, nocase)?,
             _ => patterns = pos_args1(Some(arg), patterns)?,
         }
     }
 
-    let patterns = mandatory(patterns, "patterns")?;
-
     Ok(Command::GetPorts(GetPorts {
+        hierarchical,
         regexp,
-        nocase,
         patterns,
         location,
     }))
@@ -1435,16 +1675,22 @@ impl fmt::Display for GroupPath {
 }
 
 impl Validate for GroupPath {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_7)
-            && check5(
-                &self.name,
-                &self.default,
-                &self.from,
-                &self.rise_from,
-                &self.fall_from,
-                |a, b, c, d, e| (a & !b) | (b & !a) | !a & (c ^ d ^ e),
-            )
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_7, SDC2_1))?;
+        self.arg_supported_version(version.within(SDC1_9, SDC2_1), &self.comment, "comment")?;
+        self.arg_comb5(
+            version.within(SDC1_7, SDC2_1),
+            &self.name,
+            &self.default,
+            &self.from,
+            &self.rise_from,
+            &self.fall_from,
+            |a, b, c, d, e| (a & !b) | (b & !a) | !a & (c ^ d ^ e),
+        )
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -1519,8 +1765,12 @@ impl fmt::Display for List {
 }
 
 impl Validate for List {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -1556,8 +1806,12 @@ impl fmt::Display for Set {
 }
 
 impl Validate for Set {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -1583,7 +1837,7 @@ fn set(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
 /// set_case_analysis
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetCaseAnalysis {
-    pub value: Argument,
+    pub value: Option<Argument>,
     pub port_or_pin_list: Argument,
     location: Location,
 }
@@ -1591,15 +1845,20 @@ pub struct SetCaseAnalysis {
 impl fmt::Display for SetCaseAnalysis {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut text = "set_case_analysis".to_string();
-        text.push_str(&fmt_arg(&self.value));
+        text.push_str(&fmt_opt_arg(&self.value));
         text.push_str(&fmt_arg(&self.port_or_pin_list));
         text.fmt(f)
     }
 }
 
 impl Validate for SetCaseAnalysis {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
+        self.arg_comb1(version.within(SDC1_2, SDC2_1), &self.value, |a| a)
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -1614,7 +1873,6 @@ fn set_case_analysis(args: Vec<Argument>, location: Location) -> Result<Command,
         }
     }
 
-    let value = mandatory(value, "value")?;
     let port_or_pin_list = mandatory(port_or_pin_list, "port_or_pin_list")?;
 
     Ok(Command::SetCaseAnalysis(SetCaseAnalysis {
@@ -1652,15 +1910,20 @@ impl fmt::Display for SetClockGatingCheck {
 }
 
 impl Validate for SetClockGatingCheck {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_2)
-            && check4(
-                &self.setup,
-                &self.hold,
-                &self.high,
-                &self.low,
-                |a, b, c, d| (a | b | c | d) & !(c & d),
-            )
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_2, SDC2_1))?;
+        self.arg_comb4(
+            version.within(SDC1_2, SDC2_1),
+            &self.setup,
+            &self.hold,
+            &self.high,
+            &self.low,
+            |a, b, c, d| (a | b | c | d) & !(c & d),
+        )
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -1732,14 +1995,21 @@ impl fmt::Display for SetClockGroups {
 }
 
 impl Validate for SetClockGroups {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_7)
-            && check3(
-                &self.physically_exclusive,
-                &self.logically_exclusive,
-                &self.asynchronous,
-                |a, b, c| a ^ b ^ c,
-            )
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_7, SDC2_1))?;
+        // TODO group to dup at 1.8
+        self.arg_supported_version(version.within(SDC1_9, SDC2_1), &self.comment, "comment")?;
+        self.arg_comb3(
+            version.within(SDC1_7, SDC2_1),
+            &self.physically_exclusive,
+            &self.logically_exclusive,
+            &self.asynchronous,
+            |a, b, c| a ^ b ^ c,
+        )
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -1814,8 +2084,16 @@ impl fmt::Display for SetClockLatency {
 }
 
 impl Validate for SetClockLatency {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
+        self.arg_supported_version(version.within(SDC1_2, SDC2_1), &self.early, "early")?;
+        self.arg_supported_version(version.within(SDC1_2, SDC2_1), &self.late, "late")?;
+        self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.clock, "clock")?;
+        self.arg_supported_version(version.within(SDC2_1, SDC2_1), &self.dynamic, "dynamic")
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -1867,6 +2145,80 @@ fn set_clock_latency(args: Vec<Argument>, location: Location) -> Result<Command,
     }))
 }
 
+/// set_clock_sense
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub struct SetClockSense {
+    pub clocks: Option<Argument>,
+    pub positive: bool,
+    pub negative: bool,
+    pub stop_propagation: bool,
+    pub pulse: Option<Argument>,
+    pub pins: Option<Argument>,
+    location: Location,
+}
+
+impl fmt::Display for SetClockSense {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut text = "set_clock_sense".to_string();
+        text.push_str(&fmt_named_opt_arg(&self.clocks, "clocks"));
+        text.push_str(&fmt_named_flg(self.positive, "positive"));
+        text.push_str(&fmt_named_flg(self.negative, "negative"));
+        text.push_str(&fmt_named_flg(self.stop_propagation, "stop_propagation"));
+        text.push_str(&fmt_named_opt_arg(&self.pulse, "pulse"));
+        text.push_str(&fmt_opt_arg(&self.pins));
+        text.fmt(f)
+    }
+}
+
+impl Validate for SetClockSense {
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_7, SDC2_0))?;
+        self.arg_comb4(
+            version.within(SDC1_7, SDC2_0),
+            &self.positive,
+            &self.negative,
+            &self.stop_propagation,
+            &self.pulse,
+            |a, b, c, d| a ^ b ^ c ^ d,
+        )
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
+    }
+}
+
+fn set_clock_sense(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
+    let mut clocks = None;
+    let mut positive = false;
+    let mut negative = false;
+    let mut stop_propagation = false;
+    let mut pulse = None;
+    let mut pins = None;
+
+    let mut iter = args.into_iter();
+    while let Some(arg) = iter.next() {
+        match arg.as_str() {
+            "-clocks" => clocks = opt_arg(arg, iter.next(), clocks)?,
+            "-positive" => positive = opt_flg(arg, positive)?,
+            "-negative" => negative = opt_flg(arg, negative)?,
+            "-stop_propagation" => stop_propagation = opt_flg(arg, stop_propagation)?,
+            "-pulse" => pulse = opt_arg(arg, iter.next(), pulse)?,
+            _ => pins = pos_args1(Some(arg), pins)?,
+        }
+    }
+
+    Ok(Command::SetClockSense(SetClockSense {
+        clocks,
+        positive,
+        negative,
+        stop_propagation,
+        pulse,
+        pins,
+        location,
+    }))
+}
+
 /// set_clock_transition
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetClockTransition {
@@ -1893,9 +2245,18 @@ impl fmt::Display for SetClockTransition {
 }
 
 impl Validate for SetClockTransition {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
-            && check2(&self.rise, &self.fall, |a, b| !(a & b))
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
+        self.arg_comb2(
+            version.within(SDC1_2, SDC2_1),
+            &self.rise,
+            &self.fall,
+            |a, b| !(a & b),
+        )
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -1970,18 +2331,41 @@ impl fmt::Display for SetClockUncertainty {
 }
 
 impl Validate for SetClockUncertainty {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
-            && check7(
-                &self.object_list,
-                &self.from,
-                &self.rise_from,
-                &self.fall_from,
-                &self.to,
-                &self.rise_to,
-                &self.fall_to,
-                |a, b, c, d, e, f, g| a ^ ((b ^ c ^ d) & (e ^ f ^ g)),
-            )
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
+        self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.rise_from, "rise_from")?;
+        self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.fall_from, "fall_from")?;
+        self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.rise_to, "rise_to")?;
+        self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.fall_to, "fall_to")?;
+        self.arg_comb3(
+            version.within(SDC1_1, SDC1_2),
+            &self.object_list,
+            &self.from,
+            &self.to,
+            |a, b, c| !(a & (b | c)),
+        )?;
+        self.arg_comb3(
+            version.within(SDC1_3, SDC1_4),
+            &self.object_list,
+            &self.from,
+            &self.to,
+            |a, b, c| a ^ (b & c),
+        )?;
+        self.arg_comb7(
+            version.within(SDC1_5, SDC2_1),
+            &self.object_list,
+            &self.from,
+            &self.rise_from,
+            &self.fall_from,
+            &self.to,
+            &self.rise_to,
+            &self.fall_to,
+            |a, b, c, d, e, f, g| a ^ ((b ^ c ^ d) & (e ^ f ^ g)),
+        )
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -2069,17 +2453,22 @@ impl fmt::Display for SetDataCheck {
 }
 
 impl Validate for SetDataCheck {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_4)
-            && check6(
-                &self.from,
-                &self.rise_from,
-                &self.fall_from,
-                &self.to,
-                &self.rise_to,
-                &self.fall_to,
-                |a, b, c, d, e, f| (a | b | c) & (d | e | f),
-            )
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_4, SDC2_1))?;
+        self.arg_comb6(
+            version.within(SDC1_2, SDC2_1),
+            &self.from,
+            &self.rise_from,
+            &self.fall_from,
+            &self.to,
+            &self.rise_to,
+            &self.fall_to,
+            |a, b, c, d, e, f| (a | b | c) & (d | e | f),
+        )
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -2148,9 +2537,18 @@ impl fmt::Display for SetDisableTiming {
 }
 
 impl Validate for SetDisableTiming {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
-            && check2(&self.from, &self.to, |a, b| !(a ^ b))
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
+        self.arg_comb2(
+            version.within(SDC1_2, SDC2_1),
+            &self.from,
+            &self.to,
+            |a, b| !(a ^ b),
+        )
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -2204,8 +2602,12 @@ impl fmt::Display for SetDrive {
 }
 
 impl Validate for SetDrive {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -2253,6 +2655,7 @@ pub struct SetDrivingCell {
     pub library: Option<Argument>,
     pub pin: Option<Argument>,
     pub from_pin: Option<Argument>,
+    pub multiply_by: Option<Argument>,
     pub dont_scale: bool,
     pub no_design_rule: bool,
     pub clock: Option<Argument>,
@@ -2274,6 +2677,7 @@ impl fmt::Display for SetDrivingCell {
         text.push_str(&fmt_named_opt_arg(&self.library, "library"));
         text.push_str(&fmt_named_opt_arg(&self.pin, "pin"));
         text.push_str(&fmt_named_opt_arg(&self.from_pin, "from_pin"));
+        text.push_str(&fmt_named_opt_arg(&self.multiply_by, "multiply_by"));
         text.push_str(&fmt_named_flg(self.dont_scale, "dont_scale"));
         text.push_str(&fmt_named_flg(self.no_design_rule, "no_design_rule"));
         text.push_str(&fmt_named_opt_arg(&self.clock, "clock"));
@@ -2292,8 +2696,25 @@ impl fmt::Display for SetDrivingCell {
 }
 
 impl Validate for SetDrivingCell {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
+        self.arg_supported_version(version.within(SDC1_4, SDC2_1), &self.min, "min")?;
+        self.arg_supported_version(version.within(SDC1_4, SDC2_1), &self.max, "max")?;
+        self.arg_supported_version(version.within(SDC1_4, SDC2_1), &self.clock, "clock")?;
+        self.arg_supported_version(
+            version.within(SDC1_4, SDC2_1),
+            &self.clock_fall,
+            "clock_fall",
+        )?;
+        self.arg_supported_version(
+            version.within(SDC1_1, SDC2_0),
+            &self.multiply_by,
+            "multiply_by",
+        )
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -2306,6 +2727,7 @@ fn set_driving_cell(args: Vec<Argument>, location: Location) -> Result<Command, 
     let mut library = None;
     let mut pin = None;
     let mut from_pin = None;
+    let mut multiply_by = None;
     let mut dont_scale = false;
     let mut no_design_rule = false;
     let mut clock = None;
@@ -2325,6 +2747,7 @@ fn set_driving_cell(args: Vec<Argument>, location: Location) -> Result<Command, 
             "-library" => library = opt_arg(arg, iter.next(), library)?,
             "-pin" => pin = opt_arg(arg, iter.next(), pin)?,
             "-from_pin" => from_pin = opt_arg(arg, iter.next(), from_pin)?,
+            "-multiply_by" => multiply_by = opt_arg(arg, iter.next(), multiply_by)?,
             "-dont_scale" => dont_scale = opt_flg(arg, dont_scale)?,
             "-no_design_rule" => no_design_rule = opt_flg(arg, no_design_rule)?,
             "-clock" => clock = opt_arg(arg, iter.next(), clock)?,
@@ -2351,6 +2774,7 @@ fn set_driving_cell(args: Vec<Argument>, location: Location) -> Result<Command, 
         library,
         pin,
         from_pin,
+        multiply_by,
         dont_scale,
         no_design_rule,
         clock,
@@ -2404,18 +2828,45 @@ impl fmt::Display for SetFalsePath {
 }
 
 impl Validate for SetFalsePath {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
-            && check7(
-                &self.from,
-                &self.to,
-                &self.through,
-                &self.rise,
-                &self.fall,
-                &self.setup,
-                &self.hold,
-                |a, b, c, d, e, f, g| (a | b | c) & !(d & e) & !(f & g),
-            )
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
+        self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.rise_from, "rise_from")?;
+        self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.fall_from, "fall_from")?;
+        self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.rise_to, "rise_to")?;
+        self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.fall_to, "fall_to")?;
+        self.arg_supported_version(
+            version.within(SDC1_7, SDC2_1),
+            &self.rise_through,
+            "rise_through",
+        )?;
+        self.arg_supported_version(
+            version.within(SDC1_7, SDC2_1),
+            &self.fall_through,
+            "fall_through",
+        )?;
+        self.arg_supported_version(version.within(SDC1_9, SDC2_1), &self.comment, "comment")?;
+        self.arg_comb3(
+            version.within(SDC1_1, SDC1_1),
+            &self.from,
+            &self.to,
+            &self.through,
+            |a, b, c| (a | b | c),
+        )?;
+        self.arg_comb7(
+            version.within(SDC1_2, SDC2_1),
+            &self.from,
+            &self.to,
+            &self.through,
+            &self.rise,
+            &self.fall,
+            &self.setup,
+            &self.hold,
+            |a, b, c, d, e, f, g| (a | b | c) & !(d & e) & !(f & g),
+        )
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -2493,8 +2944,12 @@ impl fmt::Display for SetFanoutLoad {
 }
 
 impl Validate for SetFanoutLoad {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -2535,8 +2990,12 @@ impl fmt::Display for SetHierarchySeparator {
 }
 
 impl Validate for SetHierarchySeparator {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_2)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_2, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -2582,8 +3041,12 @@ impl fmt::Display for SetIdealLatency {
 }
 
 impl Validate for SetIdealLatency {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_7)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_7, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -2638,8 +3101,12 @@ impl fmt::Display for SetIdealNetwork {
 }
 
 impl Validate for SetIdealNetwork {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_7)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_7, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -2690,8 +3157,12 @@ impl fmt::Display for SetIdealTransition {
 }
 
 impl Validate for SetIdealTransition {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_7, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -2777,14 +3248,34 @@ impl fmt::Display for SetInputDelay {
 }
 
 impl Validate for SetInputDelay {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
-            && check3(
-                &self.clock_fall,
-                &self.level_sensitive,
-                &self.clock,
-                |a, b, c| !((a | b) & !c),
-            )
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
+        self.arg_supported_version(
+            version.within(SDC1_4, SDC2_1),
+            &self.network_latency_included,
+            "network_latency_included",
+        )?;
+        self.arg_supported_version(
+            version.within(SDC1_4, SDC2_1),
+            &self.source_latency_included,
+            "source_latency_included",
+        )?;
+        self.arg_supported_version(
+            version.within(SDC2_0, SDC2_1),
+            &self.reference_pin,
+            "reference_pin",
+        )?;
+        self.arg_comb3(
+            version.within(SDC1_2, SDC2_1),
+            &self.clock_fall,
+            &self.level_sensitive,
+            &self.clock,
+            |a, b, c| !((a | b) & !c),
+        )
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -2876,8 +3367,18 @@ impl fmt::Display for SetInputTransition {
 }
 
 impl Validate for SetInputTransition {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
+        self.arg_supported_version(version.within(SDC1_4, SDC2_1), &self.clock, "clock")?;
+        self.arg_supported_version(
+            version.within(SDC1_4, SDC2_1),
+            &self.clock_fall,
+            "clock_fall",
+        )
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -2936,8 +3437,12 @@ impl fmt::Display for SetLevelShifterStrategy {
 }
 
 impl Validate for SetLevelShifterStrategy {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_6)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_6, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -2981,8 +3486,12 @@ impl fmt::Display for SetLevelShifterThreshold {
 }
 
 impl Validate for SetLevelShifterThreshold {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_6)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_6, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -3041,8 +3550,12 @@ impl fmt::Display for SetLoad {
 }
 
 impl Validate for SetLoad {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -3098,8 +3611,12 @@ impl fmt::Display for SetLogicDc {
 }
 
 impl Validate for SetLogicDc {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -3137,8 +3654,12 @@ impl fmt::Display for SetLogicOne {
 }
 
 impl Validate for SetLogicOne {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -3176,8 +3697,12 @@ impl fmt::Display for SetLogicZero {
 }
 
 impl Validate for SetLogicZero {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -3215,8 +3740,12 @@ impl fmt::Display for SetMaxArea {
 }
 
 impl Validate for SetMaxArea {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -3256,8 +3785,12 @@ impl fmt::Display for SetMaxCapacitance {
 }
 
 impl Validate for SetMaxCapacitance {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -3327,9 +3860,38 @@ impl fmt::Display for SetMaxDelay {
 }
 
 impl Validate for SetMaxDelay {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
-            && check2(&self.rise, &self.fall, |a, b| !(a & b))
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
+        self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.rise_from, "rise_from")?;
+        self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.fall_from, "fall_from")?;
+        self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.rise_to, "rise_to")?;
+        self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.fall_to, "fall_to")?;
+        self.arg_supported_version(
+            version.within(SDC1_7, SDC2_1),
+            &self.rise_through,
+            "rise_through",
+        )?;
+        self.arg_supported_version(
+            version.within(SDC1_7, SDC2_1),
+            &self.fall_through,
+            "fall_through",
+        )?;
+        self.arg_supported_version(version.within(SDC1_9, SDC2_1), &self.comment, "comment")?;
+        self.arg_supported_version(
+            version.within(SDC2_1, SDC2_1),
+            &self.ignore_clock_latency,
+            "ignore_clock_latency",
+        )?;
+        self.arg_comb2(
+            version.within(SDC1_2, SDC2_1),
+            &self.rise,
+            &self.fall,
+            |a, b| !(a & b),
+        )
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -3408,8 +3970,12 @@ impl fmt::Display for SetMaxDynamicPower {
 }
 
 impl Validate for SetMaxDynamicPower {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_4)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_4, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -3451,8 +4017,12 @@ impl fmt::Display for SetMaxFanout {
 }
 
 impl Validate for SetMaxFanout {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -3495,8 +4065,12 @@ impl fmt::Display for SetMaxLeakagePower {
 }
 
 impl Validate for SetMaxLeakagePower {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_4)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_4, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -3538,8 +4112,12 @@ impl fmt::Display for SetMaxTimeBorrow {
 }
 
 impl Validate for SetMaxTimeBorrow {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -3568,7 +4146,6 @@ fn set_max_time_borrow(args: Vec<Argument>, location: Location) -> Result<Comman
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetMaxTransition {
     pub clock_path: bool,
-    pub data_path: bool,
     pub rise: bool,
     pub fall: bool,
     pub value: Argument,
@@ -3580,7 +4157,6 @@ impl fmt::Display for SetMaxTransition {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut text = "set_max_transition".to_string();
         text.push_str(&fmt_named_flg(self.clock_path, "clock_path"));
-        text.push_str(&fmt_named_flg(self.data_path, "data_path"));
         text.push_str(&fmt_named_flg(self.rise, "rise"));
         text.push_str(&fmt_named_flg(self.fall, "fall"));
         text.push_str(&fmt_arg(&self.value));
@@ -3590,14 +4166,24 @@ impl fmt::Display for SetMaxTransition {
 }
 
 impl Validate for SetMaxTransition {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
+        self.arg_supported_version(
+            version.within(SDC1_5, SDC2_1),
+            &self.clock_path,
+            "clock_path",
+        )?;
+        self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.rise, "rise")?;
+        self.arg_supported_version(version.within(SDC1_5, SDC2_1), &self.fall, "fall")
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
 fn set_max_transition(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
     let mut clock_path = false;
-    let mut data_path = false;
     let mut rise = false;
     let mut fall = false;
     let mut value = None;
@@ -3607,7 +4193,6 @@ fn set_max_transition(args: Vec<Argument>, location: Location) -> Result<Command
     while let Some(arg) = iter.next() {
         match arg.as_str() {
             "-clock_path" => clock_path = opt_flg(arg, clock_path)?,
-            "-data_path" => data_path = opt_flg(arg, data_path)?,
             "-rise" => rise = opt_flg(arg, rise)?,
             "-fall" => fall = opt_flg(arg, fall)?,
             _ => (value, object_list) = pos_args2(Some(arg), (value, object_list))?,
@@ -3619,7 +4204,6 @@ fn set_max_transition(args: Vec<Argument>, location: Location) -> Result<Command
 
     Ok(Command::SetMaxTransition(SetMaxTransition {
         clock_path,
-        data_path,
         rise,
         fall,
         value,
@@ -3646,8 +4230,12 @@ impl fmt::Display for SetMinCapacitance {
 }
 
 impl Validate for SetMinCapacitance {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -3717,9 +4305,38 @@ impl fmt::Display for SetMinDelay {
 }
 
 impl Validate for SetMinDelay {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
-            && check2(&self.rise, &self.fall, |a, b| !(a & b))
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
+        self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.rise_from, "rise_from")?;
+        self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.fall_from, "fall_from")?;
+        self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.rise_to, "rise_to")?;
+        self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.fall_to, "fall_to")?;
+        self.arg_supported_version(
+            version.within(SDC1_7, SDC2_1),
+            &self.rise_through,
+            "rise_through",
+        )?;
+        self.arg_supported_version(
+            version.within(SDC1_7, SDC2_1),
+            &self.fall_through,
+            "fall_through",
+        )?;
+        self.arg_supported_version(version.within(SDC1_9, SDC2_1), &self.comment, "comment")?;
+        self.arg_supported_version(
+            version.within(SDC2_1, SDC2_1),
+            &self.ignore_clock_latency,
+            "ignore_clock_latency",
+        )?;
+        self.arg_comb2(
+            version.within(SDC1_2, SDC2_1),
+            &self.rise,
+            &self.fall,
+            |a, b| !(a & b),
+        )
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -3780,6 +4397,56 @@ fn set_min_delay(args: Vec<Argument>, location: Location) -> Result<Command, Sdc
     }))
 }
 
+/// set_min_porosity
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub struct SetMinPorosity {
+    pub porosity_value: Argument,
+    pub object_list: Argument,
+    location: Location,
+}
+
+impl fmt::Display for SetMinPorosity {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut text = "set_min_porosity".to_string();
+        text.push_str(&fmt_arg(&self.porosity_value));
+        text.push_str(&fmt_arg(&self.object_list));
+        text.fmt(f)
+    }
+}
+
+impl Validate for SetMinPorosity {
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_4, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
+    }
+}
+
+fn set_min_porosity(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
+    let mut porosity_value = None;
+    let mut object_list = None;
+
+    let mut iter = args.into_iter();
+    while let Some(arg) = iter.next() {
+        match arg.as_str() {
+            _ => {
+                (porosity_value, object_list) = pos_args2(Some(arg), (porosity_value, object_list))?
+            }
+        }
+    }
+
+    let porosity_value = mandatory(porosity_value, "porosity_value")?;
+    let object_list = mandatory(object_list, "value")?;
+
+    Ok(Command::SetMinPorosity(SetMinPorosity {
+        porosity_value,
+        object_list,
+        location,
+    }))
+}
+
 /// set_min_pulse_width
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetMinPulseWidth {
@@ -3802,8 +4469,12 @@ impl fmt::Display for SetMinPulseWidth {
 }
 
 impl Validate for SetMinPulseWidth {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC2_0)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC2_0, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -3881,8 +4552,27 @@ impl fmt::Display for SetMulticyclePath {
 }
 
 impl Validate for SetMulticyclePath {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
+        self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.rise_from, "rise_from")?;
+        self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.fall_from, "fall_from")?;
+        self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.rise_to, "rise_to")?;
+        self.arg_supported_version(version.within(SDC1_7, SDC2_1), &self.fall_to, "fall_to")?;
+        self.arg_supported_version(
+            version.within(SDC1_7, SDC2_1),
+            &self.rise_through,
+            "rise_through",
+        )?;
+        self.arg_supported_version(
+            version.within(SDC1_7, SDC2_1),
+            &self.fall_through,
+            "fall_through",
+        )?;
+        self.arg_supported_version(version.within(SDC1_9, SDC2_1), &self.comment, "comment")
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -3982,8 +4672,17 @@ impl fmt::Display for SetOperatingConditions {
 }
 
 impl Validate for SetOperatingConditions {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
+        self.arg_supported_version(
+            version.within(SDC1_5, SDC2_1),
+            &self.object_list,
+            "object_list",
+        )
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -4070,14 +4769,34 @@ impl fmt::Display for SetOutputDelay {
 }
 
 impl Validate for SetOutputDelay {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
-            && check3(
-                &self.clock_fall,
-                &self.level_sensitive,
-                &self.clock,
-                |a, b, c| !((a | b) & !c),
-            )
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))?;
+        self.arg_supported_version(
+            version.within(SDC1_4, SDC2_1),
+            &self.network_latency_included,
+            "network_latency_included",
+        )?;
+        self.arg_supported_version(
+            version.within(SDC1_4, SDC2_1),
+            &self.source_latency_included,
+            "source_latency_included",
+        )?;
+        self.arg_supported_version(
+            version.within(SDC2_0, SDC2_1),
+            &self.reference_pin,
+            "reference_pin",
+        )?;
+        self.arg_comb3(
+            version.within(SDC1_2, SDC2_1),
+            &self.clock_fall,
+            &self.level_sensitive,
+            &self.clock,
+            |a, b, c| !((a | b) & !c),
+        )
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -4157,8 +4876,12 @@ impl fmt::Display for SetPortFanoutNumber {
 }
 
 impl Validate for SetPortFanoutNumber {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -4199,8 +4922,12 @@ impl fmt::Display for SetPropagatedClock {
 }
 
 impl Validate for SetPropagatedClock {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -4244,8 +4971,12 @@ impl fmt::Display for SetResistance {
 }
 
 impl Validate for SetResistance {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -4308,17 +5039,22 @@ impl fmt::Display for SetSense {
 }
 
 impl Validate for SetSense {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC2_1)
-            && check6(
-                &self.positive,
-                &self.negative,
-                &self.pulse,
-                &self.stop_propagation,
-                &self.non_unate,
-                &self.clocks,
-                |a, b, c, d, e, f| a ^ b ^ c ^ d ^ (e & f),
-            )
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC2_1, SDC2_1))?;
+        self.arg_comb6(
+            version.within(SDC1_2, SDC2_1),
+            &self.positive,
+            &self.negative,
+            &self.pulse,
+            &self.stop_propagation,
+            &self.non_unate,
+            &self.clocks,
+            |a, b, c, d, e, f| a ^ b ^ c ^ d ^ (e & f),
+        )
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -4406,9 +5142,23 @@ impl fmt::Display for SetTimingDerate {
 }
 
 impl Validate for SetTimingDerate {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_5)
-            && check2(&self.early, &self.late, |a, b| (a & !b) | (b & !a))
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_5, SDC2_1))?;
+        self.arg_supported_version(version.within(SDC1_8, SDC2_1), &self.rise, "rise")?;
+        self.arg_supported_version(version.within(SDC1_8, SDC2_1), &self.fall, "fall")?;
+        self.arg_supported_version(version.within(SDC2_1, SDC2_1), &self.r#static, "static")?;
+        self.arg_supported_version(version.within(SDC2_1, SDC2_1), &self.dynamic, "dynamic")?;
+        self.arg_supported_version(version.within(SDC2_1, SDC2_1), &self.increment, "increment")?;
+        self.arg_comb2(
+            version.within(SDC1_5, SDC2_1),
+            &self.early,
+            &self.late,
+            |a, b| (a & !b) | (b & !a),
+        )
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -4494,8 +5244,12 @@ impl fmt::Display for SetUnits {
 }
 
 impl Validate for SetUnits {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_7)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_7, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -4551,8 +5305,12 @@ impl fmt::Display for SetVoltage {
 }
 
 impl Validate for SetVoltage {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_8)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_8, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -4596,8 +5354,12 @@ impl fmt::Display for SetWireLoadMinBlockSize {
 }
 
 impl Validate for SetWireLoadMinBlockSize {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -4638,8 +5400,12 @@ impl fmt::Display for SetWireLoadMode {
 }
 
 impl Validate for SetWireLoadMode {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -4685,8 +5451,12 @@ impl fmt::Display for SetWireLoadModel {
 }
 
 impl Validate for SetWireLoadModel {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 
@@ -4744,8 +5514,13 @@ impl fmt::Display for SetWireLoadSelectionGroup {
 }
 
 impl Validate for SetWireLoadSelectionGroup {
-    fn validate(&self, version: SdcVersion) -> bool {
-        minimum_supported_version(version, SdcVersion::SDC1_1)
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError> {
+        self.cmd_supported_version(version.within(SDC1_1, SDC2_1))
+        // TODO group_name change from opt_arg to pos_arg at SDC1.3
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
     }
 }
 

@@ -1,4 +1,4 @@
-use crate::sdc::{Argument, SdcError, SdcVersion};
+use crate::sdc::{Argument, Location, SdcError, SdcVersion};
 
 pub(crate) fn opt_arg(
     name: Argument,
@@ -105,10 +105,6 @@ pub(crate) fn fmt_named_flg(x: bool, name: &str) -> String {
     }
 }
 
-pub(crate) fn minimum_supported_version(tgt: SdcVersion, msv: SdcVersion) -> bool {
-    tgt >= msv
-}
-
 pub(crate) trait Exist {
     fn exist(&self) -> bool;
 }
@@ -131,106 +127,219 @@ impl<T> Exist for Vec<T> {
     }
 }
 
-pub(crate) fn check2<A: Exist, B: Exist, T: Fn(bool, bool) -> bool>(a: &A, b: &B, func: T) -> bool {
-    func(a.exist(), b.exist())
-}
+pub(crate) trait Validate {
+    fn cmd_supported_version(&self, cond: (bool, SdcVersion)) -> Result<(), SdcError> {
+        if cond.0 {
+            Ok(())
+        } else {
+            Err(SdcError::CmdUnsupportedVersion(
+                cond.1,
+                self.location().clone(),
+            ))
+        }
+    }
 
-pub(crate) fn check3<A: Exist, B: Exist, C: Exist, T: Fn(bool, bool, bool) -> bool>(
-    a: &A,
-    b: &B,
-    c: &C,
-    func: T,
-) -> bool {
-    func(a.exist(), b.exist(), c.exist())
-}
+    fn arg_supported_version<T: Exist>(
+        &self,
+        cond: (bool, SdcVersion),
+        arg: &T,
+        name: &str,
+    ) -> Result<(), SdcError> {
+        if arg.exist() {
+            if cond.0 {
+                Ok(())
+            } else {
+                Err(SdcError::ArgUnsupportedVersion(
+                    cond.1,
+                    self.location().clone(),
+                    name.into(),
+                ))
+            }
+        } else {
+            Ok(())
+        }
+    }
 
-pub(crate) fn check4<
-    A: Exist,
-    B: Exist,
-    C: Exist,
-    D: Exist,
-    T: Fn(bool, bool, bool, bool) -> bool,
->(
-    a: &A,
-    b: &B,
-    c: &C,
-    d: &D,
-    func: T,
-) -> bool {
-    func(a.exist(), b.exist(), c.exist(), d.exist())
-}
+    fn arg_comb1<A: Exist, T: Fn(bool) -> bool>(
+        &self,
+        cond: (bool, SdcVersion),
+        a: &A,
+        func: T,
+    ) -> Result<(), SdcError> {
+        if cond.0 {
+            if func(a.exist()) {
+                Ok(())
+            } else {
+                Err(SdcError::ArgumentCombination(self.location().clone()))
+            }
+        } else {
+            Ok(())
+        }
+    }
 
-pub(crate) fn check5<
-    A: Exist,
-    B: Exist,
-    C: Exist,
-    D: Exist,
-    E: Exist,
-    T: Fn(bool, bool, bool, bool, bool) -> bool,
->(
-    a: &A,
-    b: &B,
-    c: &C,
-    d: &D,
-    e: &E,
-    func: T,
-) -> bool {
-    func(a.exist(), b.exist(), c.exist(), d.exist(), e.exist())
-}
+    fn arg_comb2<A: Exist, B: Exist, T: Fn(bool, bool) -> bool>(
+        &self,
+        cond: (bool, SdcVersion),
+        a: &A,
+        b: &B,
+        func: T,
+    ) -> Result<(), SdcError> {
+        if cond.0 {
+            if func(a.exist(), b.exist()) {
+                Ok(())
+            } else {
+                Err(SdcError::ArgumentCombination(self.location().clone()))
+            }
+        } else {
+            Ok(())
+        }
+    }
 
-pub(crate) fn check6<
-    A: Exist,
-    B: Exist,
-    C: Exist,
-    D: Exist,
-    E: Exist,
-    F: Exist,
-    T: Fn(bool, bool, bool, bool, bool, bool) -> bool,
->(
-    a: &A,
-    b: &B,
-    c: &C,
-    d: &D,
-    e: &E,
-    f: &F,
-    func: T,
-) -> bool {
-    func(
-        a.exist(),
-        b.exist(),
-        c.exist(),
-        d.exist(),
-        e.exist(),
-        f.exist(),
-    )
-}
+    fn arg_comb3<A: Exist, B: Exist, C: Exist, T: Fn(bool, bool, bool) -> bool>(
+        &self,
+        cond: (bool, SdcVersion),
+        a: &A,
+        b: &B,
+        c: &C,
+        func: T,
+    ) -> Result<(), SdcError> {
+        if cond.0 {
+            if func(a.exist(), b.exist(), c.exist()) {
+                Ok(())
+            } else {
+                Err(SdcError::ArgumentCombination(self.location().clone()))
+            }
+        } else {
+            Ok(())
+        }
+    }
 
-pub(crate) fn check7<
-    A: Exist,
-    B: Exist,
-    C: Exist,
-    D: Exist,
-    E: Exist,
-    F: Exist,
-    G: Exist,
-    T: Fn(bool, bool, bool, bool, bool, bool, bool) -> bool,
->(
-    a: &A,
-    b: &B,
-    c: &C,
-    d: &D,
-    e: &E,
-    f: &F,
-    g: &G,
-    func: T,
-) -> bool {
-    func(
-        a.exist(),
-        b.exist(),
-        c.exist(),
-        d.exist(),
-        e.exist(),
-        f.exist(),
-        g.exist(),
-    )
+    fn arg_comb4<A: Exist, B: Exist, C: Exist, D: Exist, T: Fn(bool, bool, bool, bool) -> bool>(
+        &self,
+        cond: (bool, SdcVersion),
+        a: &A,
+        b: &B,
+        c: &C,
+        d: &D,
+        func: T,
+    ) -> Result<(), SdcError> {
+        if cond.0 {
+            if func(a.exist(), b.exist(), c.exist(), d.exist()) {
+                Ok(())
+            } else {
+                Err(SdcError::ArgumentCombination(self.location().clone()))
+            }
+        } else {
+            Ok(())
+        }
+    }
+
+    fn arg_comb5<
+        A: Exist,
+        B: Exist,
+        C: Exist,
+        D: Exist,
+        E: Exist,
+        T: Fn(bool, bool, bool, bool, bool) -> bool,
+    >(
+        &self,
+        cond: (bool, SdcVersion),
+        a: &A,
+        b: &B,
+        c: &C,
+        d: &D,
+        e: &E,
+        func: T,
+    ) -> Result<(), SdcError> {
+        if cond.0 {
+            if func(a.exist(), b.exist(), c.exist(), d.exist(), e.exist()) {
+                Ok(())
+            } else {
+                Err(SdcError::ArgumentCombination(self.location().clone()))
+            }
+        } else {
+            Ok(())
+        }
+    }
+
+    fn arg_comb6<
+        A: Exist,
+        B: Exist,
+        C: Exist,
+        D: Exist,
+        E: Exist,
+        F: Exist,
+        T: Fn(bool, bool, bool, bool, bool, bool) -> bool,
+    >(
+        &self,
+        cond: (bool, SdcVersion),
+        a: &A,
+        b: &B,
+        c: &C,
+        d: &D,
+        e: &E,
+        f: &F,
+        func: T,
+    ) -> Result<(), SdcError> {
+        if cond.0 {
+            if func(
+                a.exist(),
+                b.exist(),
+                c.exist(),
+                d.exist(),
+                e.exist(),
+                f.exist(),
+            ) {
+                Ok(())
+            } else {
+                Err(SdcError::ArgumentCombination(self.location().clone()))
+            }
+        } else {
+            Ok(())
+        }
+    }
+
+    fn arg_comb7<
+        A: Exist,
+        B: Exist,
+        C: Exist,
+        D: Exist,
+        E: Exist,
+        F: Exist,
+        G: Exist,
+        T: Fn(bool, bool, bool, bool, bool, bool, bool) -> bool,
+    >(
+        &self,
+        cond: (bool, SdcVersion),
+        a: &A,
+        b: &B,
+        c: &C,
+        d: &D,
+        e: &E,
+        f: &F,
+        g: &G,
+        func: T,
+    ) -> Result<(), SdcError> {
+        if cond.0 {
+            if func(
+                a.exist(),
+                b.exist(),
+                c.exist(),
+                d.exist(),
+                e.exist(),
+                f.exist(),
+                g.exist(),
+            ) {
+                Ok(())
+            } else {
+                Err(SdcError::ArgumentCombination(self.location().clone()))
+            }
+        } else {
+            Ok(())
+        }
+    }
+
+    fn location(&self) -> &Location;
+
+    fn validate(&self, version: SdcVersion) -> Result<(), SdcError>;
 }

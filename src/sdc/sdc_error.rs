@@ -1,4 +1,4 @@
-use crate::sdc::{Argument, Location};
+use crate::sdc::{Argument, Location, SdcVersion};
 use codespan_reporting::diagnostic::{Diagnostic, Label};
 use codespan_reporting::files::{self, Files, SimpleFile};
 use codespan_reporting::term::{self, termcolor::StandardStream};
@@ -39,6 +39,15 @@ pub enum SdcError {
 
     #[error("UnknownVersion")]
     UnknownVersion,
+
+    #[error("CmdUnsupportedVersion")]
+    CmdUnsupportedVersion(SdcVersion, Location),
+
+    #[error("ArgUnsupportedVersion")]
+    ArgUnsupportedVersion(SdcVersion, Location, String),
+
+    #[error("ArgumentCombination")]
+    ArgumentCombination(Location),
 }
 
 impl SdcError {

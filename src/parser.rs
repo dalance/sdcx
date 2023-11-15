@@ -16,6 +16,8 @@ impl Parser {
     pub fn parse<T: AsRef<Path>>(input: &str, file: &T) -> Result<Sdc, SdcError> {
         let mut grammar = SdcGrammar::new();
         parse(input, file, &mut grammar)?;
-        grammar.sdc.unwrap()
+        let sdc = grammar.sdc.unwrap()?;
+        sdc.validate()?;
+        Ok(sdc)
     }
 }

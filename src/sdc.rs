@@ -1,5 +1,6 @@
 use crate::parser::sdc_grammar_trait as grammar;
 use crate::sdc::sdc_error::FileDb;
+use crate::sdc::util::Validate;
 use std::fmt;
 use std::ops::Range;
 use std::path::PathBuf;
@@ -22,9 +23,12 @@ pub struct Sdc {
 }
 
 impl Sdc {
-    pub fn validate(&self) -> bool {
+    pub fn validate(&self) -> Result<(), SdcError> {
         let version = self.version.unwrap_or(SdcVersion::SDC2_1);
-        self.commands.iter().all(|x| x.validate(version))
+        for command in &self.commands {
+            command.validate(version)?;
+        }
+        Ok(())
     }
 
     pub fn normalize(&mut self) {
@@ -117,6 +121,12 @@ pub enum SdcVersion {
     SDC2_1 = 10,
 }
 
+impl SdcVersion {
+    pub fn within(&self, from: SdcVersion, to: SdcVersion) -> (bool, SdcVersion) {
+        (&from <= self && self <= &to, *self)
+    }
+}
+
 impl fmt::Display for SdcVersion {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -189,8 +199,4 @@ impl From<&parol_runtime::Location> for Location {
             file_name: value.file_name.clone(),
         }
     }
-}
-
-trait Validate {
-    fn validate(&self, version: SdcVersion) -> bool;
 }
