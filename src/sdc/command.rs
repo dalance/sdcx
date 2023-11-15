@@ -810,7 +810,7 @@ fn create_clock(args: Vec<Argument>, location: Location) -> Result<Command, SdcE
         }
     }
 
-    let period = mandatory(period, "-period")?;
+    let period = mandatory(period, "-period", &location)?;
 
     Ok(Command::CreateClock(CreateClock {
         period,
@@ -924,8 +924,8 @@ fn create_generated_clock(args: Vec<Argument>, location: Location) -> Result<Com
         }
     }
 
-    let source = mandatory(source, "-source")?;
-    let source_objects = mandatory(source_objects, "source_objects")?;
+    let source = mandatory(source, "-source", &location)?;
+    let source_objects = mandatory(source_objects, "source_objects", &location)?;
 
     Ok(Command::CreateGeneratedClock(CreateGeneratedClock {
         name,
@@ -996,8 +996,8 @@ fn create_voltage_area(args: Vec<Argument>, location: Location) -> Result<Comman
         }
     }
 
-    let name = mandatory(name, "name")?;
-    let cell_list = mandatory(cell_list, "cell_list")?;
+    let name = mandatory(name, "name", &location)?;
+    let cell_list = mandatory(cell_list, "cell_list", &location)?;
 
     Ok(Command::CreateVoltageArea(CreateVoltageArea {
         name,
@@ -1321,7 +1321,7 @@ fn get_lib_cells(
         }
     }
 
-    let patterns = mandatory(patterns, "patterns")?;
+    let patterns = mandatory(patterns, "patterns", &location)?;
 
     Ok(Command::GetLibCells(GetLibCells {
         regexp,
@@ -1385,7 +1385,7 @@ fn get_lib_pins(args: Vec<Argument>, location: Location, alias: bool) -> Result<
         }
     }
 
-    let patterns = mandatory(patterns, "patterns")?;
+    let patterns = mandatory(patterns, "patterns", &location)?;
 
     Ok(Command::GetLibPins(GetLibPins {
         regexp,
@@ -1853,8 +1853,8 @@ fn set(args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
         (variable_name, value) = pos_args2(Some(arg), (variable_name, value), &location)?;
     }
 
-    let variable_name = mandatory(variable_name, "variable_name")?;
-    let value = mandatory(value, "value")?;
+    let variable_name = mandatory(variable_name, "variable_name", &location)?;
+    let value = mandatory(value, "value", &location)?;
 
     Ok(Command::Set(Set {
         variable_name,
@@ -1905,7 +1905,7 @@ fn set_case_analysis(args: Vec<Argument>, location: Location) -> Result<Command,
         }
     }
 
-    let port_or_pin_list = mandatory(port_or_pin_list, "port_or_pin_list")?;
+    let port_or_pin_list = mandatory(port_or_pin_list, "port_or_pin_list", &location)?;
 
     Ok(Command::SetCaseAnalysis(SetCaseAnalysis {
         value,
@@ -2165,8 +2165,8 @@ fn set_clock_latency(args: Vec<Argument>, location: Location) -> Result<Command,
         }
     }
 
-    let delay = mandatory(delay, "delay")?;
-    let object_list = mandatory(object_list, "object_list")?;
+    let delay = mandatory(delay, "delay", &location)?;
+    let object_list = mandatory(object_list, "object_list", &location)?;
 
     Ok(Command::SetClockLatency(SetClockLatency {
         rise,
@@ -2321,8 +2321,8 @@ fn set_clock_transition(args: Vec<Argument>, location: Location) -> Result<Comma
         }
     }
 
-    let transition = mandatory(transition, "transition")?;
-    let clock_list = mandatory(clock_list, "clock_list")?;
+    let transition = mandatory(transition, "transition", &location)?;
+    let clock_list = mandatory(clock_list, "clock_list", &location)?;
 
     Ok(Command::SetClockTransition(SetClockTransition {
         rise,
@@ -2445,7 +2445,7 @@ fn set_clock_uncertainty(args: Vec<Argument>, location: Location) -> Result<Comm
         }
     }
 
-    let uncertainty = mandatory(uncertainty, "uncertainty")?;
+    let uncertainty = mandatory(uncertainty, "uncertainty", &location)?;
 
     Ok(Command::SetClockUncertainty(SetClockUncertainty {
         from,
@@ -2545,7 +2545,7 @@ fn set_data_check(args: Vec<Argument>, location: Location) -> Result<Command, Sd
         }
     }
 
-    let value = mandatory(value, "value")?;
+    let value = mandatory(value, "value", &location)?;
 
     Ok(Command::SetDataCheck(SetDataCheck {
         from,
@@ -2611,7 +2611,7 @@ fn set_disable_timing(args: Vec<Argument>, location: Location) -> Result<Command
         }
     }
 
-    let cell_pin_list = mandatory(cell_pin_list, "cell_pin_list")?;
+    let cell_pin_list = mandatory(cell_pin_list, "cell_pin_list", &location)?;
 
     Ok(Command::SetDisableTiming(SetDisableTiming {
         from,
@@ -2677,8 +2677,8 @@ fn set_drive(args: Vec<Argument>, location: Location) -> Result<Command, SdcErro
         }
     }
 
-    let resistance = mandatory(resistance, "resistance")?;
-    let port_list = mandatory(port_list, "port_list")?;
+    let resistance = mandatory(resistance, "resistance", &location)?;
+    let port_list = mandatory(port_list, "port_list", &location)?;
 
     Ok(Command::SetDrive(SetDrive {
         rise,
@@ -2809,8 +2809,8 @@ fn set_driving_cell(args: Vec<Argument>, location: Location) -> Result<Command, 
         }
     }
 
-    let lib_cell = mandatory(lib_cell, "lib_cell")?;
-    let port_list = mandatory(port_list, "port_list")?;
+    let lib_cell = mandatory(lib_cell, "lib_cell", &location)?;
+    let port_list = mandatory(port_list, "port_list", &location)?;
 
     Ok(Command::SetDrivingCell(SetDrivingCell {
         lib_cell,
@@ -3011,8 +3011,8 @@ fn set_fanout_load(args: Vec<Argument>, location: Location) -> Result<Command, S
         }
     }
 
-    let value = mandatory(value, "value")?;
-    let port_list = mandatory(port_list, "port_list")?;
+    let value = mandatory(value, "value", &location)?;
+    let port_list = mandatory(port_list, "port_list", &location)?;
 
     Ok(Command::SetFanoutLoad(SetFanoutLoad {
         value,
@@ -3054,7 +3054,7 @@ fn set_hierarchy_separator(args: Vec<Argument>, location: Location) -> Result<Co
         separator = pos_args1(Some(arg), separator, &location)?;
     }
 
-    let separator = mandatory(separator, "separator")?;
+    let separator = mandatory(separator, "separator", &location)?;
 
     Ok(Command::SetHierarchySeparator(SetHierarchySeparator {
         separator,
@@ -3116,8 +3116,8 @@ fn set_ideal_latency(args: Vec<Argument>, location: Location) -> Result<Command,
         }
     }
 
-    let delay = mandatory(delay, "delay")?;
-    let object_list = mandatory(object_list, "object_list")?;
+    let delay = mandatory(delay, "delay", &location)?;
+    let object_list = mandatory(object_list, "object_list", &location)?;
 
     Ok(Command::SetIdealLatency(SetIdealLatency {
         rise,
@@ -3169,7 +3169,7 @@ fn set_ideal_network(args: Vec<Argument>, location: Location) -> Result<Command,
         }
     }
 
-    let object_list = mandatory(object_list, "object_list")?;
+    let object_list = mandatory(object_list, "object_list", &location)?;
 
     Ok(Command::SetIdealNetwork(SetIdealNetwork {
         no_propagate,
@@ -3235,8 +3235,8 @@ fn set_ideal_transition(args: Vec<Argument>, location: Location) -> Result<Comma
         }
     }
 
-    let transition_time = mandatory(transition_time, "transition_time")?;
-    let object_list = mandatory(object_list, "object_list")?;
+    let transition_time = mandatory(transition_time, "transition_time", &location)?;
+    let object_list = mandatory(object_list, "object_list", &location)?;
 
     Ok(Command::SetIdealTransition(SetIdealTransition {
         rise,
@@ -3366,8 +3366,8 @@ fn set_input_delay(args: Vec<Argument>, location: Location) -> Result<Command, S
         }
     }
 
-    let delay_value = mandatory(delay_value, "delay_value")?;
-    let port_pin_list = mandatory(port_pin_list, "port_pin_list")?;
+    let delay_value = mandatory(delay_value, "delay_value", &location)?;
+    let port_pin_list = mandatory(port_pin_list, "port_pin_list", &location)?;
 
     Ok(Command::SetInputDelay(SetInputDelay {
         clock,
@@ -3457,8 +3457,8 @@ fn set_input_transition(args: Vec<Argument>, location: Location) -> Result<Comma
         }
     }
 
-    let transition = mandatory(transition, "transition")?;
-    let port_list = mandatory(port_list, "port_list")?;
+    let transition = mandatory(transition, "transition", &location)?;
+    let port_list = mandatory(port_list, "port_list", &location)?;
 
     Ok(Command::SetInputTransition(SetInputTransition {
         rise,
@@ -3512,7 +3512,7 @@ fn set_level_shifter_strategy(
         }
     }
 
-    let rule = mandatory(rule, "rule")?;
+    let rule = mandatory(rule, "rule", &location)?;
 
     Ok(Command::SetLevelShifterStrategy(SetLevelShifterStrategy {
         rule,
@@ -3563,7 +3563,7 @@ fn set_level_shifter_threshold(
         }
     }
 
-    let voltage = mandatory(voltage, "voltage")?;
+    let voltage = mandatory(voltage, "voltage", &location)?;
 
     Ok(Command::SetLevelShifterThreshold(
         SetLevelShifterThreshold {
@@ -3632,8 +3632,8 @@ fn set_load(args: Vec<Argument>, location: Location) -> Result<Command, SdcError
         }
     }
 
-    let value = mandatory(value, "value")?;
-    let objects = mandatory(objects, "objects")?;
+    let value = mandatory(value, "value", &location)?;
+    let objects = mandatory(objects, "objects", &location)?;
 
     Ok(Command::SetLoad(SetLoad {
         min,
@@ -3682,7 +3682,7 @@ fn set_logic_dc(args: Vec<Argument>, location: Location) -> Result<Command, SdcE
         }
     }
 
-    let port_list = mandatory(port_list, "port_list")?;
+    let port_list = mandatory(port_list, "port_list", &location)?;
 
     Ok(Command::SetLogicDc(SetLogicDc {
         port_list,
@@ -3725,7 +3725,7 @@ fn set_logic_one(args: Vec<Argument>, location: Location) -> Result<Command, Sdc
         }
     }
 
-    let port_list = mandatory(port_list, "port_list")?;
+    let port_list = mandatory(port_list, "port_list", &location)?;
 
     Ok(Command::SetLogicOne(SetLogicOne {
         port_list,
@@ -3768,7 +3768,7 @@ fn set_logic_zero(args: Vec<Argument>, location: Location) -> Result<Command, Sd
         }
     }
 
-    let port_list = mandatory(port_list, "port_list")?;
+    let port_list = mandatory(port_list, "port_list", &location)?;
 
     Ok(Command::SetLogicZero(SetLogicZero {
         port_list,
@@ -3811,7 +3811,7 @@ fn set_max_area(args: Vec<Argument>, location: Location) -> Result<Command, SdcE
         }
     }
 
-    let area_value = mandatory(area_value, "area_value")?;
+    let area_value = mandatory(area_value, "area_value", &location)?;
 
     Ok(Command::SetMaxArea(SetMaxArea {
         area_value,
@@ -3857,8 +3857,8 @@ fn set_max_capacitance(args: Vec<Argument>, location: Location) -> Result<Comman
         }
     }
 
-    let value = mandatory(value, "value")?;
-    let object_list = mandatory(object_list, "object_list")?;
+    let value = mandatory(value, "value", &location)?;
+    let object_list = mandatory(object_list, "object_list", &location)?;
 
     Ok(Command::SetMaxCapacitance(SetMaxCapacitance {
         value,
@@ -3983,7 +3983,7 @@ fn set_max_delay(args: Vec<Argument>, location: Location) -> Result<Command, Sdc
         }
     }
 
-    let delay_value = mandatory(delay_value, "delay_value")?;
+    let delay_value = mandatory(delay_value, "delay_value", &location)?;
 
     Ok(Command::SetMaxDelay(SetMaxDelay {
         rise,
@@ -4042,7 +4042,7 @@ fn set_max_dynamic_power(args: Vec<Argument>, location: Location) -> Result<Comm
         }
     }
 
-    let power = mandatory(power, "power")?;
+    let power = mandatory(power, "power", &location)?;
 
     Ok(Command::SetMaxDynamicPower(SetMaxDynamicPower {
         power,
@@ -4089,8 +4089,8 @@ fn set_max_fanout(args: Vec<Argument>, location: Location) -> Result<Command, Sd
         }
     }
 
-    let value = mandatory(value, "value")?;
-    let object_list = mandatory(object_list, "object_list")?;
+    let value = mandatory(value, "value", &location)?;
+    let object_list = mandatory(object_list, "object_list", &location)?;
 
     Ok(Command::SetMaxFanout(SetMaxFanout {
         value,
@@ -4137,7 +4137,7 @@ fn set_max_leakage_power(args: Vec<Argument>, location: Location) -> Result<Comm
         }
     }
 
-    let power = mandatory(power, "power")?;
+    let power = mandatory(power, "power", &location)?;
 
     Ok(Command::SetMaxLeakagePower(SetMaxLeakagePower {
         power,
@@ -4187,8 +4187,8 @@ fn set_max_time_borrow(args: Vec<Argument>, location: Location) -> Result<Comman
         }
     }
 
-    let delay_value = mandatory(delay_value, "delay_value")?;
-    let object_list = mandatory(object_list, "object_list")?;
+    let delay_value = mandatory(delay_value, "delay_value", &location)?;
+    let object_list = mandatory(object_list, "object_list", &location)?;
 
     Ok(Command::SetMaxTimeBorrow(SetMaxTimeBorrow {
         delay_value,
@@ -4254,8 +4254,8 @@ fn set_max_transition(args: Vec<Argument>, location: Location) -> Result<Command
         }
     }
 
-    let value = mandatory(value, "value")?;
-    let object_list = mandatory(object_list, "object_list")?;
+    let value = mandatory(value, "value", &location)?;
+    let object_list = mandatory(object_list, "object_list", &location)?;
 
     Ok(Command::SetMaxTransition(SetMaxTransition {
         clock_path,
@@ -4305,8 +4305,8 @@ fn set_min_capacitance(args: Vec<Argument>, location: Location) -> Result<Comman
         }
     }
 
-    let value = mandatory(value, "value")?;
-    let object_list = mandatory(object_list, "object_list")?;
+    let value = mandatory(value, "value", &location)?;
+    let object_list = mandatory(object_list, "object_list", &location)?;
 
     Ok(Command::SetMinCapacitance(SetMinCapacitance {
         value,
@@ -4431,7 +4431,7 @@ fn set_min_delay(args: Vec<Argument>, location: Location) -> Result<Command, Sdc
         }
     }
 
-    let delay_value = mandatory(delay_value, "delay_value")?;
+    let delay_value = mandatory(delay_value, "delay_value", &location)?;
 
     Ok(Command::SetMinDelay(SetMinDelay {
         rise,
@@ -4493,8 +4493,8 @@ fn set_min_porosity(args: Vec<Argument>, location: Location) -> Result<Command, 
         }
     }
 
-    let porosity_value = mandatory(porosity_value, "porosity_value")?;
-    let object_list = mandatory(object_list, "value")?;
+    let porosity_value = mandatory(porosity_value, "porosity_value", &location)?;
+    let object_list = mandatory(object_list, "value", &location)?;
 
     Ok(Command::SetMinPorosity(SetMinPorosity {
         porosity_value,
@@ -4549,7 +4549,7 @@ fn set_min_pulse_width(args: Vec<Argument>, location: Location) -> Result<Comman
         }
     }
 
-    let value = mandatory(value, "value")?;
+    let value = mandatory(value, "value", &location)?;
 
     Ok(Command::SetMinPulseWidth(SetMinPulseWidth {
         low,
@@ -4674,7 +4674,7 @@ fn set_multicycle_path(args: Vec<Argument>, location: Location) -> Result<Comman
         }
     }
 
-    let path_multiplier = mandatory(path_multiplier, "path_multiplier")?;
+    let path_multiplier = mandatory(path_multiplier, "path_multiplier", &location)?;
 
     Ok(Command::SetMulticyclePath(SetMulticyclePath {
         setup,
@@ -4896,8 +4896,8 @@ fn set_output_delay(args: Vec<Argument>, location: Location) -> Result<Command, 
         }
     }
 
-    let delay_value = mandatory(delay_value, "delay_value")?;
-    let port_pin_list = mandatory(port_pin_list, "port_pin_list")?;
+    let delay_value = mandatory(delay_value, "delay_value", &location)?;
+    let port_pin_list = mandatory(port_pin_list, "port_pin_list", &location)?;
 
     Ok(Command::SetOutputDelay(SetOutputDelay {
         clock,
@@ -4955,8 +4955,8 @@ fn set_port_fanout_number(args: Vec<Argument>, location: Location) -> Result<Com
         }
     }
 
-    let value = mandatory(value, "value")?;
-    let port_list = mandatory(port_list, "port_list")?;
+    let value = mandatory(value, "value", &location)?;
+    let port_list = mandatory(port_list, "port_list", &location)?;
 
     Ok(Command::SetPortFanoutNumber(SetPortFanoutNumber {
         value,
@@ -5000,7 +5000,7 @@ fn set_propagated_clock(args: Vec<Argument>, location: Location) -> Result<Comma
         }
     }
 
-    let object_list = mandatory(object_list, "object_list")?;
+    let object_list = mandatory(object_list, "object_list", &location)?;
 
     Ok(Command::SetPropagatedClock(SetPropagatedClock {
         object_list,
@@ -5054,8 +5054,8 @@ fn set_resistance(args: Vec<Argument>, location: Location) -> Result<Command, Sd
         }
     }
 
-    let value = mandatory(value, "value")?;
-    let net_list = mandatory(net_list, "net_list")?;
+    let value = mandatory(value, "value", &location)?;
+    let net_list = mandatory(net_list, "net_list", &location)?;
 
     Ok(Command::SetResistance(SetResistance {
         min,
@@ -5143,7 +5143,7 @@ fn set_sense(args: Vec<Argument>, location: Location) -> Result<Command, SdcErro
         }
     }
 
-    let pin_list = mandatory(pin_list, "pin_list")?;
+    let pin_list = mandatory(pin_list, "pin_list", &location)?;
 
     Ok(Command::SetSense(SetSense {
         r#type,
@@ -5259,7 +5259,7 @@ fn set_timing_derate(args: Vec<Argument>, location: Location) -> Result<Command,
         }
     }
 
-    let derate_value = mandatory(derate_value, "derate_value")?;
+    let derate_value = mandatory(derate_value, "derate_value", &location)?;
 
     Ok(Command::SetTimingDerate(SetTimingDerate {
         cell_delay,
@@ -5393,7 +5393,7 @@ fn set_voltage(args: Vec<Argument>, location: Location) -> Result<Command, SdcEr
         }
     }
 
-    let max_case_voltage = mandatory(max_case_voltage, "max_case_voltage")?;
+    let max_case_voltage = mandatory(max_case_voltage, "max_case_voltage", &location)?;
 
     Ok(Command::SetVoltage(SetVoltage {
         min,
@@ -5441,7 +5441,7 @@ fn set_wire_load_min_block_size(
         }
     }
 
-    let size = mandatory(size, "size")?;
+    let size = mandatory(size, "size", &location)?;
 
     Ok(Command::SetWireLoadMinBlockSize(SetWireLoadMinBlockSize {
         size,
@@ -5484,7 +5484,7 @@ fn set_wire_load_mode(args: Vec<Argument>, location: Location) -> Result<Command
         }
     }
 
-    let mode_name = mandatory(mode_name, "mode_name")?;
+    let mode_name = mandatory(mode_name, "mode_name", &location)?;
 
     Ok(Command::SetWireLoadMode(SetWireLoadMode {
         mode_name,
@@ -5543,7 +5543,7 @@ fn set_wire_load_model(args: Vec<Argument>, location: Location) -> Result<Comman
         }
     }
 
-    let name = mandatory(name, "name")?;
+    let name = mandatory(name, "name", &location)?;
 
     Ok(Command::SetWireLoadModel(SetWireLoadModel {
         name,
@@ -5612,7 +5612,7 @@ fn set_wire_load_selection_group(
         }
     }
 
-    let group_name = mandatory(group_name, "group_name")?;
+    let group_name = mandatory(group_name, "group_name", &location)?;
 
     Ok(Command::SetWireLoadSelectionGroup(
         SetWireLoadSelectionGroup {

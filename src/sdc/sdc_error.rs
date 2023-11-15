@@ -29,16 +29,16 @@ pub enum SdcError {
     TooManyArgument(Location),
 
     #[error("MissingMandatoryArgument: {0}")]
-    MissingMandatoryArgument(String),
+    MissingMandatoryArgument(String, Location),
 
     #[error("ParseError: {0}")]
     ParseError(#[from] ParolError),
 
     #[error("SdcVersionPlacement")]
-    SdcVersionPlacement,
+    SdcVersionPlacement(Location),
 
     #[error("UnknownVersion")]
-    UnknownVersion,
+    UnknownVersion(Location),
 
     #[error("CmdUnsupportedVersion")]
     CmdUnsupportedVersion(SdcVersion, Location),
@@ -62,6 +62,7 @@ impl SdcError {
             SdcError::ParseError(ParolError::ParserError(x)) => {
                 Self::report_parser_error(&x, &writer, &config, &files)
             }
+            SdcError::ParseError(ParolError::UserError(_)) => Ok(()),
             SdcError::WrongArgument(x) => {
                 let (range, file_id) = x.location().range_file(&files);
                 let diag = Diagnostic::error()
@@ -110,7 +111,62 @@ impl SdcError {
                     .with_labels(vec![Label::primary(file_id, range).with_message("Found")]);
                 Ok(term::emit(&mut writer.lock(), &config, files, &diag)?)
             }
-            x => Err(x.into()),
+            SdcError::MissingMandatoryArgument(name, location) => {
+                let (range, file_id) = location.range_file(&files);
+                let diag = Diagnostic::error()
+                    .with_message(format!("Missing mandatory argument: {name}"))
+                    .with_code("sdcx::sdc::SdcError")
+                    .with_labels(vec![Label::primary(file_id, range).with_message("Found")]);
+                Ok(term::emit(&mut writer.lock(), &config, files, &diag)?)
+            }
+            SdcError::SdcVersionPlacement(location) => {
+                let (range, file_id) = location.range_file(&files);
+                let diag = Diagnostic::error()
+                    .with_message(format!(
+                        "SDC version should be set at the beginning of file"
+                    ))
+                    .with_code("sdcx::sdc::SdcError")
+                    .with_labels(vec![Label::primary(file_id, range).with_message("Found")]);
+                Ok(term::emit(&mut writer.lock(), &config, files, &diag)?)
+            }
+            SdcError::UnknownVersion(location) => {
+                let (range, file_id) = location.range_file(&files);
+                let diag = Diagnostic::error()
+                    .with_message(format!("Unknown SDC version"))
+                    .with_code("sdcx::sdc::SdcError")
+                    .with_labels(vec![Label::primary(file_id, range).with_message("Found")]);
+                Ok(term::emit(&mut writer.lock(), &config, files, &diag)?)
+            }
+            SdcError::CmdUnsupportedVersion(version, location) => {
+                let (range, file_id) = location.range_file(&files);
+                let diag = Diagnostic::error()
+                    .with_message(format!(
+                        "Unsupported command at SDC {}",
+                        version.version_string()
+                    ))
+                    .with_code("sdcx::sdc::SdcError")
+                    .with_labels(vec![Label::primary(file_id, range).with_message("Found")]);
+                Ok(term::emit(&mut writer.lock(), &config, files, &diag)?)
+            }
+            SdcError::ArgUnsupportedVersion(version, location, name) => {
+                let (range, file_id) = location.range_file(&files);
+                let diag = Diagnostic::error()
+                    .with_message(format!(
+                        "Unsupported argument \"-{name}\" at {}",
+                        version.version_string()
+                    ))
+                    .with_code("sdcx::sdc::SdcError")
+                    .with_labels(vec![Label::primary(file_id, range).with_message("Found")]);
+                Ok(term::emit(&mut writer.lock(), &config, files, &diag)?)
+            }
+            SdcError::ArgumentCombination(x) => {
+                let (range, file_id) = x.range_file(&files);
+                let diag = Diagnostic::error()
+                    .with_message(format!("Forbidden argument combination"))
+                    .with_code("sdcx::sdc::SdcError")
+                    .with_labels(vec![Label::primary(file_id, range).with_message("Found")]);
+                Ok(term::emit(&mut writer.lock(), &config, files, &diag)?)
+            }
         }
     }
 

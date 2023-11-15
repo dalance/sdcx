@@ -80,10 +80,12 @@ impl TryFrom<&grammar::Source<'_>> for Sdc {
                                     "1.9" => sdc.version = Some(SdcVersion::SDC1_9),
                                     "2.0" => sdc.version = Some(SdcVersion::SDC2_0),
                                     "2.1" => sdc.version = Some(SdcVersion::SDC2_1),
-                                    _ => return Err(SdcError::UnknownVersion),
+                                    _ => {
+                                        return Err(SdcError::UnknownVersion(x.location().clone()))
+                                    }
                                 }
                             } else {
-                                return Err(SdcError::SdcVersionPlacement);
+                                return Err(SdcError::SdcVersionPlacement(x.location().clone()));
                             }
                         }
                         _ => sdc.commands.push(command),
@@ -124,6 +126,22 @@ pub enum SdcVersion {
 impl SdcVersion {
     pub fn within(&self, from: SdcVersion, to: SdcVersion) -> (bool, SdcVersion) {
         (&from <= self && self <= &to, *self)
+    }
+
+    pub fn version_string(&self) -> &str {
+        match self {
+            SdcVersion::SDC1_1 => "1.1",
+            SdcVersion::SDC1_2 => "1.2",
+            SdcVersion::SDC1_3 => "1.3",
+            SdcVersion::SDC1_4 => "1.4",
+            SdcVersion::SDC1_5 => "1.5",
+            SdcVersion::SDC1_6 => "1.6",
+            SdcVersion::SDC1_7 => "1.7",
+            SdcVersion::SDC1_8 => "1.8",
+            SdcVersion::SDC1_9 => "1.9",
+            SdcVersion::SDC2_0 => "2.0",
+            SdcVersion::SDC2_1 => "2.1",
+        }
     }
 }
 

@@ -23,7 +23,7 @@ TermRBracket                   : <INITIAL>']';
 TermLBrace                     : <BraceGroup, INITIAL>'{';
 TermRBrace                     : <BraceGroup, INITIAL>'}';
 
-TermStringGroup                : <INITIAL>"\u{0022}(?:\\[\u{0022}\\/bfnrt]|u[0-9a-fA-F]{4}|[^\u{0022}\\])*\u{0022}";
+TermStringGroup                : <INITIAL>"\u{0022}(?:\\[\u{0022}\\/bfnrt]|u[0-9a-fA-F]{4}|[^\u{0022}\\]|\\\n)*\u{0022}";
 
 TermComment                    : <INITIAL>/#.*(\r\n|\r|\n|$)/;
 TermSemiColon                  : <INITIAL>';';

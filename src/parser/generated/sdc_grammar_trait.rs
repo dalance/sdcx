@@ -487,7 +487,7 @@ pub struct TermSemiColon<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct TermStringGroup<'t> {
-    pub term_string_group: Token<'t>, /* \u{0022}(?:\\[\u{0022}\\/bfnrt]|u[0-9a-fA-F]{4}|[^\u{0022}\\])*\u{0022} */
+    pub term_string_group: Token<'t>, /* \u{0022}(?:\\[\u{0022}\\/bfnrt]|u[0-9a-fA-F]{4}|[^\u{0022}\\]|\\\n)*\u{0022} */
 }
 
 ///
@@ -782,7 +782,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
 
     /// Semantic action for production 4:
     ///
-    /// `TermStringGroup: "\u{0022}(?:\\[\u{0022}\\/bfnrt]|u[0-9a-fA-F]{4}|[^\u{0022}\\])*\u{0022}";`
+    /// `TermStringGroup: "\u{0022}(?:\\[\u{0022}\\/bfnrt]|u[0-9a-fA-F]{4}|[^\u{0022}\\]|\\\n)*\u{0022}";`
     ///
     #[parol_runtime::function_name::named]
     fn term_string_group(&mut self, term_string_group: &ParseTreeType<'t>) -> Result<()> {

@@ -63,8 +63,15 @@ pub(crate) fn pos_args2(
     }
 }
 
-pub(crate) fn mandatory(arg: Option<Argument>, name: &str) -> Result<Argument, SdcError> {
-    arg.ok_or(SdcError::MissingMandatoryArgument(name.into()))
+pub(crate) fn mandatory(
+    arg: Option<Argument>,
+    name: &str,
+    location: &Location,
+) -> Result<Argument, SdcError> {
+    arg.ok_or(SdcError::MissingMandatoryArgument(
+        name.into(),
+        location.clone(),
+    ))
 }
 
 pub(crate) fn fmt_arg(x: &Argument) -> String {

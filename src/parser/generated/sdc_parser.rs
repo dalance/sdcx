@@ -26,7 +26,7 @@ pub const TERMINALS: &[&str; 17] = &[
     /*  6 */ r"\]",
     /*  7 */ r"\{",
     /*  8 */ r"\}",
-    /*  9 */ r"\u{0022}(?:\\[\u{0022}\\/bfnrt]|u[0-9a-fA-F]{4}|[^\u{0022}\\])*\u{0022}",
+    /*  9 */ r"\u{0022}(?:\\[\u{0022}\\/bfnrt]|u[0-9a-fA-F]{4}|[^\u{0022}\\]|\\\n)*\u{0022}",
     /* 10 */ r"#.*(\r\n|\r|\n|$)",
     /* 11 */ r";",
     /* 12 */ r"\\(\r\n|\r|\n)",
@@ -408,7 +408,7 @@ pub const PRODUCTIONS: &[Production; 46] = &[
         lhs: 16,
         production: &[ParseType::T(8)],
     },
-    // 4 - TermStringGroup: "\u{0022}(?:\\[\u{0022}\\/bfnrt]|u[0-9a-fA-F]{4}|[^\u{0022}\\])*\u{0022}";
+    // 4 - TermStringGroup: "\u{0022}(?:\\[\u{0022}\\/bfnrt]|u[0-9a-fA-F]{4}|[^\u{0022}\\]|\\\n)*\u{0022}";
     Production {
         lhs: 19,
         production: &[ParseType::T(9)],
