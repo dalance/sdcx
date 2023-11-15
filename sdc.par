@@ -29,7 +29,7 @@ TermComment                    : <INITIAL>/#.*(\r\n|\r|\n|$)/;
 TermSemiColon                  : <INITIAL>';';
 TermBackslashLineBreak         : <INITIAL>/\\(\r\n|\r|\n)/;
 TermLineBreak                  : <INITIAL>/(\r\n|\r|\n|$)/;
-TermWord                       : <INITIAL>/[^\s\[\]]+/;
+TermWord                       : <INITIAL>/[^\s\[\]\\]+/;
 
 TermBraceGroupContent          : <BraceGroup>/[^}]*/;
 TermBraceGroup                 : TermLBrace %push(BraceGroup) (TermBraceGroup | TermBraceGroupContent) TermRBrace %pop();

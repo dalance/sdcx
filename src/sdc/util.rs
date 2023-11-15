@@ -37,12 +37,13 @@ pub(crate) fn vec_arg(
 pub(crate) fn pos_args1(
     arg: Option<Argument>,
     tgt: Option<Argument>,
+    location: &Location,
 ) -> Result<Option<Argument>, SdcError> {
     if arg.is_none() {
-        return Err(SdcError::MissingPosArgument);
+        return Err(SdcError::MissingPosArgument(location.clone()));
     }
     match tgt {
-        Some(_) => Err(SdcError::TooManyArgument),
+        Some(_) => Err(SdcError::TooManyArgument(location.clone())),
         None => Ok(arg),
     }
 }
@@ -50,14 +51,15 @@ pub(crate) fn pos_args1(
 pub(crate) fn pos_args2(
     arg: Option<Argument>,
     tgt: (Option<Argument>, Option<Argument>),
+    location: &Location,
 ) -> Result<(Option<Argument>, Option<Argument>), SdcError> {
     let (tgt0, tgt1) = tgt;
     if tgt0.is_none() {
-        Ok((pos_args1(arg, tgt0)?, None))
+        Ok((pos_args1(arg, tgt0, location)?, None))
     } else if tgt1.is_none() {
-        Ok((tgt0, pos_args1(arg, tgt1)?))
+        Ok((tgt0, pos_args1(arg, tgt1, location)?))
     } else {
-        Err(SdcError::TooManyArgument)
+        Err(SdcError::TooManyArgument(location.clone()))
     }
 }
 
@@ -136,6 +138,25 @@ pub(crate) trait Validate {
                 cond.1,
                 self.location().clone(),
             ))
+        }
+    }
+
+    fn alias_supported_version(
+        &self,
+        cond: (bool, SdcVersion),
+        is_alias: bool,
+    ) -> Result<(), SdcError> {
+        if is_alias {
+            if cond.0 {
+                Ok(())
+            } else {
+                Err(SdcError::CmdUnsupportedVersion(
+                    cond.1,
+                    self.location().clone(),
+                ))
+            }
+        } else {
+            Ok(())
         }
     }
 

@@ -31,7 +31,7 @@ pub const TERMINALS: &[&str; 17] = &[
     /* 11 */ r";",
     /* 12 */ r"\\(\r\n|\r|\n)",
     /* 13 */ r"(\r\n|\r|\n|$)",
-    /* 14 */ r"[^\s\[\]]+",
+    /* 14 */ r"[^\s\[\]\\]+",
     /* 15 */ r"[^}]*",
     /* 16 */ ERROR_TOKEN,
 ];
@@ -433,7 +433,7 @@ pub const PRODUCTIONS: &[Production; 46] = &[
         lhs: 15,
         production: &[ParseType::T(13)],
     },
-    // 9 - TermWord: /[^\s\[\]]+/;
+    // 9 - TermWord: /[^\s\[\]\\]+/;
     Production {
         lhs: 20,
         production: &[ParseType::T(14)],

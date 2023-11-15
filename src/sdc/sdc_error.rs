@@ -23,10 +23,10 @@ pub enum SdcError {
     MissingOptArgument(Argument),
 
     #[error("MissingPosArgument")]
-    MissingPosArgument,
+    MissingPosArgument(Location),
 
     #[error("TooManyArgument")]
-    TooManyArgument,
+    TooManyArgument(Location),
 
     #[error("MissingMandatoryArgument: {0}")]
     MissingMandatoryArgument(String),
@@ -90,6 +90,22 @@ impl SdcError {
                 let (range, file_id) = x.location().range_file(&files);
                 let diag = Diagnostic::error()
                     .with_message("Missing argument")
+                    .with_code("sdcx::sdc::SdcError")
+                    .with_labels(vec![Label::primary(file_id, range).with_message("Found")]);
+                Ok(term::emit(&mut writer.lock(), &config, files, &diag)?)
+            }
+            SdcError::MissingPosArgument(x) => {
+                let (range, file_id) = x.range_file(&files);
+                let diag = Diagnostic::error()
+                    .with_message("Missing positional argument")
+                    .with_code("sdcx::sdc::SdcError")
+                    .with_labels(vec![Label::primary(file_id, range).with_message("Found")]);
+                Ok(term::emit(&mut writer.lock(), &config, files, &diag)?)
+            }
+            SdcError::TooManyArgument(x) => {
+                let (range, file_id) = x.range_file(&files);
+                let diag = Diagnostic::error()
+                    .with_message("Too many argument")
                     .with_code("sdcx::sdc::SdcError")
                     .with_labels(vec![Label::primary(file_id, range).with_message("Found")]);
                 Ok(term::emit(&mut writer.lock(), &config, files, &diag)?)

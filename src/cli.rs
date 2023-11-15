@@ -29,7 +29,10 @@ enum SubCommands {
     },
 
     /// Check input file
-    Check {},
+    Check {
+        /// SDC file
+        file: PathBuf,
+    },
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -76,6 +79,39 @@ fn format(opt: &Opt) -> Result<()> {
     Ok(())
 }
 
+fn check(opt: &Opt) -> Result<()> {
+    let SubCommands::Check { ref file } = opt.subcommand else {
+        return Ok(());
+    };
+
+    let f = File::open(file)?;
+    let mut reader = BufReader::new(f);
+    let mut s = String::new();
+
+    if file.extension().map(|x| x.to_str()) == Some(Some("gz")) {
+        let mut buf = vec![];
+        reader.read_to_end(&mut buf)?;
+        let mut gz = GzDecoder::new(&*buf);
+        gz.read_to_string(&mut s)?;
+    } else {
+        reader.read_to_string(&mut s)?;
+    }
+
+    let mut files = FileDb::new();
+    files.add(file.display().to_string(), s.as_str());
+
+    let sdc = sdcx::parser::Parser::parse(&s, &file);
+
+    match sdc {
+        Ok(_) => (),
+        Err(err) => {
+            err.report(&files)?;
+        }
+    }
+
+    Ok(())
+}
+
 // ---------------------------------------------------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------------------------------------------------
@@ -85,7 +121,7 @@ fn main() -> Result<()> {
 
     match opt.subcommand {
         SubCommands::Fmt { .. } => format(&opt)?,
-        SubCommands::Check { .. } => todo!(),
+        SubCommands::Check { .. } => check(&opt)?,
     }
 
     Ok(())
