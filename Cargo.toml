@@ -4,11 +4,11 @@ version     = "0.1.0"
 edition     = "2021"
 authors     = ["dalance@gmail.com"]
 repository  = "https://github.com/dalance/sdcx"
-keywords    = []
-categories  = []
+keywords    = ["eda", "parser"]
+categories  = ["parser-implementations"]
 license     = "MIT OR Apache-2.0"
 readme      = "README.md"
-description = ""
+description = "SDC (Synopsys Design Constraints) toolkit"
 
 [[bin]]
 name = "sdcx"
@@ -26,8 +26,6 @@ thiserror          = "1.0"
 parol         =  "0.25.0"
 parol_runtime = {version = "0.20.0", features = ["auto_generation"]}
 walkdir       = "2.4.0"
-
-[workspace.dependencies]
 
 [profile.dev.build-override]
 opt-level = 3
