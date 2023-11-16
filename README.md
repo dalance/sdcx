@@ -20,6 +20,7 @@ SDCx supports SDC1.1 ~ SDC2.1 defined at the specification.
 
 `sdcx check` validates an input SDC file.
 By default, `sdcx` uses SDC version according to `set sdc_version` command.
+If version is not specified, SDC 2.1 will be assumed.
 If `--force-version` option is provided, the version can be overrided.
 
 ```

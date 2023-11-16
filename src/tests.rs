@@ -1,5 +1,7 @@
 use crate::sdc::*;
 use crate::Parser;
+use std::fs::File;
+use std::io::Read;
 
 fn check_parse(code: &str) {
     let code = format!("{code}\n");
@@ -26,6 +28,20 @@ fn check_format(code: &str, format: &str) {
     let code = format!("{code}\n");
     let sdc = Parser::parse(&code, &"").unwrap();
     assert_eq!(&format!("{}", sdc.commands[0]), format);
+}
+
+fn check_testcase(path: &str, validatable: bool) {
+    let mut f = File::open(&path).unwrap();
+    let mut code = String::new();
+    let _ = f.read_to_string(&mut code);
+    let sdc = Parser::parse(&code, &"");
+    //dbg!(&sdc);
+    assert!(sdc.is_ok());
+    if validatable {
+        assert!(sdc.unwrap().validate(None).is_empty())
+    } else {
+        assert!(!sdc.unwrap().validate(None).is_empty())
+    }
 }
 
 #[test]
@@ -87,4 +103,23 @@ fn format() {
     check_format("list A B C ", "list A B C");
     check_format("set A B", "set A B");
     check_format("set A B", "set A B");
+}
+
+#[test]
+fn testcase() {
+    check_testcase("testcase/cdctl.sdc", false);
+    check_testcase("testcase/ctu_can_fd.sdc", true);
+    check_testcase("testcase/logic_clock_domain_crossing.sdc", false);
+    check_testcase("testcase/peridot_cam.sdc", false);
+    check_testcase("testcase/peridot_hostbridge.sdc", false);
+    check_testcase("testcase/peridot_wsg.sdc", false);
+    check_testcase("testcase/scan.sdc", true);
+    // TODO linebreak of the end of file is missing
+    //check_testcase("testcase/signoff.sdc", true);
+    check_testcase("testcase/soc_system_hdmi_i2c_only.sdc", true);
+    check_testcase("testcase/soc_system_mandelbrot_timing.sdc", false);
+    check_testcase("testcase/spi_slave_mm.sdc", false);
+    check_testcase("testcase/tiles_base.sdc", true);
+    check_testcase("testcase/timing_constraints.sdc", true);
+    check_testcase("testcase/tinyODIN.sdc", true);
 }
