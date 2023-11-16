@@ -51,6 +51,9 @@ pub enum SdcError {
 
     #[error("AmbiguousOption")]
     AmbiguousOption(Location),
+
+    #[error("GenaralError")]
+    GenaralError(#[from] anyhow::Error),
 }
 
 impl SdcError {
@@ -178,6 +181,7 @@ impl SdcError {
                     .with_labels(vec![Label::primary(file_id, range).with_message("Found")]);
                 Ok(term::emit(&mut writer.lock(), &config, files, &diag)?)
             }
+            SdcError::GenaralError(x) => Err(x.into()),
         }
     }
 
