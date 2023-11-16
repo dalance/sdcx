@@ -3,8 +3,8 @@ use clap::{Parser, Subcommand};
 use flate2::read::GzDecoder;
 use flate2::write::GzEncoder;
 use flate2::Compression;
-use sdcx::sdc::sdc_error::FileDb;
-use sdcx::sdc::SdcError;
+use sdcx::errors::Report;
+use sdcx::file_db::FileDb;
 use std::fs::File;
 use std::io::{BufReader, Read, Write};
 use std::path::{Path, PathBuf};
@@ -85,6 +85,20 @@ fn write_file(file: &Path, text: &str) -> Result<()> {
     Ok(())
 }
 
+fn with_report<T, U: Report>(
+    x: Result<T, U>,
+    files: &FileDb<String, &str>,
+    msg: &str,
+) -> Result<T> {
+    match x {
+        Ok(x) => Ok(x),
+        Err(x) => {
+            x.report(files)?;
+            bail!("{}", msg)
+        }
+    }
+}
+
 fn format(opt: &Opt) -> Result<()> {
     let SubCommands::Fmt {
         ref file,
@@ -99,25 +113,18 @@ fn format(opt: &Opt) -> Result<()> {
     let mut files = FileDb::new();
     files.add(file.display().to_string(), s.as_str());
 
-    let command = || -> Result<(), SdcError> {
-        let mut sdc = sdcx::parser::Parser::parse(&s, &file)?;
-        sdc.normalize();
+    let mut sdc = with_report(
+        sdcx::parser::Parser::parse(&s, &file),
+        &files,
+        &format!("could not parse file: {}", file.display()),
+    )?;
+    sdc.normalize();
 
-        if let Some(output) = output {
-            write_file(output, &format!("{}", sdc))?;
-        } else {
-            println!("{}", sdc);
-        }
-        Ok(())
-    };
-
-    match command() {
-        Ok(_) => (),
-        Err(err) => {
-            err.report(&files)?;
-        }
+    if let Some(output) = output {
+        write_file(output, &format!("{}", sdc))?;
+    } else {
+        println!("{}", sdc);
     }
-
     Ok(())
 }
 
@@ -144,17 +151,14 @@ fn check(opt: &Opt) -> Result<()> {
         };
     }
 
-    let command = || -> Result<(), SdcError> {
-        let sdc = sdcx::parser::Parser::parse(&s, &file)?;
-        sdc.validate(version)?;
-        Ok(())
-    };
+    let sdc = with_report(
+        sdcx::parser::Parser::parse(&s, &file),
+        &files,
+        &format!("could not parse file: {}", file.display()),
+    )?;
 
-    match command() {
-        Ok(_) => (),
-        Err(err) => {
-            err.report(&files)?;
-        }
+    for err in sdc.validate(version) {
+        err.report(&files)?;
     }
 
     Ok(())

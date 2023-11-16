@@ -1,23 +1,25 @@
-use crate::sdc::{Argument, Location, SdcError, SdcVersion};
+use crate::errors::{SemanticError, ValidateError};
+use crate::file_db::Location;
+use crate::sdc::{Argument, SdcVersion};
 use std::collections::HashMap;
 
 pub(crate) fn opt_arg(
     name: Argument,
     arg: Option<Argument>,
     tgt: Option<Argument>,
-) -> Result<Option<Argument>, SdcError> {
+) -> Result<Option<Argument>, SemanticError> {
     if arg.is_none() {
-        return Err(SdcError::MissingOptArgument(name));
+        return Err(SemanticError::MissingOptArgument(name));
     }
     match tgt {
-        Some(_) => Err(SdcError::DuplicatedArgument(name)),
+        Some(_) => Err(SemanticError::DuplicatedArgument(name)),
         None => Ok(arg),
     }
 }
 
-pub(crate) fn opt_flg(name: Argument, tgt: bool) -> Result<bool, SdcError> {
+pub(crate) fn opt_flg(name: Argument, tgt: bool) -> Result<bool, SemanticError> {
     match tgt {
-        true => Err(SdcError::DuplicatedArgument(name)),
+        true => Err(SemanticError::DuplicatedArgument(name)),
         false => Ok(true),
     }
 }
@@ -26,12 +28,12 @@ pub(crate) fn vec_arg(
     name: Argument,
     arg: Option<Argument>,
     mut tgt: Vec<Argument>,
-) -> Result<Vec<Argument>, SdcError> {
+) -> Result<Vec<Argument>, SemanticError> {
     if let Some(arg) = arg {
         tgt.push(arg);
         Ok(tgt)
     } else {
-        Err(SdcError::MissingOptArgument(name))
+        Err(SemanticError::MissingOptArgument(name))
     }
 }
 
@@ -39,12 +41,12 @@ pub(crate) fn pos_args1(
     arg: Option<Argument>,
     tgt: Option<Argument>,
     location: &Location,
-) -> Result<Option<Argument>, SdcError> {
+) -> Result<Option<Argument>, SemanticError> {
     if arg.is_none() {
-        return Err(SdcError::MissingPosArgument(location.clone()));
+        return Err(SemanticError::MissingPosArgument(location.clone()));
     }
     match tgt {
-        Some(_) => Err(SdcError::TooManyArgument(location.clone())),
+        Some(_) => Err(SemanticError::TooManyArgument(location.clone())),
         None => Ok(arg),
     }
 }
@@ -53,14 +55,14 @@ pub(crate) fn pos_args2(
     arg: Option<Argument>,
     tgt: (Option<Argument>, Option<Argument>),
     location: &Location,
-) -> Result<(Option<Argument>, Option<Argument>), SdcError> {
+) -> Result<(Option<Argument>, Option<Argument>), SemanticError> {
     let (tgt0, tgt1) = tgt;
     if tgt0.is_none() {
         Ok((pos_args1(arg, tgt0, location)?, None))
     } else if tgt1.is_none() {
         Ok((tgt0, pos_args1(arg, tgt1, location)?))
     } else {
-        Err(SdcError::TooManyArgument(location.clone()))
+        Err(SemanticError::TooManyArgument(location.clone()))
     }
 }
 
@@ -68,8 +70,8 @@ pub(crate) fn mandatory(
     arg: Option<Argument>,
     name: &str,
     location: &Location,
-) -> Result<Argument, SdcError> {
-    arg.ok_or(SdcError::MissingMandatoryArgument(
+) -> Result<Argument, SemanticError> {
+    arg.ok_or(SemanticError::MissingMandatoryArgument(
         name.into(),
         location.clone(),
     ))
@@ -137,129 +139,118 @@ impl<T> Exist for Vec<T> {
     }
 }
 
+pub(crate) fn validate_arg(ret: &mut Vec<ValidateError>, version: SdcVersion, x: &Argument) {
+    ret.append(&mut x.validate(version));
+}
+
+pub(crate) fn validate_opt(
+    ret: &mut Vec<ValidateError>,
+    version: SdcVersion,
+    x: &Option<Argument>,
+) {
+    if let Some(x) = x {
+        ret.append(&mut x.validate(version));
+    }
+}
+
+pub(crate) fn validate_vec(ret: &mut Vec<ValidateError>, version: SdcVersion, x: &[Argument]) {
+    for x in x {
+        ret.append(&mut x.validate(version));
+    }
+}
+
 pub(crate) trait Validate {
-    fn cmd_supported_version(&self, cond: (bool, SdcVersion)) -> Result<(), SdcError> {
-        if cond.0 {
-            Ok(())
-        } else {
-            Err(SdcError::CmdUnsupportedVersion(
+    fn cmd_supported_version(&self, ret: &mut Vec<ValidateError>, cond: (bool, SdcVersion)) {
+        if !cond.0 {
+            ret.push(ValidateError::CmdUnsupportedVersion(
                 cond.1,
                 self.location().clone(),
-            ))
+            ));
         }
     }
 
     fn alias_supported_version(
         &self,
+        ret: &mut Vec<ValidateError>,
         cond: (bool, SdcVersion),
         is_alias: bool,
-    ) -> Result<(), SdcError> {
-        if is_alias {
-            if cond.0 {
-                Ok(())
-            } else {
-                Err(SdcError::CmdUnsupportedVersion(
-                    cond.1,
-                    self.location().clone(),
-                ))
-            }
-        } else {
-            Ok(())
+    ) {
+        if is_alias && !cond.0 {
+            ret.push(ValidateError::CmdUnsupportedVersion(
+                cond.1,
+                self.location().clone(),
+            ));
         }
     }
 
     fn arg_supported_version<T: Exist>(
         &self,
+        ret: &mut Vec<ValidateError>,
         cond: (bool, SdcVersion),
         arg: &T,
         name: &str,
-    ) -> Result<(), SdcError> {
-        if arg.exist() {
-            if cond.0 {
-                Ok(())
-            } else {
-                Err(SdcError::ArgUnsupportedVersion(
-                    cond.1,
-                    self.location().clone(),
-                    name.into(),
-                ))
-            }
-        } else {
-            Ok(())
+    ) {
+        if arg.exist() && !cond.0 {
+            ret.push(ValidateError::ArgUnsupportedVersion(
+                cond.1,
+                self.location().clone(),
+                name.into(),
+            ));
         }
     }
 
     fn arg_comb1<A: Exist, T: Fn(bool) -> bool>(
         &self,
+        ret: &mut Vec<ValidateError>,
         cond: (bool, SdcVersion),
         a: &A,
         func: T,
-    ) -> Result<(), SdcError> {
-        if cond.0 {
-            if func(a.exist()) {
-                Ok(())
-            } else {
-                Err(SdcError::ArgumentCombination(self.location().clone()))
-            }
-        } else {
-            Ok(())
+    ) {
+        if cond.0 && !func(a.exist()) {
+            ret.push(ValidateError::ArgumentCombination(self.location().clone()));
         }
     }
 
     fn arg_comb2<A: Exist, B: Exist, T: Fn(bool, bool) -> bool>(
         &self,
+        ret: &mut Vec<ValidateError>,
         cond: (bool, SdcVersion),
         a: &A,
         b: &B,
         func: T,
-    ) -> Result<(), SdcError> {
-        if cond.0 {
-            if func(a.exist(), b.exist()) {
-                Ok(())
-            } else {
-                Err(SdcError::ArgumentCombination(self.location().clone()))
-            }
-        } else {
-            Ok(())
+    ) {
+        if cond.0 && !func(a.exist(), b.exist()) {
+            ret.push(ValidateError::ArgumentCombination(self.location().clone()));
         }
     }
 
     fn arg_comb3<A: Exist, B: Exist, C: Exist, T: Fn(bool, bool, bool) -> bool>(
         &self,
+        ret: &mut Vec<ValidateError>,
         cond: (bool, SdcVersion),
         a: &A,
         b: &B,
         c: &C,
         func: T,
-    ) -> Result<(), SdcError> {
-        if cond.0 {
-            if func(a.exist(), b.exist(), c.exist()) {
-                Ok(())
-            } else {
-                Err(SdcError::ArgumentCombination(self.location().clone()))
-            }
-        } else {
-            Ok(())
+    ) {
+        if cond.0 && !func(a.exist(), b.exist(), c.exist()) {
+            ret.push(ValidateError::ArgumentCombination(self.location().clone()));
         }
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn arg_comb4<A: Exist, B: Exist, C: Exist, D: Exist, T: Fn(bool, bool, bool, bool) -> bool>(
         &self,
+        ret: &mut Vec<ValidateError>,
         cond: (bool, SdcVersion),
         a: &A,
         b: &B,
         c: &C,
         d: &D,
         func: T,
-    ) -> Result<(), SdcError> {
-        if cond.0 {
-            if func(a.exist(), b.exist(), c.exist(), d.exist()) {
-                Ok(())
-            } else {
-                Err(SdcError::ArgumentCombination(self.location().clone()))
-            }
-        } else {
-            Ok(())
+    ) {
+        if cond.0 && !func(a.exist(), b.exist(), c.exist(), d.exist()) {
+            ret.push(ValidateError::ArgumentCombination(self.location().clone()));
         }
     }
 
@@ -273,6 +264,7 @@ pub(crate) trait Validate {
         T: Fn(bool, bool, bool, bool, bool) -> bool,
     >(
         &self,
+        ret: &mut Vec<ValidateError>,
         cond: (bool, SdcVersion),
         a: &A,
         b: &B,
@@ -280,15 +272,9 @@ pub(crate) trait Validate {
         d: &D,
         e: &E,
         func: T,
-    ) -> Result<(), SdcError> {
-        if cond.0 {
-            if func(a.exist(), b.exist(), c.exist(), d.exist(), e.exist()) {
-                Ok(())
-            } else {
-                Err(SdcError::ArgumentCombination(self.location().clone()))
-            }
-        } else {
-            Ok(())
+    ) {
+        if cond.0 && !func(a.exist(), b.exist(), c.exist(), d.exist(), e.exist()) {
+            ret.push(ValidateError::ArgumentCombination(self.location().clone()));
         }
     }
 
@@ -303,6 +289,7 @@ pub(crate) trait Validate {
         T: Fn(bool, bool, bool, bool, bool, bool) -> bool,
     >(
         &self,
+        ret: &mut Vec<ValidateError>,
         cond: (bool, SdcVersion),
         a: &A,
         b: &B,
@@ -311,22 +298,18 @@ pub(crate) trait Validate {
         e: &E,
         f: &F,
         func: T,
-    ) -> Result<(), SdcError> {
-        if cond.0 {
-            if func(
+    ) {
+        if cond.0
+            && !func(
                 a.exist(),
                 b.exist(),
                 c.exist(),
                 d.exist(),
                 e.exist(),
                 f.exist(),
-            ) {
-                Ok(())
-            } else {
-                Err(SdcError::ArgumentCombination(self.location().clone()))
-            }
-        } else {
-            Ok(())
+            )
+        {
+            ret.push(ValidateError::ArgumentCombination(self.location().clone()));
         }
     }
 
@@ -342,6 +325,7 @@ pub(crate) trait Validate {
         T: Fn(bool, bool, bool, bool, bool, bool, bool) -> bool,
     >(
         &self,
+        ret: &mut Vec<ValidateError>,
         cond: (bool, SdcVersion),
         a: &A,
         b: &B,
@@ -351,9 +335,9 @@ pub(crate) trait Validate {
         f: &F,
         g: &G,
         func: T,
-    ) -> Result<(), SdcError> {
-        if cond.0 {
-            if func(
+    ) {
+        if cond.0
+            && !func(
                 a.exist(),
                 b.exist(),
                 c.exist(),
@@ -361,19 +345,15 @@ pub(crate) trait Validate {
                 e.exist(),
                 f.exist(),
                 g.exist(),
-            ) {
-                Ok(())
-            } else {
-                Err(SdcError::ArgumentCombination(self.location().clone()))
-            }
-        } else {
-            Ok(())
+            )
+        {
+            ret.push(ValidateError::ArgumentCombination(self.location().clone()));
         }
     }
 
     fn location(&self) -> &Location;
 
-    fn validate(&self, version: SdcVersion) -> Result<(), SdcError>;
+    fn validate(&self, version: SdcVersion) -> Vec<ValidateError>;
 }
 
 pub(crate) trait Matcher {
@@ -433,11 +413,11 @@ impl<'a, 'b> LazyMatcher<'a, 'b> {
         text: &'a str,
         dict: &'b LazyDict,
         location: &Location,
-    ) -> Result<Self, SdcError> {
+    ) -> Result<Self, SemanticError> {
         let strict_match = dict.dict.contains_key(text);
         let count = dict.dict.values().filter(|x| x.starts_with(text)).count();
         if count > 1 && !strict_match && !text.is_empty() {
-            return Err(SdcError::AmbiguousOption(location.clone()));
+            return Err(SemanticError::AmbiguousOption(location.clone()));
         }
         Ok(Self { text, dict })
     }

@@ -1,6 +1,8 @@
+use crate::errors::ParseError;
 use crate::parser::sdc_grammar::SdcGrammar;
 use crate::parser::sdc_parser::parse;
-use crate::sdc::{Sdc, SdcError};
+use crate::sdc::Sdc;
+use parol_runtime::ParolError;
 use std::path::Path;
 
 pub mod generated;
@@ -13,9 +15,13 @@ pub struct Parser {}
 
 impl Parser {
     #[allow(clippy::result_large_err)]
-    pub fn parse<T: AsRef<Path>>(input: &str, file: &T) -> Result<Sdc, SdcError> {
+    pub fn parse<T: AsRef<Path>>(input: &str, file: &T) -> Result<Sdc, ParseError> {
         let mut grammar = SdcGrammar::new();
-        parse(input, file, &mut grammar)?;
-        grammar.sdc.unwrap()
+        match parse(input, file, &mut grammar) {
+            Err(ParolError::LexerError(x)) => return Err(ParseError::LexicalError(x)),
+            Err(ParolError::ParserError(x)) => return Err(ParseError::SyntaxError(x)),
+            _ => (),
+        }
+        Ok(grammar.sdc.unwrap()?)
     }
 }

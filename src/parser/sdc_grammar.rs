@@ -1,12 +1,13 @@
+use crate::errors::SemanticError;
 use crate::parser::sdc_grammar_trait::*;
-use crate::sdc::{Sdc, SdcError};
+use crate::sdc::Sdc;
 use parol_runtime::ParolError;
 use std::fmt::{Debug, Display, Error, Formatter};
 
 #[derive(Debug, Default)]
 pub struct SdcGrammar<'a> {
     pub ast: Option<Source<'a>>,
-    pub sdc: Option<Result<Sdc, SdcError>>,
+    pub sdc: Option<Result<Sdc, SemanticError>>,
 }
 
 impl SdcGrammar<'_> {

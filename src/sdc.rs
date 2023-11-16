@@ -1,10 +1,7 @@
+use crate::errors::{SemanticError, ValidateError};
 use crate::parser::sdc_grammar_trait as grammar;
-use crate::sdc::sdc_error::FileDb;
 use crate::sdc::util::Validate;
 use std::fmt;
-use std::ops::Range;
-use std::path::PathBuf;
-use std::sync::Arc;
 
 pub mod argument;
 pub mod command;
@@ -12,7 +9,6 @@ pub mod sdc_error;
 pub mod util;
 pub use argument::Argument;
 pub use command::*;
-pub use sdc_error::SdcError;
 
 /// SDC
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -23,13 +19,14 @@ pub struct Sdc {
 }
 
 impl Sdc {
-    pub fn validate(&self, force_version: Option<SdcVersion>) -> Result<(), SdcError> {
+    pub fn validate(&self, force_version: Option<SdcVersion>) -> Vec<ValidateError> {
         let version = self.version.unwrap_or(SdcVersion::SDC2_1);
         let version = force_version.unwrap_or(version);
+        let mut ret = vec![];
         for command in &self.commands {
-            command.validate(version)?;
+            ret.append(&mut command.validate(version));
         }
-        Ok(())
+        ret
     }
 
     pub fn normalize(&mut self) {
@@ -54,9 +51,9 @@ impl fmt::Display for Sdc {
 }
 
 impl TryFrom<&grammar::Source<'_>> for Sdc {
-    type Error = SdcError;
+    type Error = SemanticError;
 
-    fn try_from(value: &grammar::Source<'_>) -> Result<Self, SdcError> {
+    fn try_from(value: &grammar::Source<'_>) -> Result<Self, SemanticError> {
         let mut sdc = Sdc::default();
         let mut is_header = true;
         let mut is_first_command = true;
@@ -72,10 +69,14 @@ impl TryFrom<&grammar::Source<'_>> for Sdc {
                                 if let Ok(sdc_version) = x.value.as_str().try_into() {
                                     sdc.version = Some(sdc_version);
                                 } else {
-                                    return Err(SdcError::UnknownVersion(x.location().clone()));
+                                    return Err(SemanticError::UnknownVersion(
+                                        x.location().clone(),
+                                    ));
                                 }
                             } else {
-                                return Err(SdcError::SdcVersionPlacement(x.location().clone()));
+                                return Err(SemanticError::SdcVersionPlacement(
+                                    x.location().clone(),
+                                ));
                             }
                         }
                         _ => sdc.commands.push(command),
@@ -170,62 +171,6 @@ impl TryFrom<&str> for SdcVersion {
             "2.0" => Ok(SdcVersion::SDC2_0),
             "2.1" => Ok(SdcVersion::SDC2_1),
             _ => Err(()),
-        }
-    }
-}
-
-/// Location
-#[derive(Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Location {
-    pub start_byte: u32,
-    pub start_line: u32,
-    pub start_column: u32,
-    pub end_line: u32,
-    pub end_column: u32,
-    pub length: u32,
-    pub file_name: Arc<PathBuf>,
-}
-
-impl Location {
-    fn from_to(from: &Location, to: &Location) -> Location {
-        Location {
-            start_byte: from.start_byte,
-            start_line: from.start_line,
-            start_column: to.start_column,
-            end_line: to.end_line,
-            end_column: to.end_column,
-            length: to.start_byte - from.start_byte + to.length,
-            file_name: from.file_name.clone(),
-        }
-    }
-
-    fn range_file(&self, files: &FileDb<String, &str>) -> (Range<usize>, usize) {
-        let range: Range<usize> = self.into();
-        let file_id = files.get_id(&self.file_name.display().to_string()).unwrap();
-        (range, file_id)
-    }
-}
-
-impl From<&Location> for Range<usize> {
-    fn from(value: &Location) -> Self {
-        Range {
-            start: value.start_byte as usize,
-            end: (value.start_byte + value.length) as usize,
-        }
-    }
-}
-
-impl From<&parol_runtime::Location> for Location {
-    fn from(value: &parol_runtime::Location) -> Self {
-        let start_byte = value.scanner_switch_pos as u32 + value.offset as u32 - value.length;
-        Location {
-            start_byte,
-            start_line: value.start_line,
-            start_column: value.start_column,
-            end_line: value.end_line,
-            end_column: value.end_column,
-            length: value.length,
-            file_name: value.file_name.clone(),
         }
     }
 }

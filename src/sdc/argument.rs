@@ -1,5 +1,8 @@
+use crate::errors::SemanticError;
+use crate::errors::ValidateError;
+use crate::file_db::Location;
 use crate::parser::sdc_grammar_trait as grammar;
-use crate::sdc::{Command, Location, SdcError};
+use crate::sdc::{Command, SdcVersion, Validate};
 use std::fmt;
 
 /// Argument
@@ -31,6 +34,21 @@ impl Argument {
     }
 }
 
+impl Validate for Argument {
+    fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
+        match self {
+            Argument::Word(_) => vec![],
+            Argument::StringGroup(_) => vec![],
+            Argument::BraceGroup(_) => vec![],
+            Argument::CommandReplacement(x, _) => x.validate(version),
+        }
+    }
+
+    fn location(&self) -> &Location {
+        self.location()
+    }
+}
+
 impl fmt::Display for Argument {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -53,9 +71,9 @@ impl From<&str> for Argument {
 }
 
 impl TryFrom<&grammar::Argument<'_>> for Argument {
-    type Error = SdcError;
+    type Error = SemanticError;
 
-    fn try_from(value: &grammar::Argument) -> Result<Self, SdcError> {
+    fn try_from(value: &grammar::Argument) -> Result<Self, SemanticError> {
         match value {
             grammar::Argument::TokenWord(x) => {
                 let text = x.token_word.term_word.term_word.text().to_string();
