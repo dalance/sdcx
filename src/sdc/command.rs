@@ -82,6 +82,7 @@ pub enum Command {
     SetWireLoadMode(SetWireLoadMode),
     SetWireLoadModel(SetWireLoadModel),
     SetWireLoadSelectionGroup(SetWireLoadSelectionGroup),
+    Unknown(Unknown),
 }
 
 impl Command {
@@ -159,6 +160,7 @@ impl Command {
             Command::SetWireLoadMode(x) => &x.location,
             Command::SetWireLoadModel(x) => &x.location,
             Command::SetWireLoadSelectionGroup(x) => &x.location,
+            Command::Unknown(x) => &x.location,
         }
     }
 }
@@ -238,6 +240,7 @@ impl fmt::Display for Command {
             Command::SetWireLoadMode(x) => x.fmt(f),
             Command::SetWireLoadModel(x) => x.fmt(f),
             Command::SetWireLoadSelectionGroup(x) => x.fmt(f),
+            Command::Unknown(x) => x.fmt(f),
         }
     }
 }
@@ -317,6 +320,7 @@ impl Validate for Command {
             Command::SetWireLoadMode(x) => x.validate(version),
             Command::SetWireLoadModel(x) => x.validate(version),
             Command::SetWireLoadSelectionGroup(x) => x.validate(version),
+            Command::Unknown(x) => x.validate(version),
         }
     }
 
@@ -394,6 +398,7 @@ impl Validate for Command {
             Command::SetWireLoadMode(x) => x.location(),
             Command::SetWireLoadModel(x) => x.location(),
             Command::SetWireLoadSelectionGroup(x) => x.location(),
+            Command::Unknown(x) => x.location(),
         }
     }
 }
@@ -497,7 +502,7 @@ impl TryFrom<&grammar::Command<'_>> for Command {
             "set_wire_load_mode" => set_wire_load_mode(args, loc),
             "set_wire_load_model" => set_wire_load_model(args, loc),
             "set_wire_load_selection_group" => set_wire_load_selection_group(args, loc),
-            _ => Err(SdcError::UnknownCommand(command.into(), loc)),
+            x => unknown(x, args, loc),
         }
     }
 }
@@ -6009,4 +6014,45 @@ fn set_wire_load_selection_group(
             location,
         },
     ))
+}
+
+/// unknowun command
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub struct Unknown {
+    pub name: String,
+    pub args: Vec<Argument>,
+    location: Location,
+}
+
+impl fmt::Display for Unknown {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut text = self.name.clone();
+        for arg in &self.args {
+            text.push_str(&fmt_arg(arg));
+        }
+        text.fmt(f)
+    }
+}
+
+impl Validate for Unknown {
+    fn validate(&self, _: SdcVersion) -> Result<(), SdcError> {
+        Err(SdcError::UnknownCommand(
+            self.name.clone(),
+            self.location.clone(),
+        ))
+    }
+
+    fn location(&self) -> &Location {
+        &self.location
+    }
+}
+
+fn unknown(name: &str, args: Vec<Argument>, location: Location) -> Result<Command, SdcError> {
+    let name = name.to_string();
+
+    Ok(Command::Unknown(Unknown {
+        name,
+        args,
+        location,
+    }))
 }
