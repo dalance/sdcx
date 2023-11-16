@@ -1,3 +1,5 @@
+#![allow(clippy::while_let_on_iterator)]
+
 use crate::parser::sdc_grammar_trait as grammar;
 use crate::sdc::util::*;
 use crate::sdc::SdcVersion::*;
@@ -411,7 +413,7 @@ impl TryFrom<&grammar::Command<'_>> for Command {
         let loc = if args.is_empty() {
             start
         } else {
-            Location::from_to(&start, &args.last().unwrap().location())
+            Location::from_to(&start, args.last().unwrap().location())
         };
 
         match command {
@@ -495,7 +497,7 @@ impl TryFrom<&grammar::Command<'_>> for Command {
             "set_wire_load_mode" => set_wire_load_mode(args, loc),
             "set_wire_load_model" => set_wire_load_model(args, loc),
             "set_wire_load_selection_group" => set_wire_load_selection_group(args, loc),
-            _ => return Err(SdcError::UnknownCommand(command.into(), loc)),
+            _ => Err(SdcError::UnknownCommand(command.into(), loc)),
         }
     }
 }
@@ -577,7 +579,7 @@ fn all_inputs(args: Vec<Argument>, location: Location) -> Result<Command, SdcErr
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-level_sensitive") => level_sensitive = opt_flg(arg, level_sensitive)?,
             x if x.m("-edge_triggered") => edge_triggered = opt_flg(arg, edge_triggered)?,
             x if x.m("-clock") => clock = opt_arg(arg, iter.next(), clock)?,
@@ -639,7 +641,7 @@ fn all_outputs(args: Vec<Argument>, location: Location) -> Result<Command, SdcEr
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-level_sensitive") => level_sensitive = opt_flg(arg, level_sensitive)?,
             x if x.m("-edge_triggered") => edge_triggered = opt_flg(arg, edge_triggered)?,
             x if x.m("-clock") => clock = opt_arg(arg, iter.next(), clock)?,
@@ -739,7 +741,7 @@ fn all_registers(args: Vec<Argument>, location: Location) -> Result<Command, Sdc
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-no_hierarchy") => no_hierarchy = opt_flg(arg, no_hierarchy)?,
             x if x.m("-clock") => clock = opt_arg(arg, iter.next(), clock)?,
             x if x.m("-rise_clock") => rise_clock = opt_arg(arg, iter.next(), rise_clock)?,
@@ -832,7 +834,7 @@ fn create_clock(args: Vec<Argument>, location: Location) -> Result<Command, SdcE
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-period") => period = opt_arg(arg, iter.next(), period)?,
             x if x.m("-name") => name = opt_arg(arg, iter.next(), name)?,
             x if x.m("-waveform") => waveform = opt_arg(arg, iter.next(), waveform)?,
@@ -957,7 +959,7 @@ fn create_generated_clock(args: Vec<Argument>, location: Location) -> Result<Com
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-name") => name = opt_arg(arg, iter.next(), name)?,
             x if x.m("-source") => source = opt_arg(arg, iter.next(), source)?,
             x if x.m("-edges") => edges = opt_arg(arg, iter.next(), edges)?,
@@ -1041,7 +1043,7 @@ fn create_voltage_area(args: Vec<Argument>, location: Location) -> Result<Comman
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-name") => name = opt_arg(arg, iter.next(), name)?,
             x if x.m("-coordinate") => coordinate = opt_arg(arg, iter.next(), coordinate)?,
             x if x.m("-guard_band_x") => guard_band_x = opt_arg(arg, iter.next(), guard_band_x)?,
@@ -1248,7 +1250,7 @@ fn get_cells(args: Vec<Argument>, location: Location, alias: bool) -> Result<Com
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-hierarchical") => hierarchical = opt_flg(arg, hierarchical)?,
             x if x.m("-regexp") => regexp = opt_flg(arg, regexp)?,
             x if x.m("-nocase") => nocase = opt_flg(arg, nocase)?,
@@ -1312,7 +1314,7 @@ fn get_clocks(args: Vec<Argument>, location: Location) -> Result<Command, SdcErr
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-regexp") => regexp = opt_flg(arg, regexp)?,
             x if x.m("-nocase") => nocase = opt_flg(arg, nocase)?,
             _ => patterns = pos_args1(Some(arg), patterns, &location)?,
@@ -1378,7 +1380,7 @@ fn get_lib_cells(
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-regexp") => regexp = opt_flg(arg, regexp)?,
             x if x.m("-hsc") => hsc = opt_arg(arg, iter.next(), hsc)?,
             x if x.m("-nocase") => nocase = opt_flg(arg, nocase)?,
@@ -1445,7 +1447,7 @@ fn get_lib_pins(args: Vec<Argument>, location: Location, alias: bool) -> Result<
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-regexp") => regexp = opt_flg(arg, regexp)?,
             x if x.m("-hsc") => hsc = opt_flg(arg, hsc)?,
             x if x.m("-nocase") => nocase = opt_flg(arg, nocase)?,
@@ -1507,7 +1509,7 @@ fn get_libs(args: Vec<Argument>, location: Location) -> Result<Command, SdcError
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-regexp") => regexp = opt_flg(arg, regexp)?,
             x if x.m("-nocase") => nocase = opt_flg(arg, nocase)?,
             _ => patterns = pos_args1(Some(arg), patterns, &location)?,
@@ -1589,7 +1591,7 @@ fn get_nets(args: Vec<Argument>, location: Location, alias: bool) -> Result<Comm
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-hierarchical") => hierarchical = opt_flg(arg, hierarchical)?,
             x if x.m("-hsc") => hsc = opt_arg(arg, iter.next(), hsc)?,
             x if x.m("-regexp") => regexp = opt_flg(arg, regexp)?,
@@ -1662,7 +1664,7 @@ fn get_pins(args: Vec<Argument>, location: Location, alias: bool) -> Result<Comm
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-hierarchical") => hierarchical = opt_flg(arg, hierarchical)?,
             x if x.m("-hsc") => hsc = opt_arg(arg, iter.next(), hsc)?,
             x if x.m("-regexp") => regexp = opt_flg(arg, regexp)?,
@@ -1730,7 +1732,7 @@ fn get_ports(args: Vec<Argument>, location: Location, alias: bool) -> Result<Com
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-hierarchical") => hierarchical = opt_flg(arg, hierarchical)?,
             x if x.m("-regexp") => regexp = opt_flg(arg, regexp)?,
             _ => patterns = pos_args1(Some(arg), patterns, &location)?,
@@ -1841,7 +1843,7 @@ fn group_path(args: Vec<Argument>, location: Location) -> Result<Command, SdcErr
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-name") => name = opt_arg(arg, iter.next(), name)?,
             x if x.m("-default") => default = opt_flg(arg, default)?,
             x if x.m("-weight") => weight = opt_arg(arg, iter.next(), weight)?,
@@ -2070,7 +2072,7 @@ fn set_clock_gating_check(args: Vec<Argument>, location: Location) -> Result<Com
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-setup") => setup = opt_arg(arg, iter.next(), setup)?,
             x if x.m("-hold") => hold = opt_arg(arg, iter.next(), hold)?,
             x if x.m("-rise") => rise = opt_flg(arg, rise)?,
@@ -2175,7 +2177,7 @@ fn set_clock_groups(
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-group") => group = vec_arg(arg, iter.next(), group)?,
             x if x.m("-logically_exclusive") => {
                 logically_exclusive = opt_flg(arg, logically_exclusive)?
@@ -2275,7 +2277,7 @@ fn set_clock_latency(args: Vec<Argument>, location: Location) -> Result<Command,
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-rise") => rise = opt_flg(arg, rise)?,
             x if x.m("-fall") => fall = opt_flg(arg, fall)?,
             x if x.m("-min") => min = opt_flg(arg, min)?,
@@ -2372,7 +2374,7 @@ fn set_clock_sense(args: Vec<Argument>, location: Location) -> Result<Command, S
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-clocks") => clocks = opt_arg(arg, iter.next(), clocks)?,
             x if x.m("-positive") => positive = opt_flg(arg, positive)?,
             x if x.m("-negative") => negative = opt_flg(arg, negative)?,
@@ -2447,7 +2449,7 @@ fn set_clock_transition(args: Vec<Argument>, location: Location) -> Result<Comma
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-rise") => rise = opt_flg(arg, rise)?,
             x if x.m("-fall") => fall = opt_flg(arg, fall)?,
             x if x.m("-min") => min = opt_flg(arg, min)?,
@@ -2581,7 +2583,7 @@ fn set_clock_uncertainty(args: Vec<Argument>, location: Location) -> Result<Comm
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-from") => from = opt_arg(arg, iter.next(), from)?,
             x if x.m("-rise_from") => rise_from = opt_arg(arg, iter.next(), rise_from)?,
             x if x.m("-fall_from") => fall_from = opt_arg(arg, iter.next(), fall_from)?,
@@ -2700,7 +2702,7 @@ fn set_data_check(args: Vec<Argument>, location: Location) -> Result<Command, Sd
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-from") => from = opt_arg(arg, iter.next(), from)?,
             x if x.m("-to") => to = opt_arg(arg, iter.next(), to)?,
             x if x.m("-rise_from") => rise_from = opt_arg(arg, iter.next(), rise_from)?,
@@ -2776,7 +2778,7 @@ fn set_disable_timing(args: Vec<Argument>, location: Location) -> Result<Command
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-from") => from = opt_arg(arg, iter.next(), from)?,
             x if x.m("-to") => to = opt_arg(arg, iter.next(), to)?,
             _ => cell_pin_list = pos_args1(Some(arg), cell_pin_list, &location)?,
@@ -2841,7 +2843,7 @@ fn set_drive(args: Vec<Argument>, location: Location) -> Result<Command, SdcErro
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-rise") => rise = opt_flg(arg, rise)?,
             x if x.m("-fall") => fall = opt_flg(arg, fall)?,
             x if x.m("-min") => min = opt_flg(arg, min)?,
@@ -2981,7 +2983,7 @@ fn set_driving_cell(args: Vec<Argument>, location: Location) -> Result<Command, 
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-lib_cell") => lib_cell = opt_arg(arg, iter.next(), lib_cell)?,
             x if x.m("-rise") => rise = opt_flg(arg, rise)?,
             x if x.m("-fall") => fall = opt_flg(arg, fall)?,
@@ -3151,7 +3153,7 @@ fn set_false_path(args: Vec<Argument>, location: Location) -> Result<Command, Sd
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-setup") => setup = opt_flg(arg, setup)?,
             x if x.m("-hold") => hold = opt_flg(arg, hold)?,
             x if x.m("-rise") => rise = opt_flg(arg, rise)?,
@@ -3324,7 +3326,7 @@ fn set_ideal_latency(args: Vec<Argument>, location: Location) -> Result<Command,
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-rise") => rise = opt_flg(arg, rise)?,
             x if x.m("-fall") => fall = opt_flg(arg, fall)?,
             x if x.m("-min") => min = opt_flg(arg, min)?,
@@ -3383,7 +3385,7 @@ fn set_ideal_network(args: Vec<Argument>, location: Location) -> Result<Command,
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-no_propagate") => no_propagate = opt_flg(arg, no_propagate)?,
             _ => object_list = pos_args1(Some(arg), object_list, &location)?,
         }
@@ -3446,7 +3448,7 @@ fn set_ideal_transition(args: Vec<Argument>, location: Location) -> Result<Comma
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-rise") => rise = opt_flg(arg, rise)?,
             x if x.m("-fall") => fall = opt_flg(arg, fall)?,
             x if x.m("-min") => min = opt_flg(arg, min)?,
@@ -3583,7 +3585,7 @@ fn set_input_delay(args: Vec<Argument>, location: Location) -> Result<Command, S
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-clock") => clock = opt_arg(arg, iter.next(), clock)?,
             x if x.m("-reference_pin") => reference_pin = opt_arg(arg, iter.next(), reference_pin)?,
             x if x.m("-clock_fall") => clock_fall = opt_flg(arg, clock_fall)?,
@@ -3689,7 +3691,7 @@ fn set_input_transition(args: Vec<Argument>, location: Location) -> Result<Comma
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-rise") => rise = opt_flg(arg, rise)?,
             x if x.m("-fall") => fall = opt_flg(arg, fall)?,
             x if x.m("-min") => min = opt_flg(arg, min)?,
@@ -3754,7 +3756,7 @@ fn set_level_shifter_strategy(
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-rule") => rule = opt_arg(arg, iter.next(), rule)?,
             _ => return Err(SdcError::WrongArgument(arg)),
         }
@@ -3807,7 +3809,7 @@ fn set_level_shifter_threshold(
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-voltage") => voltage = opt_arg(arg, iter.next(), voltage)?,
             x if x.m("-percent") => percent = opt_arg(arg, iter.next(), percent)?,
             _ => return Err(SdcError::WrongArgument(arg)),
@@ -3884,7 +3886,7 @@ fn set_load(args: Vec<Argument>, location: Location) -> Result<Command, SdcError
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-min") => min = opt_flg(arg, min)?,
             x if x.m("-max") => max = opt_flg(arg, max)?,
             x if x.m("-subtract_pin_load") => subtract_pin_load = opt_flg(arg, subtract_pin_load)?,
@@ -4236,7 +4238,7 @@ fn set_max_delay(args: Vec<Argument>, location: Location) -> Result<Command, Sdc
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-rise") => rise = opt_flg(arg, rise)?,
             x if x.m("-fall") => fall = opt_flg(arg, fall)?,
             x if x.m("-from") => from = opt_arg(arg, iter.next(), from)?,
@@ -4511,7 +4513,7 @@ fn set_max_transition(args: Vec<Argument>, location: Location) -> Result<Command
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-clock_path") => clock_path = opt_flg(arg, clock_path)?,
             x if x.m("-rise") => rise = opt_flg(arg, rise)?,
             x if x.m("-fall") => fall = opt_flg(arg, fall)?,
@@ -4695,7 +4697,7 @@ fn set_min_delay(args: Vec<Argument>, location: Location) -> Result<Command, Sdc
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-rise") => rise = opt_flg(arg, rise)?,
             x if x.m("-fall") => fall = opt_flg(arg, fall)?,
             x if x.m("-from") => from = opt_arg(arg, iter.next(), from)?,
@@ -4825,7 +4827,7 @@ fn set_min_pulse_width(args: Vec<Argument>, location: Location) -> Result<Comman
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-low") => low = opt_flg(arg, low)?,
             x if x.m("-high") => high = opt_flg(arg, high)?,
             _ => (value, object_list) = pos_args2(Some(arg), (value, object_list), &location)?,
@@ -4958,7 +4960,7 @@ fn set_multicycle_path(args: Vec<Argument>, location: Location) -> Result<Comman
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-setup") => setup = opt_flg(arg, setup)?,
             x if x.m("-hold") => hold = opt_flg(arg, hold)?,
             x if x.m("-rise") => rise = opt_flg(arg, rise)?,
@@ -5072,7 +5074,7 @@ fn set_operating_conditions(args: Vec<Argument>, location: Location) -> Result<C
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-library") => library = opt_arg(arg, iter.next(), library)?,
             x if x.m("-analysis_type") => analysis_type = opt_arg(arg, iter.next(), analysis_type)?,
             x if x.m("-max") => max = opt_arg(arg, iter.next(), max)?,
@@ -5208,7 +5210,7 @@ fn set_output_delay(args: Vec<Argument>, location: Location) -> Result<Command, 
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-clock") => clock = opt_arg(arg, iter.next(), clock)?,
             x if x.m("-reference_pin") => reference_pin = opt_arg(arg, iter.next(), reference_pin)?,
             x if x.m("-clock_fall") => clock_fall = opt_flg(arg, clock_fall)?,
@@ -5381,7 +5383,7 @@ fn set_resistance(args: Vec<Argument>, location: Location) -> Result<Command, Sd
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-min") => min = opt_flg(arg, min)?,
             x if x.m("-max") => max = opt_flg(arg, max)?,
             _ => (value, net_list) = pos_args2(Some(arg), (value, net_list), &location)?,
@@ -5478,7 +5480,7 @@ fn set_sense(args: Vec<Argument>, location: Location) -> Result<Command, SdcErro
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-type") => r#type = opt_arg(arg, iter.next(), r#type)?,
             x if x.m("-non_unate") => non_unate = opt_flg(arg, non_unate)?,
             x if x.m("-positive") => positive = opt_flg(arg, positive)?,
@@ -5605,7 +5607,7 @@ fn set_timing_derate(args: Vec<Argument>, location: Location) -> Result<Command,
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-cell_delay") => cell_delay = opt_flg(arg, cell_delay)?,
             x if x.m("-cell_check") => cell_check = opt_flg(arg, cell_check)?,
             x if x.m("-net_delay") => net_delay = opt_flg(arg, net_delay)?,
@@ -5705,7 +5707,7 @@ fn set_units(args: Vec<Argument>, location: Location, alias: bool) -> Result<Com
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-capacitance") => capacitance = opt_arg(arg, iter.next(), capacitance)?,
             x if x.m("-resistance") => resistance = opt_arg(arg, iter.next(), resistance)?,
             x if x.m("-time") => time = opt_arg(arg, iter.next(), time)?,
@@ -5767,7 +5769,7 @@ fn set_voltage(args: Vec<Argument>, location: Location) -> Result<Command, SdcEr
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-min") => min = opt_arg(arg, iter.next(), min)?,
             x if x.m("-object_list") => object_list = opt_arg(arg, iter.next(), object_list)?,
             _ => max_case_voltage = pos_args1(Some(arg), max_case_voltage, &location)?,
@@ -5914,7 +5916,7 @@ fn set_wire_load_model(args: Vec<Argument>, location: Location) -> Result<Comman
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-name") => name = opt_arg(arg, iter.next(), name)?,
             x if x.m("-library") => library = opt_arg(arg, iter.next(), library)?,
             x if x.m("-min") => min = opt_flg(arg, min)?,
@@ -5984,7 +5986,7 @@ fn set_wire_load_selection_group(
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
-        match LazyMatcher::new(arg.as_str(), &dict, &location)? {
+        match LazyMatcher::new(arg.as_str(), dict, &location)? {
             x if x.m("-library") => library = opt_arg(arg, iter.next(), library)?,
             x if x.m("-min") => min = opt_flg(arg, min)?,
             x if x.m("-max") => max = opt_flg(arg, max)?,

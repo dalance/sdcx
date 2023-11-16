@@ -263,6 +263,7 @@ pub(crate) trait Validate {
         }
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn arg_comb5<
         A: Exist,
         B: Exist,
@@ -291,6 +292,7 @@ pub(crate) trait Validate {
         }
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn arg_comb6<
         A: Exist,
         B: Exist,
@@ -328,6 +330,7 @@ pub(crate) trait Validate {
         }
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn arg_comb7<
         A: Exist,
         B: Exist,
@@ -444,12 +447,10 @@ impl<'a, 'b> Matcher for LazyMatcher<'a, 'b> {
     fn m(&self, x: &str) -> bool {
         if self.text == x {
             true
+        } else if self.dict.dict.values().any(|v| x == v) {
+            false
         } else {
-            if self.dict.dict.values().any(|v| x == v) {
-                false
-            } else {
-                self.text.starts_with(self.dict.dict.get(x).unwrap())
-            }
+            self.text.starts_with(self.dict.dict.get(x).unwrap())
         }
     }
 }

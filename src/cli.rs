@@ -3,7 +3,6 @@ use clap::{Parser, Subcommand};
 use flate2::read::GzDecoder;
 use flate2::write::GzEncoder;
 use flate2::Compression;
-use sdcx;
 use sdcx::sdc::sdc_error::FileDb;
 use sdcx::sdc::SdcError;
 use std::fs::File;
@@ -95,7 +94,7 @@ fn format(opt: &Opt) -> Result<()> {
         return Ok(());
     };
 
-    let s = read_file(&file)?;
+    let s = read_file(file)?;
 
     let mut files = FileDb::new();
     files.add(file.display().to_string(), s.as_str());
@@ -131,7 +130,7 @@ fn check(opt: &Opt) -> Result<()> {
         return Ok(());
     };
 
-    let s = read_file(&file)?;
+    let s = read_file(file)?;
 
     let mut files = FileDb::new();
     files.add(file.display().to_string(), s.as_str());

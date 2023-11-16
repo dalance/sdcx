@@ -63,14 +63,14 @@ impl SdcError {
 
         match self {
             SdcError::ParseError(ParolError::LexerError(x)) => {
-                Self::report_lexer_error(&x, &writer, &config, &files)
+                Self::report_lexer_error(&x, &writer, &config, files)
             }
             SdcError::ParseError(ParolError::ParserError(x)) => {
-                Self::report_parser_error(&x, &writer, &config, &files)
+                Self::report_parser_error(&x, &writer, &config, files)
             }
             SdcError::ParseError(ParolError::UserError(_)) => Ok(()),
             SdcError::WrongArgument(x) => {
-                let (range, file_id) = x.location().range_file(&files);
+                let (range, file_id) = x.location().range_file(files);
                 let diag = Diagnostic::error()
                     .with_message("Wrong argument")
                     .with_code("sdcx::sdc::SdcError")
@@ -78,7 +78,7 @@ impl SdcError {
                 Ok(term::emit(&mut writer.lock(), &config, files, &diag)?)
             }
             SdcError::UnknownCommand(_, location) => {
-                let (range, file_id) = location.range_file(&files);
+                let (range, file_id) = location.range_file(files);
                 let diag = Diagnostic::error()
                     .with_message("Unknown command")
                     .with_code("sdcx::sdc::SdcError")
@@ -86,7 +86,7 @@ impl SdcError {
                 Ok(term::emit(&mut writer.lock(), &config, files, &diag)?)
             }
             SdcError::DuplicatedArgument(x) => {
-                let (range, file_id) = x.location().range_file(&files);
+                let (range, file_id) = x.location().range_file(files);
                 let diag = Diagnostic::error()
                     .with_message("Duplicated arguments")
                     .with_code("sdcx::sdc::SdcError")
@@ -94,7 +94,7 @@ impl SdcError {
                 Ok(term::emit(&mut writer.lock(), &config, files, &diag)?)
             }
             SdcError::MissingOptArgument(x) => {
-                let (range, file_id) = x.location().range_file(&files);
+                let (range, file_id) = x.location().range_file(files);
                 let diag = Diagnostic::error()
                     .with_message("Missing argument")
                     .with_code("sdcx::sdc::SdcError")
@@ -102,7 +102,7 @@ impl SdcError {
                 Ok(term::emit(&mut writer.lock(), &config, files, &diag)?)
             }
             SdcError::MissingPosArgument(x) => {
-                let (range, file_id) = x.range_file(&files);
+                let (range, file_id) = x.range_file(files);
                 let diag = Diagnostic::error()
                     .with_message("Missing positional argument")
                     .with_code("sdcx::sdc::SdcError")
@@ -110,7 +110,7 @@ impl SdcError {
                 Ok(term::emit(&mut writer.lock(), &config, files, &diag)?)
             }
             SdcError::TooManyArgument(x) => {
-                let (range, file_id) = x.range_file(&files);
+                let (range, file_id) = x.range_file(files);
                 let diag = Diagnostic::error()
                     .with_message("Too many argument")
                     .with_code("sdcx::sdc::SdcError")
@@ -118,7 +118,7 @@ impl SdcError {
                 Ok(term::emit(&mut writer.lock(), &config, files, &diag)?)
             }
             SdcError::MissingMandatoryArgument(name, location) => {
-                let (range, file_id) = location.range_file(&files);
+                let (range, file_id) = location.range_file(files);
                 let diag = Diagnostic::error()
                     .with_message(format!("Missing mandatory argument: {name}"))
                     .with_code("sdcx::sdc::SdcError")
@@ -126,25 +126,23 @@ impl SdcError {
                 Ok(term::emit(&mut writer.lock(), &config, files, &diag)?)
             }
             SdcError::SdcVersionPlacement(location) => {
-                let (range, file_id) = location.range_file(&files);
+                let (range, file_id) = location.range_file(files);
                 let diag = Diagnostic::error()
-                    .with_message(format!(
-                        "SDC version should be set at the beginning of file"
-                    ))
+                    .with_message("SDC version should be set at the beginning of file")
                     .with_code("sdcx::sdc::SdcError")
                     .with_labels(vec![Label::primary(file_id, range).with_message("Found")]);
                 Ok(term::emit(&mut writer.lock(), &config, files, &diag)?)
             }
             SdcError::UnknownVersion(location) => {
-                let (range, file_id) = location.range_file(&files);
+                let (range, file_id) = location.range_file(files);
                 let diag = Diagnostic::error()
-                    .with_message(format!("Unknown SDC version"))
+                    .with_message("Unknown SDC version")
                     .with_code("sdcx::sdc::SdcError")
                     .with_labels(vec![Label::primary(file_id, range).with_message("Found")]);
                 Ok(term::emit(&mut writer.lock(), &config, files, &diag)?)
             }
             SdcError::CmdUnsupportedVersion(version, location) => {
-                let (range, file_id) = location.range_file(&files);
+                let (range, file_id) = location.range_file(files);
                 let diag = Diagnostic::error()
                     .with_message(format!(
                         "Unsupported command at SDC {}",
@@ -155,7 +153,7 @@ impl SdcError {
                 Ok(term::emit(&mut writer.lock(), &config, files, &diag)?)
             }
             SdcError::ArgUnsupportedVersion(version, location, name) => {
-                let (range, file_id) = location.range_file(&files);
+                let (range, file_id) = location.range_file(files);
                 let diag = Diagnostic::error()
                     .with_message(format!(
                         "Unsupported argument \"-{name}\" at {}",
@@ -166,22 +164,22 @@ impl SdcError {
                 Ok(term::emit(&mut writer.lock(), &config, files, &diag)?)
             }
             SdcError::ArgumentCombination(x) => {
-                let (range, file_id) = x.range_file(&files);
+                let (range, file_id) = x.range_file(files);
                 let diag = Diagnostic::error()
-                    .with_message(format!("Forbidden argument combination"))
+                    .with_message("Forbidden argument combination")
                     .with_code("sdcx::sdc::SdcError")
                     .with_labels(vec![Label::primary(file_id, range).with_message("Found")]);
                 Ok(term::emit(&mut writer.lock(), &config, files, &diag)?)
             }
             SdcError::AmbiguousOption(x) => {
-                let (range, file_id) = x.range_file(&files);
+                let (range, file_id) = x.range_file(files);
                 let diag = Diagnostic::error()
-                    .with_message(format!("Ambiguous option"))
+                    .with_message("Ambiguous option")
                     .with_code("sdcx::sdc::SdcError")
                     .with_labels(vec![Label::primary(file_id, range).with_message("Found")]);
                 Ok(term::emit(&mut writer.lock(), &config, files, &diag)?)
             }
-            SdcError::GenaralError(x) => Err(x.into()),
+            SdcError::GenaralError(x) => Err(x),
         }
     }
 
@@ -194,7 +192,7 @@ impl SdcError {
         match err {
             LexerError::TokenBufferEmptyError => Ok(term::emit(
                 &mut writer.lock(),
-                &config,
+                config,
                 files,
                 &Diagnostic::bug()
                     .with_message("No valid token read")
@@ -203,7 +201,7 @@ impl SdcError {
             )?),
             LexerError::InternalError(e) => Ok(term::emit(
                 &mut writer.lock(),
-                &config,
+                config,
                 files,
                 &Diagnostic::bug()
                     .with_message(format!("Internal lexer error: {e}"))
@@ -211,7 +209,7 @@ impl SdcError {
             )?),
             LexerError::LookaheadExceedsMaximum => Ok(term::emit(
                 &mut writer.lock(),
-                &config,
+                config,
                 files,
                 &Diagnostic::bug()
                     .with_message("Lookahead exceeds maximum".to_string())
@@ -219,7 +217,7 @@ impl SdcError {
             )?),
             LexerError::LookaheadExceedsTokenBufferLength => Ok(term::emit(
                 &mut writer.lock(),
-                &config,
+                config,
                 files,
                 &Diagnostic::bug()
                     .with_message("Lookahead exceeds token buffer length".to_string())
@@ -227,7 +225,7 @@ impl SdcError {
             )?),
             LexerError::ScannerStackEmptyError => Ok(term::emit(
                 &mut writer.lock(),
-                &config,
+                config,
                 files,
                 &Diagnostic::bug()
                     .with_message("Tried to pop from empty scanner stack".to_string())
@@ -238,7 +236,7 @@ impl SdcError {
             )?),
             LexerError::RecoveryError(e) => Ok(term::emit(
                 &mut writer.lock(),
-                &config,
+                config,
                 files,
                 &Diagnostic::bug()
                     .with_message(format!("Lexer recovery error: {e}"))
@@ -256,7 +254,7 @@ impl SdcError {
         match err {
             ParserError::TreeError { source } => Ok(term::emit(
                 &mut writer.lock(),
-                &config,
+                config,
                 files,
                 &Diagnostic::bug()
                     .with_message(format!("Error from syntree crate: {}", source))
@@ -265,7 +263,7 @@ impl SdcError {
             )?),
             ParserError::DataError(e) => Ok(term::emit(
                 &mut writer.lock(),
-                &config,
+                config,
                 files,
                 &Diagnostic::bug()
                     .with_message(format!("Data error: {e}"))
@@ -274,7 +272,7 @@ impl SdcError {
             )?),
             ParserError::PredictionError { cause } => Ok(term::emit(
                 &mut writer.lock(),
-                &config,
+                config,
                 files,
                 &Diagnostic::error()
                     .with_message("Error in input")
@@ -330,7 +328,7 @@ impl SdcError {
                             });
                         Ok(term::emit(
                             &mut writer.lock(),
-                            &config,
+                            config,
                             files,
                             &Diagnostic::error()
                                 .with_message("Syntax error")
@@ -348,7 +346,7 @@ impl SdcError {
                 )?;
                 Ok(term::emit(
                     &mut writer.lock(),
-                    &config,
+                    config,
                     files,
                     &Diagnostic::error()
                         .with_message(format!("{} syntax error(s) found", entries.len())),
@@ -361,7 +359,7 @@ impl SdcError {
                     .unwrap();
                 Ok(term::emit(
                     &mut writer.lock(),
-                    &config,
+                    config,
                     files,
                     &Diagnostic::error()
                         .with_message("Unprocessed input is left after parsing has finished")
@@ -381,7 +379,7 @@ impl SdcError {
 
                 Ok(term::emit(
                     &mut writer.lock(),
-                    &config,
+                    config,
                     files,
                     &Diagnostic::error()
                         .with_message(format!("{context}Tried to pop from an empty scanner stack"))
@@ -390,7 +388,7 @@ impl SdcError {
             }
             ParserError::InternalError(e) => Ok(term::emit(
                 &mut writer.lock(),
-                &config,
+                config,
                 files,
                 &Diagnostic::bug()
                     .with_message(format!("Internal parser error: {e}"))
@@ -408,6 +406,15 @@ pub struct FileDb<Name, Source> {
     ids: HashMap<Name, usize>,
 }
 
+impl<Name, Source> Default for FileDb<Name, Source> {
+    fn default() -> Self {
+        Self {
+            files: Vec::new(),
+            ids: HashMap::new(),
+        }
+    }
+}
+
 impl<Name, Source> FileDb<Name, Source>
 where
     Name: std::fmt::Display + Clone + PartialEq + Eq + std::hash::Hash,
@@ -415,10 +422,7 @@ where
 {
     /// Create a new files database.
     pub fn new() -> Self {
-        Self {
-            files: Vec::new(),
-            ids: HashMap::new(),
-        }
+        Self::default()
     }
 
     /// Add a file to the database, returning the handle that can be used to

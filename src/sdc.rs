@@ -43,10 +43,10 @@ impl fmt::Display for Sdc {
             write!(f, "{}", s)?;
         }
         if let Some(version) = self.version {
-            write!(f, "{}\n", version)?;
+            writeln!(f, "{}", version)?;
         }
         for c in &self.commands {
-            write!(f, "{}\n", c)?;
+            writeln!(f, "{}", c)?;
         }
 
         Ok(())
