@@ -9,6 +9,7 @@ categories  = ["parser-implementations"]
 license     = "MIT OR Apache-2.0"
 readme      = "README.md"
 description = "SDC (Synopsys Design Constraints) toolkit"
+exclude     = ["testcase/*"]
 
 [[bin]]
 name = "sdcx"
