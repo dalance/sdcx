@@ -16,7 +16,7 @@
 /*  6 */ TermSemiColon: ';';
 /*  7 */ TermBackslashLineBreak: /\\(\r\n|\r|\n)/;
 /*  8 */ TermLineBreak: /(\r\n|\r|\n|$)/;
-/*  9 */ TermWord: /[^\s\[\]\\]+/;
+/*  9 */ TermWord: /[^\s\[\]\\;]+/;
 /* 10 */ TermBraceGroupContent: <BraceGroup>/[^}]*/;
 /* 11 */ TermBraceGroup: TermLBrace %push(BraceGroup) TermBraceGroupGroup TermRBrace %pop();
 /* 12 */ TermBraceGroupGroup: TermBraceGroup;

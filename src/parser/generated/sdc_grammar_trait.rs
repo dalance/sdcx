@@ -497,7 +497,7 @@ pub struct TermStringGroup<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct TermWord<'t> {
-    pub term_word: Token<'t>, /* [^\s\[\]\\]+ */
+    pub term_word: Token<'t>, /* [^\s\[\]\\;]+ */
 }
 
 ///
@@ -872,7 +872,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
 
     /// Semantic action for production 9:
     ///
-    /// `TermWord: /[^\s\[\]\\]+/;`
+    /// `TermWord: /[^\s\[\]\\;]+/;`
     ///
     #[parol_runtime::function_name::named]
     fn term_word(&mut self, term_word: &ParseTreeType<'t>) -> Result<()> {

@@ -23,8 +23,9 @@ pub struct Sdc {
 }
 
 impl Sdc {
-    pub fn validate(&self) -> Result<(), SdcError> {
+    pub fn validate(&self, force_version: Option<SdcVersion>) -> Result<(), SdcError> {
         let version = self.version.unwrap_or(SdcVersion::SDC2_1);
+        let version = force_version.unwrap_or(version);
         for command in &self.commands {
             command.validate(version)?;
         }
@@ -68,21 +69,10 @@ impl TryFrom<&grammar::Source<'_>> for Sdc {
                     match command {
                         Command::Set(x) if x.variable_name.as_str() == "sdc_version" => {
                             if is_first_command {
-                                match x.value.as_str() {
-                                    "1.1" => sdc.version = Some(SdcVersion::SDC1_1),
-                                    "1.2" => sdc.version = Some(SdcVersion::SDC1_2),
-                                    "1.3" => sdc.version = Some(SdcVersion::SDC1_3),
-                                    "1.4" => sdc.version = Some(SdcVersion::SDC1_4),
-                                    "1.5" => sdc.version = Some(SdcVersion::SDC1_5),
-                                    "1.6" => sdc.version = Some(SdcVersion::SDC1_6),
-                                    "1.7" => sdc.version = Some(SdcVersion::SDC1_7),
-                                    "1.8" => sdc.version = Some(SdcVersion::SDC1_8),
-                                    "1.9" => sdc.version = Some(SdcVersion::SDC1_9),
-                                    "2.0" => sdc.version = Some(SdcVersion::SDC2_0),
-                                    "2.1" => sdc.version = Some(SdcVersion::SDC2_1),
-                                    _ => {
-                                        return Err(SdcError::UnknownVersion(x.location().clone()))
-                                    }
+                                if let Ok(sdc_version) = x.value.as_str().try_into() {
+                                    sdc.version = Some(sdc_version);
+                                } else {
+                                    return Err(SdcError::UnknownVersion(x.location().clone()));
                                 }
                             } else {
                                 return Err(SdcError::SdcVersionPlacement(x.location().clone()));
@@ -159,6 +149,27 @@ impl fmt::Display for SdcVersion {
             SdcVersion::SDC1_9 => "set sdc_version 1.9".fmt(f),
             SdcVersion::SDC2_0 => "set sdc_version 2.0".fmt(f),
             SdcVersion::SDC2_1 => "set sdc_version 2.1".fmt(f),
+        }
+    }
+}
+
+impl TryFrom<&str> for SdcVersion {
+    type Error = ();
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "1.1" => Ok(SdcVersion::SDC1_1),
+            "1.2" => Ok(SdcVersion::SDC1_2),
+            "1.3" => Ok(SdcVersion::SDC1_3),
+            "1.4" => Ok(SdcVersion::SDC1_4),
+            "1.5" => Ok(SdcVersion::SDC1_5),
+            "1.6" => Ok(SdcVersion::SDC1_6),
+            "1.7" => Ok(SdcVersion::SDC1_7),
+            "1.8" => Ok(SdcVersion::SDC1_8),
+            "1.9" => Ok(SdcVersion::SDC1_9),
+            "2.0" => Ok(SdcVersion::SDC2_0),
+            "2.1" => Ok(SdcVersion::SDC2_1),
+            _ => Err(()),
         }
     }
 }

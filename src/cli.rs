@@ -1,8 +1,9 @@
-use anyhow::Result;
+use anyhow::{bail, Result};
 use clap::{Parser, Subcommand};
 use flate2::read::GzDecoder;
 use sdcx;
 use sdcx::sdc::sdc_error::FileDb;
+use sdcx::sdc::SdcError;
 use std::fs::File;
 use std::io::{BufReader, Read};
 use std::path::PathBuf;
@@ -32,6 +33,10 @@ enum SubCommands {
     Check {
         /// SDC file
         file: PathBuf,
+
+        /// Force SDC version
+        #[arg(long)]
+        force_version: Option<String>,
     },
 }
 
@@ -64,13 +69,15 @@ fn format(opt: &Opt) -> Result<()> {
     let mut files = FileDb::new();
     files.add(file.display().to_string(), s.as_str());
 
-    let sdc = sdcx::parser::Parser::parse(&s, &file);
+    let command = || -> Result<(), SdcError> {
+        let mut sdc = sdcx::parser::Parser::parse(&s, &file)?;
+        sdc.normalize();
+        println!("{}", sdc);
+        Ok(())
+    };
 
-    match sdc {
-        Ok(mut sdc) => {
-            sdc.normalize();
-            println!("{}", sdc);
-        }
+    match command() {
+        Ok(_) => (),
         Err(err) => {
             err.report(&files)?;
         }
@@ -80,7 +87,11 @@ fn format(opt: &Opt) -> Result<()> {
 }
 
 fn check(opt: &Opt) -> Result<()> {
-    let SubCommands::Check { ref file } = opt.subcommand else {
+    let SubCommands::Check {
+        ref file,
+        ref force_version,
+    } = opt.subcommand
+    else {
         return Ok(());
     };
 
@@ -100,9 +111,22 @@ fn check(opt: &Opt) -> Result<()> {
     let mut files = FileDb::new();
     files.add(file.display().to_string(), s.as_str());
 
-    let sdc = sdcx::parser::Parser::parse(&s, &file);
+    let mut version = None;
+    if let Some(force_version) = force_version {
+        if let Ok(x) = force_version.as_str().try_into() {
+            version = Some(x);
+        } else {
+            bail!("Unknown version: {force_version}")
+        };
+    }
 
-    match sdc {
+    let command = || -> Result<(), SdcError> {
+        let sdc = sdcx::parser::Parser::parse(&s, &file)?;
+        sdc.validate(version)?;
+        Ok(())
+    };
+
+    match command() {
         Ok(_) => (),
         Err(err) => {
             err.report(&files)?;
