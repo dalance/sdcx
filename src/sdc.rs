@@ -3,10 +3,9 @@ use crate::parser::sdc_grammar_trait as grammar;
 use crate::sdc::util::Validate;
 use std::fmt;
 
-pub mod argument;
-pub mod command;
-pub mod sdc_error;
-pub mod util;
+pub(crate) mod argument;
+pub(crate) mod command;
+pub(crate) mod util;
 pub use argument::Argument;
 pub use command::*;
 
@@ -101,16 +100,27 @@ impl TryFrom<&grammar::Source<'_>> for Sdc {
 /// SDC version
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum SdcVersion {
+    /// SDC 1.1
     SDC1_1 = 0,
+    /// SDC 1.2
     SDC1_2 = 1,
+    /// SDC 1.3
     SDC1_3 = 2,
+    /// SDC 1.4
     SDC1_4 = 3,
+    /// SDC 1.5
     SDC1_5 = 4,
+    /// SDC 1.6
     SDC1_6 = 5,
+    /// SDC 1.7
     SDC1_7 = 6,
+    /// SDC 1.8
     SDC1_8 = 7,
+    /// SDC 1.9
     SDC1_9 = 8,
+    /// SDC 2.0
     SDC2_0 = 9,
+    /// SDC 2.1
     SDC2_1 = 10,
 }
 
