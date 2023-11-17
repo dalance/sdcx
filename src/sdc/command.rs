@@ -945,7 +945,9 @@ impl Validate for CreateGeneratedClock {
         );
         self.arg_supported_version(
             &mut ret,
-            version.within(SDC1_7, SDC2_0),
+            // spec shows -combinational was removed at SDC2.1, but
+            // actual implementations shows it is keeped.
+            version.within(SDC1_7, SDC2_1),
             &self.combinational,
             "combinational",
         );

@@ -38,3 +38,6 @@ release_rpm:
 	mkdir -p target
 	cargo rpm build
 	cp target/x86_64-unknown-linux-musl/release/rpmbuild/RPMS/x86_64/* ./
+
+flamegraph:
+	cargo bench --bench benchmark -- --profile-time=5
