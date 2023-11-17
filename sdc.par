@@ -17,19 +17,19 @@
 
 // Longest match should be first
 
-TermLBracket                   : <INITIAL>'[';
-TermRBracket                   : <INITIAL>']';
+TermLBracket                   : '[';
+TermRBracket                   : ']';
 
 TermLBrace                     : <BraceGroup, INITIAL>'{';
 TermRBrace                     : <BraceGroup, INITIAL>'}';
 
-TermStringGroup                : <INITIAL>"\u{0022}(?:\\[\u{0022}\\/bfnrt]|u[0-9a-fA-F]{4}|[^\u{0022}\\]|\\\n)*\u{0022}";
+TermStringGroup                : "\u{0022}(?:\\[\u{0022}\\/bfnrt]|u[0-9a-fA-F]{4}|[^\u{0022}\\]|\\\n)*\u{0022}";
 
-TermComment                    : <INITIAL>/#.*(\r\n|\r|\n|$)/;
-TermSemiColon                  : <INITIAL>';';
-TermBackslashLineBreak         : <INITIAL>/\\(\r\n|\r|\n)/;
-TermLineBreak                  : <INITIAL>/(\r\n|\r|\n|$)/;
-TermWord                       : <INITIAL>/[^\s\[\]\\;]+/;
+TermComment                    : /#.*(\r\n|\r|\n|$)/;
+TermSemiColon                  : ';';
+TermBackslashLineBreak         : /\\(\r\n|\r|\n)/;
+TermLineBreak                  : /(\r\n|\r|\n|$)/;
+TermWord                       : /[^\s\[\]\\;]+/;
 
 TermBraceGroupContent          : <BraceGroup>/[^}]*/;
 TermBraceGroup                 : TermLBrace %push(BraceGroup) (TermBraceGroup | TermBraceGroupContent) TermRBrace %pop();
