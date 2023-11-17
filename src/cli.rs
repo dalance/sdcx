@@ -114,7 +114,7 @@ fn format(opt: &Opt) -> Result<()> {
     files.add(file.display().to_string(), s.as_str());
 
     let mut sdc = with_report(
-        sdcx::parser::Parser::parse(&s, &file),
+        sdcx::Parser::parse(&s, &file),
         &files,
         &format!("could not parse file: {}", file.display()),
     )?;
@@ -152,7 +152,7 @@ fn check(opt: &Opt) -> Result<()> {
     }
 
     let sdc = with_report(
-        sdcx::parser::Parser::parse(&s, &file),
+        sdcx::Parser::parse(&s, &file),
         &files,
         &format!("could not parse file: {}", file.display()),
     )?;
