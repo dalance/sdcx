@@ -24,12 +24,12 @@ impl Argument {
         }
     }
 
-    pub fn location(&self) -> &Location {
+    pub fn location(&self) -> Location {
         match self {
-            Argument::Word(x) => &x.location,
-            Argument::StringGroup(x) => &x.location,
-            Argument::BraceGroup(x) => &x.location,
-            Argument::CommandReplacement(_, x) => x,
+            Argument::Word(x) => x.location.clone(),
+            Argument::StringGroup(x) => x.location.clone(),
+            Argument::BraceGroup(x) => x.location.clone(),
+            Argument::CommandReplacement(_, x) => x.clone(),
         }
     }
 }
@@ -44,7 +44,7 @@ impl Validate for Argument {
         }
     }
 
-    fn location(&self) -> &Location {
+    fn location(&self) -> Location {
         self.location()
     }
 }

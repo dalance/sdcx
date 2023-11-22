@@ -1,6 +1,6 @@
 use crate::errors::{SemanticError, ValidateError};
 use crate::file_db::Location;
-use crate::sdc::{Argument, SdcVersion};
+use crate::sdc::{Argument, Command, CommandKind, SdcVersion};
 use std::collections::HashMap;
 
 pub(crate) fn opt_arg(
@@ -164,7 +164,7 @@ pub(crate) trait Validate {
         if !cond.0 {
             ret.push(ValidateError::CmdUnsupportedVersion(
                 cond.1,
-                self.location().clone(),
+                self.location(),
             ));
         }
     }
@@ -178,7 +178,7 @@ pub(crate) trait Validate {
         if is_alias && !cond.0 {
             ret.push(ValidateError::CmdUnsupportedVersion(
                 cond.1,
-                self.location().clone(),
+                self.location(),
             ));
         }
     }
@@ -193,7 +193,7 @@ pub(crate) trait Validate {
         if arg.exist() && !cond.0 {
             ret.push(ValidateError::ArgUnsupportedVersion(
                 cond.1,
-                self.location().clone(),
+                self.location(),
                 name.into(),
             ));
         }
@@ -207,7 +207,7 @@ pub(crate) trait Validate {
         func: T,
     ) {
         if cond.0 && !func(a.exist()) {
-            ret.push(ValidateError::ArgumentCombination(self.location().clone()));
+            ret.push(ValidateError::ArgumentCombination(self.location()));
         }
     }
 
@@ -220,7 +220,7 @@ pub(crate) trait Validate {
         func: T,
     ) {
         if cond.0 && !func(a.exist(), b.exist()) {
-            ret.push(ValidateError::ArgumentCombination(self.location().clone()));
+            ret.push(ValidateError::ArgumentCombination(self.location()));
         }
     }
 
@@ -234,7 +234,7 @@ pub(crate) trait Validate {
         func: T,
     ) {
         if cond.0 && !func(a.exist(), b.exist(), c.exist()) {
-            ret.push(ValidateError::ArgumentCombination(self.location().clone()));
+            ret.push(ValidateError::ArgumentCombination(self.location()));
         }
     }
 
@@ -250,7 +250,7 @@ pub(crate) trait Validate {
         func: T,
     ) {
         if cond.0 && !func(a.exist(), b.exist(), c.exist(), d.exist()) {
-            ret.push(ValidateError::ArgumentCombination(self.location().clone()));
+            ret.push(ValidateError::ArgumentCombination(self.location()));
         }
     }
 
@@ -274,7 +274,7 @@ pub(crate) trait Validate {
         func: T,
     ) {
         if cond.0 && !func(a.exist(), b.exist(), c.exist(), d.exist(), e.exist()) {
-            ret.push(ValidateError::ArgumentCombination(self.location().clone()));
+            ret.push(ValidateError::ArgumentCombination(self.location()));
         }
     }
 
@@ -309,7 +309,7 @@ pub(crate) trait Validate {
                 f.exist(),
             )
         {
-            ret.push(ValidateError::ArgumentCombination(self.location().clone()));
+            ret.push(ValidateError::ArgumentCombination(self.location()));
         }
     }
 
@@ -347,11 +347,11 @@ pub(crate) trait Validate {
                 g.exist(),
             )
         {
-            ret.push(ValidateError::ArgumentCombination(self.location().clone()));
+            ret.push(ValidateError::ArgumentCombination(self.location()));
         }
     }
 
-    fn location(&self) -> &Location;
+    fn location(&self) -> Location;
 
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError>;
 }
@@ -433,6 +433,63 @@ impl<'a, 'b> Matcher for LazyMatcher<'a, 'b> {
             self.text.starts_with(self.dict.dict.get(x).unwrap())
         }
     }
+}
+
+pub(crate) trait Extract {
+    fn extract_arg<'a>(kind: CommandKind, list: &mut Vec<&'a Command>, arg: &'a Argument) {
+        if let Argument::CommandReplacement(c, _) = arg {
+            c.extract(kind, list);
+        }
+    }
+
+    fn extract_opt<'a>(kind: CommandKind, list: &mut Vec<&'a Command>, arg: &'a Option<Argument>) {
+        if let Some(Argument::CommandReplacement(c, _)) = arg {
+            c.extract(kind, list);
+        }
+    }
+
+    fn extract_vec<'a>(kind: CommandKind, list: &mut Vec<&'a Command>, args: &'a Vec<Argument>) {
+        for arg in args {
+            if let Argument::CommandReplacement(c, _) = arg {
+                c.extract(kind, list);
+            }
+        }
+    }
+
+    fn extract_mut_arg<'a>(
+        kind: CommandKind,
+        list: &mut Vec<&'a mut Command>,
+        arg: &'a mut Argument,
+    ) {
+        if let Argument::CommandReplacement(c, _) = arg {
+            c.extract_mut(kind, list);
+        }
+    }
+
+    fn extract_mut_opt<'a>(
+        kind: CommandKind,
+        list: &mut Vec<&'a mut Command>,
+        arg: &'a mut Option<Argument>,
+    ) {
+        if let Some(Argument::CommandReplacement(c, _)) = arg {
+            c.extract_mut(kind, list);
+        }
+    }
+
+    fn extract_mut_vec<'a>(
+        kind: CommandKind,
+        list: &mut Vec<&'a mut Command>,
+        args: &'a mut Vec<Argument>,
+    ) {
+        for arg in args {
+            if let Argument::CommandReplacement(c, _) = arg {
+                c.extract_mut(kind, list);
+            }
+        }
+    }
+
+    fn extract<'a>(&'a self, _kind: CommandKind, _list: &mut Vec<&'a Command>) {}
+    fn extract_mut<'a>(&'a mut self, _kind: CommandKind, _list: &mut Vec<&'a mut Command>) {}
 }
 
 #[cfg(test)]

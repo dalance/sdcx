@@ -1,13 +1,13 @@
-use crate::errors::{SemanticError, ValidateError};
-use crate::parser::sdc_grammar_trait as grammar;
-use crate::sdc::util::Validate;
-use std::fmt;
-
 pub(crate) mod argument;
 pub(crate) mod command;
 pub(crate) mod util;
+
+use crate::errors::{SemanticError, ValidateError};
+use crate::parser::sdc_grammar_trait as grammar;
+use crate::sdc::util::{Extract, Validate};
 pub use argument::Argument;
 pub use command::*;
+use std::fmt;
 
 /// SDC
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -30,6 +30,22 @@ impl Sdc {
 
     pub fn normalize(&mut self) {
         self.commands.sort()
+    }
+
+    pub fn extract(&self, kind: CommandKind) -> Vec<&Command> {
+        let mut ret = vec![];
+        for command in &self.commands {
+            command.extract(kind, &mut ret);
+        }
+        ret
+    }
+
+    pub fn extract_mut(&mut self, kind: CommandKind) -> Vec<&mut Command> {
+        let mut ret = vec![];
+        for command in &mut self.commands {
+            command.extract_mut(kind, &mut ret);
+        }
+        ret
     }
 }
 

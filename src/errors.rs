@@ -282,6 +282,9 @@ pub enum SemanticError {
 
     #[error("AmbiguousOption")]
     AmbiguousOption(Location),
+
+    #[error("Interpret")]
+    Interpret(Location),
 }
 
 impl Report for SemanticError {
@@ -358,6 +361,14 @@ impl Report for SemanticError {
                 let (range, file_id) = x.range_file(files);
                 let diag = Diagnostic::error()
                     .with_message("Ambiguous option")
+                    .with_code("sdcx::errors::SemanticError")
+                    .with_labels(vec![Label::primary(file_id, range).with_message("Found")]);
+                Ok(term::emit(&mut writer.lock(), &config, files, &diag)?)
+            }
+            SemanticError::Interpret(x) => {
+                let (range, file_id) = x.range_file(files);
+                let diag = Diagnostic::error()
+                    .with_message("Interpretation failed")
                     .with_code("sdcx::errors::SemanticError")
                     .with_labels(vec![Label::primary(file_id, range).with_message("Found")]);
                 Ok(term::emit(&mut writer.lock(), &config, files, &diag)?)

@@ -3,6 +3,7 @@ use clap::{Parser, Subcommand};
 use flate2::read::GzDecoder;
 use flate2::write::GzEncoder;
 use flate2::Compression;
+use sdcx::constraints::Constraints;
 use sdcx::errors::Report;
 use sdcx::file_db::FileDb;
 use std::fs::File;
@@ -39,6 +40,16 @@ enum SubCommands {
         /// Force SDC version
         #[arg(long)]
         force_version: Option<String>,
+    },
+
+    /// Dump elements of input file
+    Dump {
+        /// SDC file
+        file: PathBuf,
+
+        /// Show clock
+        #[arg(long)]
+        clock: bool,
     },
 }
 
@@ -164,6 +175,37 @@ fn check(opt: &Opt) -> Result<()> {
     Ok(())
 }
 
+fn dump(opt: &Opt) -> Result<()> {
+    let SubCommands::Dump {
+        ref file,
+        ref clock,
+    } = opt.subcommand
+    else {
+        return Ok(());
+    };
+
+    let s = read_file(file)?;
+
+    let mut files = FileDb::new();
+    files.add(file.display().to_string(), s.as_str());
+
+    let sdc = with_report(
+        sdcx::Parser::parse(&s, &file),
+        &files,
+        &format!("could not parse file: {}", file.display()),
+    )?;
+
+    let mut constraints: Constraints = sdc.into();
+
+    if *clock {
+        for clock in constraints.clocks() {
+            println!("{clock}");
+        }
+    }
+
+    Ok(())
+}
+
 // ---------------------------------------------------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------------------------------------------------
@@ -174,6 +216,7 @@ fn main() -> Result<()> {
     match opt.subcommand {
         SubCommands::Fmt { .. } => format(&opt)?,
         SubCommands::Check { .. } => check(&opt)?,
+        SubCommands::Dump { .. } => dump(&opt)?,
     }
 
     Ok(())

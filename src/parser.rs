@@ -1,14 +1,14 @@
+pub mod generated;
+pub mod sdc_grammar;
+pub mod sdc_grammar_trait;
+pub mod sdc_parser;
+
 use crate::errors::ParseError;
 use crate::parser::sdc_grammar::SdcGrammar;
 use crate::parser::sdc_parser::parse;
 use crate::sdc::Sdc;
 use parol_runtime::ParolError;
 use std::path::Path;
-
-pub mod generated;
-pub mod sdc_grammar;
-pub mod sdc_grammar_trait;
-pub mod sdc_parser;
 
 #[derive(Debug)]
 pub struct Parser {}

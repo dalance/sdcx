@@ -10,6 +10,84 @@ use crate::sdc::{Argument, SdcVersion};
 use std::fmt;
 use std::sync::OnceLock;
 
+/// SDC kind
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub enum CommandKind {
+    AllClocks,
+    AllInputs,
+    AllOutputs,
+    AllRegisters,
+    CreateClock,
+    CreateGeneratedClock,
+    CreateVoltageArea,
+    CurrentDesign,
+    CurrentInstance,
+    Expr,
+    GetCells,
+    GetClocks,
+    GetLibCells,
+    GetLibPins,
+    GetLibs,
+    GetNets,
+    GetPins,
+    GetPorts,
+    GroupPath,
+    List,
+    Set,
+    SetCaseAnalysis,
+    SetClockGatingCheck,
+    SetClockGroups,
+    SetClockLatency,
+    SetClockSense,
+    SetClockTransition,
+    SetClockUncertainty,
+    SetDataCheck,
+    SetDisableTiming,
+    SetDrive,
+    SetDrivingCell,
+    SetFalsePath,
+    SetFanoutLoad,
+    SetHierarchySeparator,
+    SetIdealLatency,
+    SetIdealNetwork,
+    SetIdealTransition,
+    SetInputDelay,
+    SetInputTransition,
+    SetLevelShifterStrategy,
+    SetLevelShifterThreshold,
+    SetLoad,
+    SetLogicDc,
+    SetLogicOne,
+    SetLogicZero,
+    SetMaxArea,
+    SetMaxCapacitance,
+    SetMaxDelay,
+    SetMaxDynamicPower,
+    SetMaxFanout,
+    SetMaxLeakagePower,
+    SetMaxTimeBorrow,
+    SetMaxTransition,
+    SetMinCapacitance,
+    SetMinDelay,
+    SetMinPorosity,
+    SetMinPulseWidth,
+    SetMulticyclePath,
+    SetOperatingConditions,
+    SetOutputDelay,
+    SetPortFanoutNumber,
+    SetPropagatedClock,
+    SetResistance,
+    SetSense,
+    SetTimingDerate,
+    SetUnits,
+    SetVoltage,
+    SetWireLoadMinBlockSize,
+    SetWireLoadMode,
+    SetWireLoadModel,
+    SetWireLoadSelectionGroup,
+    Unknown,
+}
+
 /// SDC command
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Command {
@@ -88,320 +166,376 @@ pub enum Command {
     Unknown(Unknown),
 }
 
-impl Command {
-    pub fn location(&self) -> &Location {
-        match self {
-            Command::AllClocks(x) => &x.location,
-            Command::AllInputs(x) => &x.location,
-            Command::AllOutputs(x) => &x.location,
-            Command::AllRegisters(x) => &x.location,
-            Command::CreateClock(x) => &x.location,
-            Command::CreateGeneratedClock(x) => &x.location,
-            Command::CreateVoltageArea(x) => &x.location,
-            Command::CurrentDesign(x) => &x.location,
-            Command::CurrentInstance(x) => &x.location,
-            Command::Expr(x) => &x.location,
-            Command::GetCells(x) => &x.location,
-            Command::GetClocks(x) => &x.location,
-            Command::GetLibCells(x) => &x.location,
-            Command::GetLibPins(x) => &x.location,
-            Command::GetLibs(x) => &x.location,
-            Command::GetNets(x) => &x.location,
-            Command::GetPins(x) => &x.location,
-            Command::GetPorts(x) => &x.location,
-            Command::GroupPath(x) => &x.location,
-            Command::List(x) => &x.location,
-            Command::Set(x) => &x.location,
-            Command::SetCaseAnalysis(x) => &x.location,
-            Command::SetClockGatingCheck(x) => &x.location,
-            Command::SetClockGroups(x) => &x.location,
-            Command::SetClockLatency(x) => &x.location,
-            Command::SetClockSense(x) => &x.location,
-            Command::SetClockTransition(x) => &x.location,
-            Command::SetClockUncertainty(x) => &x.location,
-            Command::SetDataCheck(x) => &x.location,
-            Command::SetDisableTiming(x) => &x.location,
-            Command::SetDrive(x) => &x.location,
-            Command::SetDrivingCell(x) => &x.location,
-            Command::SetFalsePath(x) => &x.location,
-            Command::SetFanoutLoad(x) => &x.location,
-            Command::SetHierarchySeparator(x) => &x.location,
-            Command::SetIdealLatency(x) => &x.location,
-            Command::SetIdealNetwork(x) => &x.location,
-            Command::SetIdealTransition(x) => &x.location,
-            Command::SetInputDelay(x) => &x.location,
-            Command::SetInputTransition(x) => &x.location,
-            Command::SetLevelShifterStrategy(x) => &x.location,
-            Command::SetLevelShifterThreshold(x) => &x.location,
-            Command::SetLoad(x) => &x.location,
-            Command::SetLogicDc(x) => &x.location,
-            Command::SetLogicOne(x) => &x.location,
-            Command::SetLogicZero(x) => &x.location,
-            Command::SetMaxArea(x) => &x.location,
-            Command::SetMaxCapacitance(x) => &x.location,
-            Command::SetMaxDelay(x) => &x.location,
-            Command::SetMaxDynamicPower(x) => &x.location,
-            Command::SetMaxFanout(x) => &x.location,
-            Command::SetMaxLeakagePower(x) => &x.location,
-            Command::SetMaxTimeBorrow(x) => &x.location,
-            Command::SetMaxTransition(x) => &x.location,
-            Command::SetMinCapacitance(x) => &x.location,
-            Command::SetMinDelay(x) => &x.location,
-            Command::SetMinPorosity(x) => &x.location,
-            Command::SetMinPulseWidth(x) => &x.location,
-            Command::SetMulticyclePath(x) => &x.location,
-            Command::SetOperatingConditions(x) => &x.location,
-            Command::SetOutputDelay(x) => &x.location,
-            Command::SetPortFanoutNumber(x) => &x.location,
-            Command::SetPropagatedClock(x) => &x.location,
-            Command::SetResistance(x) => &x.location,
-            Command::SetSense(x) => &x.location,
-            Command::SetTimingDerate(x) => &x.location,
-            Command::SetUnits(x) => &x.location,
-            Command::SetVoltage(x) => &x.location,
-            Command::SetWireLoadMinBlockSize(x) => &x.location,
-            Command::SetWireLoadMode(x) => &x.location,
-            Command::SetWireLoadModel(x) => &x.location,
-            Command::SetWireLoadSelectionGroup(x) => &x.location,
-            Command::Unknown(x) => &x.location,
+macro_rules! match_command {
+    ($self: ident, |$x:ident| $e: expr) => {
+        match $self {
+            Command::AllClocks($x)                 => $e,
+            Command::AllInputs($x)                 => $e,
+            Command::AllOutputs($x)                => $e,
+            Command::AllRegisters($x)              => $e,
+            Command::CreateClock($x)               => $e,
+            Command::CreateGeneratedClock($x)      => $e,
+            Command::CreateVoltageArea($x)         => $e,
+            Command::CurrentDesign($x)             => $e,
+            Command::CurrentInstance($x)           => $e,
+            Command::Expr($x)                      => $e,
+            Command::GetCells($x)                  => $e,
+            Command::GetClocks($x)                 => $e,
+            Command::GetLibCells($x)               => $e,
+            Command::GetLibPins($x)                => $e,
+            Command::GetLibs($x)                   => $e,
+            Command::GetNets($x)                   => $e,
+            Command::GetPins($x)                   => $e,
+            Command::GetPorts($x)                  => $e,
+            Command::GroupPath($x)                 => $e,
+            Command::List($x)                      => $e,
+            Command::Set($x)                       => $e,
+            Command::SetCaseAnalysis($x)           => $e,
+            Command::SetClockGatingCheck($x)       => $e,
+            Command::SetClockGroups($x)            => $e,
+            Command::SetClockLatency($x)           => $e,
+            Command::SetClockSense($x)             => $e,
+            Command::SetClockTransition($x)        => $e,
+            Command::SetClockUncertainty($x)       => $e,
+            Command::SetDataCheck($x)              => $e,
+            Command::SetDisableTiming($x)          => $e,
+            Command::SetDrive($x)                  => $e,
+            Command::SetDrivingCell($x)            => $e,
+            Command::SetFalsePath($x)              => $e,
+            Command::SetFanoutLoad($x)             => $e,
+            Command::SetHierarchySeparator($x)     => $e,
+            Command::SetIdealLatency($x)           => $e,
+            Command::SetIdealNetwork($x)           => $e,
+            Command::SetIdealTransition($x)        => $e,
+            Command::SetInputDelay($x)             => $e,
+            Command::SetInputTransition($x)        => $e,
+            Command::SetLevelShifterStrategy($x)   => $e,
+            Command::SetLevelShifterThreshold($x)  => $e,
+            Command::SetLoad($x)                   => $e,
+            Command::SetLogicDc($x)                => $e,
+            Command::SetLogicOne($x)               => $e,
+            Command::SetLogicZero($x)              => $e,
+            Command::SetMaxArea($x)                => $e,
+            Command::SetMaxCapacitance($x)         => $e,
+            Command::SetMaxDelay($x)               => $e,
+            Command::SetMaxDynamicPower($x)        => $e,
+            Command::SetMaxFanout($x)              => $e,
+            Command::SetMaxLeakagePower($x)        => $e,
+            Command::SetMaxTimeBorrow($x)          => $e,
+            Command::SetMaxTransition($x)          => $e,
+            Command::SetMinCapacitance($x)         => $e,
+            Command::SetMinDelay($x)               => $e,
+            Command::SetMinPorosity($x)            => $e,
+            Command::SetMinPulseWidth($x)          => $e,
+            Command::SetMulticyclePath($x)         => $e,
+            Command::SetOperatingConditions($x)    => $e,
+            Command::SetOutputDelay($x)            => $e,
+            Command::SetPortFanoutNumber($x)       => $e,
+            Command::SetPropagatedClock($x)        => $e,
+            Command::SetResistance($x)             => $e,
+            Command::SetSense($x)                  => $e,
+            Command::SetTimingDerate($x)           => $e,
+            Command::SetUnits($x)                  => $e,
+            Command::SetVoltage($x)                => $e,
+            Command::SetWireLoadMinBlockSize($x)   => $e,
+            Command::SetWireLoadMode($x)           => $e,
+            Command::SetWireLoadModel($x)          => $e,
+            Command::SetWireLoadSelectionGroup($x) => $e,
+            Command::Unknown($x)                   => $e,
         }
+    }
+}
+
+impl Command {
+    pub fn location(&self) -> Location {
+        match_command!(self, |x| { x.location() })
     }
 }
 
 impl fmt::Display for Command {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Command::AllClocks(x) => x.fmt(f),
-            Command::AllInputs(x) => x.fmt(f),
-            Command::AllOutputs(x) => x.fmt(f),
-            Command::AllRegisters(x) => x.fmt(f),
-            Command::CreateClock(x) => x.fmt(f),
-            Command::CreateGeneratedClock(x) => x.fmt(f),
-            Command::CreateVoltageArea(x) => x.fmt(f),
-            Command::CurrentDesign(x) => x.fmt(f),
-            Command::CurrentInstance(x) => x.fmt(f),
-            Command::Expr(x) => x.fmt(f),
-            Command::GetCells(x) => x.fmt(f),
-            Command::GetClocks(x) => x.fmt(f),
-            Command::GetLibCells(x) => x.fmt(f),
-            Command::GetLibPins(x) => x.fmt(f),
-            Command::GetLibs(x) => x.fmt(f),
-            Command::GetNets(x) => x.fmt(f),
-            Command::GetPins(x) => x.fmt(f),
-            Command::GetPorts(x) => x.fmt(f),
-            Command::GroupPath(x) => x.fmt(f),
-            Command::List(x) => x.fmt(f),
-            Command::Set(x) => x.fmt(f),
-            Command::SetCaseAnalysis(x) => x.fmt(f),
-            Command::SetClockGatingCheck(x) => x.fmt(f),
-            Command::SetClockGroups(x) => x.fmt(f),
-            Command::SetClockLatency(x) => x.fmt(f),
-            Command::SetClockSense(x) => x.fmt(f),
-            Command::SetClockTransition(x) => x.fmt(f),
-            Command::SetClockUncertainty(x) => x.fmt(f),
-            Command::SetDataCheck(x) => x.fmt(f),
-            Command::SetDisableTiming(x) => x.fmt(f),
-            Command::SetDrive(x) => x.fmt(f),
-            Command::SetDrivingCell(x) => x.fmt(f),
-            Command::SetFalsePath(x) => x.fmt(f),
-            Command::SetFanoutLoad(x) => x.fmt(f),
-            Command::SetHierarchySeparator(x) => x.fmt(f),
-            Command::SetIdealLatency(x) => x.fmt(f),
-            Command::SetIdealNetwork(x) => x.fmt(f),
-            Command::SetIdealTransition(x) => x.fmt(f),
-            Command::SetInputDelay(x) => x.fmt(f),
-            Command::SetInputTransition(x) => x.fmt(f),
-            Command::SetLevelShifterStrategy(x) => x.fmt(f),
-            Command::SetLevelShifterThreshold(x) => x.fmt(f),
-            Command::SetLoad(x) => x.fmt(f),
-            Command::SetLogicDc(x) => x.fmt(f),
-            Command::SetLogicOne(x) => x.fmt(f),
-            Command::SetLogicZero(x) => x.fmt(f),
-            Command::SetMaxArea(x) => x.fmt(f),
-            Command::SetMaxCapacitance(x) => x.fmt(f),
-            Command::SetMaxDelay(x) => x.fmt(f),
-            Command::SetMaxDynamicPower(x) => x.fmt(f),
-            Command::SetMaxFanout(x) => x.fmt(f),
-            Command::SetMaxLeakagePower(x) => x.fmt(f),
-            Command::SetMaxTimeBorrow(x) => x.fmt(f),
-            Command::SetMaxTransition(x) => x.fmt(f),
-            Command::SetMinCapacitance(x) => x.fmt(f),
-            Command::SetMinDelay(x) => x.fmt(f),
-            Command::SetMinPorosity(x) => x.fmt(f),
-            Command::SetMinPulseWidth(x) => x.fmt(f),
-            Command::SetMulticyclePath(x) => x.fmt(f),
-            Command::SetOperatingConditions(x) => x.fmt(f),
-            Command::SetOutputDelay(x) => x.fmt(f),
-            Command::SetPortFanoutNumber(x) => x.fmt(f),
-            Command::SetPropagatedClock(x) => x.fmt(f),
-            Command::SetResistance(x) => x.fmt(f),
-            Command::SetSense(x) => x.fmt(f),
-            Command::SetTimingDerate(x) => x.fmt(f),
-            Command::SetUnits(x) => x.fmt(f),
-            Command::SetVoltage(x) => x.fmt(f),
-            Command::SetWireLoadMinBlockSize(x) => x.fmt(f),
-            Command::SetWireLoadMode(x) => x.fmt(f),
-            Command::SetWireLoadModel(x) => x.fmt(f),
-            Command::SetWireLoadSelectionGroup(x) => x.fmt(f),
-            Command::Unknown(x) => x.fmt(f),
-        }
+        match_command!(self, |x| { x.fmt(f) })
     }
 }
 
 impl Validate for Command {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
+        match_command!(self, |x| { x.validate(version) })
+    }
+
+    fn location(&self) -> Location {
+        self.location()
+    }
+}
+
+impl Extract for Command {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
         match self {
-            Command::AllClocks(x) => x.validate(version),
-            Command::AllInputs(x) => x.validate(version),
-            Command::AllOutputs(x) => x.validate(version),
-            Command::AllRegisters(x) => x.validate(version),
-            Command::CreateClock(x) => x.validate(version),
-            Command::CreateGeneratedClock(x) => x.validate(version),
-            Command::CreateVoltageArea(x) => x.validate(version),
-            Command::CurrentDesign(x) => x.validate(version),
-            Command::CurrentInstance(x) => x.validate(version),
-            Command::Expr(x) => x.validate(version),
-            Command::GetCells(x) => x.validate(version),
-            Command::GetClocks(x) => x.validate(version),
-            Command::GetLibCells(x) => x.validate(version),
-            Command::GetLibPins(x) => x.validate(version),
-            Command::GetLibs(x) => x.validate(version),
-            Command::GetNets(x) => x.validate(version),
-            Command::GetPins(x) => x.validate(version),
-            Command::GetPorts(x) => x.validate(version),
-            Command::GroupPath(x) => x.validate(version),
-            Command::List(x) => x.validate(version),
-            Command::Set(x) => x.validate(version),
-            Command::SetCaseAnalysis(x) => x.validate(version),
-            Command::SetClockGatingCheck(x) => x.validate(version),
-            Command::SetClockGroups(x) => x.validate(version),
-            Command::SetClockLatency(x) => x.validate(version),
-            Command::SetClockSense(x) => x.validate(version),
-            Command::SetClockTransition(x) => x.validate(version),
-            Command::SetClockUncertainty(x) => x.validate(version),
-            Command::SetDataCheck(x) => x.validate(version),
-            Command::SetDisableTiming(x) => x.validate(version),
-            Command::SetDrive(x) => x.validate(version),
-            Command::SetDrivingCell(x) => x.validate(version),
-            Command::SetFalsePath(x) => x.validate(version),
-            Command::SetFanoutLoad(x) => x.validate(version),
-            Command::SetHierarchySeparator(x) => x.validate(version),
-            Command::SetIdealLatency(x) => x.validate(version),
-            Command::SetIdealNetwork(x) => x.validate(version),
-            Command::SetIdealTransition(x) => x.validate(version),
-            Command::SetInputDelay(x) => x.validate(version),
-            Command::SetInputTransition(x) => x.validate(version),
-            Command::SetLevelShifterStrategy(x) => x.validate(version),
-            Command::SetLevelShifterThreshold(x) => x.validate(version),
-            Command::SetLoad(x) => x.validate(version),
-            Command::SetLogicDc(x) => x.validate(version),
-            Command::SetLogicOne(x) => x.validate(version),
-            Command::SetLogicZero(x) => x.validate(version),
-            Command::SetMaxArea(x) => x.validate(version),
-            Command::SetMaxCapacitance(x) => x.validate(version),
-            Command::SetMaxDelay(x) => x.validate(version),
-            Command::SetMaxDynamicPower(x) => x.validate(version),
-            Command::SetMaxFanout(x) => x.validate(version),
-            Command::SetMaxLeakagePower(x) => x.validate(version),
-            Command::SetMaxTimeBorrow(x) => x.validate(version),
-            Command::SetMaxTransition(x) => x.validate(version),
-            Command::SetMinCapacitance(x) => x.validate(version),
-            Command::SetMinDelay(x) => x.validate(version),
-            Command::SetMinPorosity(x) => x.validate(version),
-            Command::SetMinPulseWidth(x) => x.validate(version),
-            Command::SetMulticyclePath(x) => x.validate(version),
-            Command::SetOperatingConditions(x) => x.validate(version),
-            Command::SetOutputDelay(x) => x.validate(version),
-            Command::SetPortFanoutNumber(x) => x.validate(version),
-            Command::SetPropagatedClock(x) => x.validate(version),
-            Command::SetResistance(x) => x.validate(version),
-            Command::SetSense(x) => x.validate(version),
-            Command::SetTimingDerate(x) => x.validate(version),
-            Command::SetUnits(x) => x.validate(version),
-            Command::SetVoltage(x) => x.validate(version),
-            Command::SetWireLoadMinBlockSize(x) => x.validate(version),
-            Command::SetWireLoadMode(x) => x.validate(version),
-            Command::SetWireLoadModel(x) => x.validate(version),
-            Command::SetWireLoadSelectionGroup(x) => x.validate(version),
-            Command::Unknown(x) => x.validate(version),
+            Command::AllClocks(_) if kind == CommandKind::AllClocks => list.push(self),
+            Command::AllInputs(_) if kind == CommandKind::AllInputs => list.push(self),
+            Command::AllOutputs(_) if kind == CommandKind::AllOutputs => list.push(self),
+            Command::AllRegisters(_) if kind == CommandKind::AllRegisters => list.push(self),
+            Command::CreateClock(_) if kind == CommandKind::CreateClock => list.push(self),
+            Command::CreateGeneratedClock(_) if kind == CommandKind::CreateGeneratedClock => {
+                list.push(self)
+            }
+            Command::CreateVoltageArea(_) if kind == CommandKind::CreateVoltageArea => {
+                list.push(self)
+            }
+            Command::CurrentDesign(_) if kind == CommandKind::CurrentDesign => list.push(self),
+            Command::CurrentInstance(_) if kind == CommandKind::CurrentInstance => list.push(self),
+            Command::Expr(_) if kind == CommandKind::Expr => list.push(self),
+            Command::GetCells(_) if kind == CommandKind::GetCells => list.push(self),
+            Command::GetClocks(_) if kind == CommandKind::GetClocks => list.push(self),
+            Command::GetLibCells(_) if kind == CommandKind::GetLibCells => list.push(self),
+            Command::GetLibPins(_) if kind == CommandKind::GetLibPins => list.push(self),
+            Command::GetLibs(_) if kind == CommandKind::GetLibs => list.push(self),
+            Command::GetNets(_) if kind == CommandKind::GetNets => list.push(self),
+            Command::GetPins(_) if kind == CommandKind::GetPins => list.push(self),
+            Command::GetPorts(_) if kind == CommandKind::GetPorts => list.push(self),
+            Command::GroupPath(_) if kind == CommandKind::GroupPath => list.push(self),
+            Command::List(_) if kind == CommandKind::List => list.push(self),
+            Command::Set(_) if kind == CommandKind::Set => list.push(self),
+            Command::SetCaseAnalysis(_) if kind == CommandKind::SetCaseAnalysis => list.push(self),
+            Command::SetClockGatingCheck(_) if kind == CommandKind::SetClockGatingCheck => {
+                list.push(self)
+            }
+            Command::SetClockGroups(_) if kind == CommandKind::SetClockGroups => list.push(self),
+            Command::SetClockLatency(_) if kind == CommandKind::SetClockLatency => list.push(self),
+            Command::SetClockSense(_) if kind == CommandKind::SetClockSense => list.push(self),
+            Command::SetClockTransition(_) if kind == CommandKind::SetClockTransition => {
+                list.push(self)
+            }
+            Command::SetClockUncertainty(_) if kind == CommandKind::SetClockUncertainty => {
+                list.push(self)
+            }
+            Command::SetDataCheck(_) if kind == CommandKind::SetDataCheck => list.push(self),
+            Command::SetDisableTiming(_) if kind == CommandKind::SetDisableTiming => {
+                list.push(self)
+            }
+            Command::SetDrive(_) if kind == CommandKind::SetDrive => list.push(self),
+            Command::SetDrivingCell(_) if kind == CommandKind::SetDrivingCell => list.push(self),
+            Command::SetFalsePath(_) if kind == CommandKind::SetFalsePath => list.push(self),
+            Command::SetFanoutLoad(_) if kind == CommandKind::SetFanoutLoad => list.push(self),
+            Command::SetHierarchySeparator(_) if kind == CommandKind::SetHierarchySeparator => {
+                list.push(self)
+            }
+            Command::SetIdealLatency(_) if kind == CommandKind::SetIdealLatency => list.push(self),
+            Command::SetIdealNetwork(_) if kind == CommandKind::SetIdealNetwork => list.push(self),
+            Command::SetIdealTransition(_) if kind == CommandKind::SetIdealTransition => {
+                list.push(self)
+            }
+            Command::SetInputDelay(_) if kind == CommandKind::SetInputDelay => list.push(self),
+            Command::SetInputTransition(_) if kind == CommandKind::SetInputTransition => {
+                list.push(self)
+            }
+            Command::SetLevelShifterStrategy(_) if kind == CommandKind::SetLevelShifterStrategy => {
+                list.push(self)
+            }
+            Command::SetLevelShifterThreshold(_)
+                if kind == CommandKind::SetLevelShifterThreshold =>
+            {
+                list.push(self)
+            }
+            Command::SetLoad(_) if kind == CommandKind::SetLoad => list.push(self),
+            Command::SetLogicDc(_) if kind == CommandKind::SetLogicDc => list.push(self),
+            Command::SetLogicOne(_) if kind == CommandKind::SetLogicOne => list.push(self),
+            Command::SetLogicZero(_) if kind == CommandKind::SetLogicZero => list.push(self),
+            Command::SetMaxArea(_) if kind == CommandKind::SetMaxArea => list.push(self),
+            Command::SetMaxCapacitance(_) if kind == CommandKind::SetMaxCapacitance => {
+                list.push(self)
+            }
+            Command::SetMaxDelay(_) if kind == CommandKind::SetMaxDelay => list.push(self),
+            Command::SetMaxDynamicPower(_) if kind == CommandKind::SetMaxDynamicPower => {
+                list.push(self)
+            }
+            Command::SetMaxFanout(_) if kind == CommandKind::SetMaxFanout => list.push(self),
+            Command::SetMaxLeakagePower(_) if kind == CommandKind::SetMaxLeakagePower => {
+                list.push(self)
+            }
+            Command::SetMaxTimeBorrow(_) if kind == CommandKind::SetMaxTimeBorrow => {
+                list.push(self)
+            }
+            Command::SetMaxTransition(_) if kind == CommandKind::SetMaxTransition => {
+                list.push(self)
+            }
+            Command::SetMinCapacitance(_) if kind == CommandKind::SetMinCapacitance => {
+                list.push(self)
+            }
+            Command::SetMinDelay(_) if kind == CommandKind::SetMinDelay => list.push(self),
+            Command::SetMinPorosity(_) if kind == CommandKind::SetMinPorosity => list.push(self),
+            Command::SetMinPulseWidth(_) if kind == CommandKind::SetMinPulseWidth => {
+                list.push(self)
+            }
+            Command::SetMulticyclePath(_) if kind == CommandKind::SetMulticyclePath => {
+                list.push(self)
+            }
+            Command::SetOperatingConditions(_) if kind == CommandKind::SetOperatingConditions => {
+                list.push(self)
+            }
+            Command::SetOutputDelay(_) if kind == CommandKind::SetOutputDelay => list.push(self),
+            Command::SetPortFanoutNumber(_) if kind == CommandKind::SetPortFanoutNumber => {
+                list.push(self)
+            }
+            Command::SetPropagatedClock(_) if kind == CommandKind::SetPropagatedClock => {
+                list.push(self)
+            }
+            Command::SetResistance(_) if kind == CommandKind::SetResistance => list.push(self),
+            Command::SetSense(_) if kind == CommandKind::SetSense => list.push(self),
+            Command::SetTimingDerate(_) if kind == CommandKind::SetTimingDerate => list.push(self),
+            Command::SetUnits(_) if kind == CommandKind::SetUnits => list.push(self),
+            Command::SetVoltage(_) if kind == CommandKind::SetVoltage => list.push(self),
+            Command::SetWireLoadMinBlockSize(_) if kind == CommandKind::SetWireLoadMinBlockSize => {
+                list.push(self)
+            }
+            Command::SetWireLoadMode(_) if kind == CommandKind::SetWireLoadMode => list.push(self),
+            Command::SetWireLoadModel(_) if kind == CommandKind::SetWireLoadModel => {
+                list.push(self)
+            }
+            Command::SetWireLoadSelectionGroup(_)
+                if kind == CommandKind::SetWireLoadSelectionGroup =>
+            {
+                list.push(self)
+            }
+            Command::Unknown(_) if kind == CommandKind::Unknown => list.push(self),
+            _ => {
+                match_command!(self, |x| { x.extract(kind, list) })
+            }
         }
     }
 
-    fn location(&self) -> &Location {
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
         match self {
-            Command::AllClocks(x) => x.location(),
-            Command::AllInputs(x) => x.location(),
-            Command::AllOutputs(x) => x.location(),
-            Command::AllRegisters(x) => x.location(),
-            Command::CreateClock(x) => x.location(),
-            Command::CreateGeneratedClock(x) => x.location(),
-            Command::CreateVoltageArea(x) => x.location(),
-            Command::CurrentDesign(x) => x.location(),
-            Command::CurrentInstance(x) => x.location(),
-            Command::Expr(x) => x.location(),
-            Command::GetCells(x) => x.location(),
-            Command::GetClocks(x) => x.location(),
-            Command::GetLibCells(x) => x.location(),
-            Command::GetLibPins(x) => x.location(),
-            Command::GetLibs(x) => x.location(),
-            Command::GetNets(x) => x.location(),
-            Command::GetPins(x) => x.location(),
-            Command::GetPorts(x) => x.location(),
-            Command::GroupPath(x) => x.location(),
-            Command::List(x) => x.location(),
-            Command::Set(x) => x.location(),
-            Command::SetCaseAnalysis(x) => x.location(),
-            Command::SetClockGatingCheck(x) => x.location(),
-            Command::SetClockGroups(x) => x.location(),
-            Command::SetClockLatency(x) => x.location(),
-            Command::SetClockSense(x) => x.location(),
-            Command::SetClockTransition(x) => x.location(),
-            Command::SetClockUncertainty(x) => x.location(),
-            Command::SetDataCheck(x) => x.location(),
-            Command::SetDisableTiming(x) => x.location(),
-            Command::SetDrive(x) => x.location(),
-            Command::SetDrivingCell(x) => x.location(),
-            Command::SetFalsePath(x) => x.location(),
-            Command::SetFanoutLoad(x) => x.location(),
-            Command::SetHierarchySeparator(x) => x.location(),
-            Command::SetIdealLatency(x) => x.location(),
-            Command::SetIdealNetwork(x) => x.location(),
-            Command::SetIdealTransition(x) => x.location(),
-            Command::SetInputDelay(x) => x.location(),
-            Command::SetInputTransition(x) => x.location(),
-            Command::SetLevelShifterStrategy(x) => x.location(),
-            Command::SetLevelShifterThreshold(x) => x.location(),
-            Command::SetLoad(x) => x.location(),
-            Command::SetLogicDc(x) => x.location(),
-            Command::SetLogicOne(x) => x.location(),
-            Command::SetLogicZero(x) => x.location(),
-            Command::SetMaxArea(x) => x.location(),
-            Command::SetMaxCapacitance(x) => x.location(),
-            Command::SetMaxDelay(x) => x.location(),
-            Command::SetMaxDynamicPower(x) => x.location(),
-            Command::SetMaxFanout(x) => x.location(),
-            Command::SetMaxLeakagePower(x) => x.location(),
-            Command::SetMaxTimeBorrow(x) => x.location(),
-            Command::SetMaxTransition(x) => x.location(),
-            Command::SetMinCapacitance(x) => x.location(),
-            Command::SetMinDelay(x) => x.location(),
-            Command::SetMinPorosity(x) => x.location(),
-            Command::SetMinPulseWidth(x) => x.location(),
-            Command::SetMulticyclePath(x) => x.location(),
-            Command::SetOperatingConditions(x) => x.location(),
-            Command::SetOutputDelay(x) => x.location(),
-            Command::SetPortFanoutNumber(x) => x.location(),
-            Command::SetPropagatedClock(x) => x.location(),
-            Command::SetResistance(x) => x.location(),
-            Command::SetSense(x) => x.location(),
-            Command::SetTimingDerate(x) => x.location(),
-            Command::SetUnits(x) => x.location(),
-            Command::SetVoltage(x) => x.location(),
-            Command::SetWireLoadMinBlockSize(x) => x.location(),
-            Command::SetWireLoadMode(x) => x.location(),
-            Command::SetWireLoadModel(x) => x.location(),
-            Command::SetWireLoadSelectionGroup(x) => x.location(),
-            Command::Unknown(x) => x.location(),
+            Command::AllClocks(_) if kind == CommandKind::AllClocks => list.push(self),
+            Command::AllInputs(_) if kind == CommandKind::AllInputs => list.push(self),
+            Command::AllOutputs(_) if kind == CommandKind::AllOutputs => list.push(self),
+            Command::AllRegisters(_) if kind == CommandKind::AllRegisters => list.push(self),
+            Command::CreateClock(_) if kind == CommandKind::CreateClock => list.push(self),
+            Command::CreateGeneratedClock(_) if kind == CommandKind::CreateGeneratedClock => {
+                list.push(self)
+            }
+            Command::CreateVoltageArea(_) if kind == CommandKind::CreateVoltageArea => {
+                list.push(self)
+            }
+            Command::CurrentDesign(_) if kind == CommandKind::CurrentDesign => list.push(self),
+            Command::CurrentInstance(_) if kind == CommandKind::CurrentInstance => list.push(self),
+            Command::Expr(_) if kind == CommandKind::Expr => list.push(self),
+            Command::GetCells(_) if kind == CommandKind::GetCells => list.push(self),
+            Command::GetClocks(_) if kind == CommandKind::GetClocks => list.push(self),
+            Command::GetLibCells(_) if kind == CommandKind::GetLibCells => list.push(self),
+            Command::GetLibPins(_) if kind == CommandKind::GetLibPins => list.push(self),
+            Command::GetLibs(_) if kind == CommandKind::GetLibs => list.push(self),
+            Command::GetNets(_) if kind == CommandKind::GetNets => list.push(self),
+            Command::GetPins(_) if kind == CommandKind::GetPins => list.push(self),
+            Command::GetPorts(_) if kind == CommandKind::GetPorts => list.push(self),
+            Command::GroupPath(_) if kind == CommandKind::GroupPath => list.push(self),
+            Command::List(_) if kind == CommandKind::List => list.push(self),
+            Command::Set(_) if kind == CommandKind::Set => list.push(self),
+            Command::SetCaseAnalysis(_) if kind == CommandKind::SetCaseAnalysis => list.push(self),
+            Command::SetClockGatingCheck(_) if kind == CommandKind::SetClockGatingCheck => {
+                list.push(self)
+            }
+            Command::SetClockGroups(_) if kind == CommandKind::SetClockGroups => list.push(self),
+            Command::SetClockLatency(_) if kind == CommandKind::SetClockLatency => list.push(self),
+            Command::SetClockSense(_) if kind == CommandKind::SetClockSense => list.push(self),
+            Command::SetClockTransition(_) if kind == CommandKind::SetClockTransition => {
+                list.push(self)
+            }
+            Command::SetClockUncertainty(_) if kind == CommandKind::SetClockUncertainty => {
+                list.push(self)
+            }
+            Command::SetDataCheck(_) if kind == CommandKind::SetDataCheck => list.push(self),
+            Command::SetDisableTiming(_) if kind == CommandKind::SetDisableTiming => {
+                list.push(self)
+            }
+            Command::SetDrive(_) if kind == CommandKind::SetDrive => list.push(self),
+            Command::SetDrivingCell(_) if kind == CommandKind::SetDrivingCell => list.push(self),
+            Command::SetFalsePath(_) if kind == CommandKind::SetFalsePath => list.push(self),
+            Command::SetFanoutLoad(_) if kind == CommandKind::SetFanoutLoad => list.push(self),
+            Command::SetHierarchySeparator(_) if kind == CommandKind::SetHierarchySeparator => {
+                list.push(self)
+            }
+            Command::SetIdealLatency(_) if kind == CommandKind::SetIdealLatency => list.push(self),
+            Command::SetIdealNetwork(_) if kind == CommandKind::SetIdealNetwork => list.push(self),
+            Command::SetIdealTransition(_) if kind == CommandKind::SetIdealTransition => {
+                list.push(self)
+            }
+            Command::SetInputDelay(_) if kind == CommandKind::SetInputDelay => list.push(self),
+            Command::SetInputTransition(_) if kind == CommandKind::SetInputTransition => {
+                list.push(self)
+            }
+            Command::SetLevelShifterStrategy(_) if kind == CommandKind::SetLevelShifterStrategy => {
+                list.push(self)
+            }
+            Command::SetLevelShifterThreshold(_)
+                if kind == CommandKind::SetLevelShifterThreshold =>
+            {
+                list.push(self)
+            }
+            Command::SetLoad(_) if kind == CommandKind::SetLoad => list.push(self),
+            Command::SetLogicDc(_) if kind == CommandKind::SetLogicDc => list.push(self),
+            Command::SetLogicOne(_) if kind == CommandKind::SetLogicOne => list.push(self),
+            Command::SetLogicZero(_) if kind == CommandKind::SetLogicZero => list.push(self),
+            Command::SetMaxArea(_) if kind == CommandKind::SetMaxArea => list.push(self),
+            Command::SetMaxCapacitance(_) if kind == CommandKind::SetMaxCapacitance => {
+                list.push(self)
+            }
+            Command::SetMaxDelay(_) if kind == CommandKind::SetMaxDelay => list.push(self),
+            Command::SetMaxDynamicPower(_) if kind == CommandKind::SetMaxDynamicPower => {
+                list.push(self)
+            }
+            Command::SetMaxFanout(_) if kind == CommandKind::SetMaxFanout => list.push(self),
+            Command::SetMaxLeakagePower(_) if kind == CommandKind::SetMaxLeakagePower => {
+                list.push(self)
+            }
+            Command::SetMaxTimeBorrow(_) if kind == CommandKind::SetMaxTimeBorrow => {
+                list.push(self)
+            }
+            Command::SetMaxTransition(_) if kind == CommandKind::SetMaxTransition => {
+                list.push(self)
+            }
+            Command::SetMinCapacitance(_) if kind == CommandKind::SetMinCapacitance => {
+                list.push(self)
+            }
+            Command::SetMinDelay(_) if kind == CommandKind::SetMinDelay => list.push(self),
+            Command::SetMinPorosity(_) if kind == CommandKind::SetMinPorosity => list.push(self),
+            Command::SetMinPulseWidth(_) if kind == CommandKind::SetMinPulseWidth => {
+                list.push(self)
+            }
+            Command::SetMulticyclePath(_) if kind == CommandKind::SetMulticyclePath => {
+                list.push(self)
+            }
+            Command::SetOperatingConditions(_) if kind == CommandKind::SetOperatingConditions => {
+                list.push(self)
+            }
+            Command::SetOutputDelay(_) if kind == CommandKind::SetOutputDelay => list.push(self),
+            Command::SetPortFanoutNumber(_) if kind == CommandKind::SetPortFanoutNumber => {
+                list.push(self)
+            }
+            Command::SetPropagatedClock(_) if kind == CommandKind::SetPropagatedClock => {
+                list.push(self)
+            }
+            Command::SetResistance(_) if kind == CommandKind::SetResistance => list.push(self),
+            Command::SetSense(_) if kind == CommandKind::SetSense => list.push(self),
+            Command::SetTimingDerate(_) if kind == CommandKind::SetTimingDerate => list.push(self),
+            Command::SetUnits(_) if kind == CommandKind::SetUnits => list.push(self),
+            Command::SetVoltage(_) if kind == CommandKind::SetVoltage => list.push(self),
+            Command::SetWireLoadMinBlockSize(_) if kind == CommandKind::SetWireLoadMinBlockSize => {
+                list.push(self)
+            }
+            Command::SetWireLoadMode(_) if kind == CommandKind::SetWireLoadMode => list.push(self),
+            Command::SetWireLoadModel(_) if kind == CommandKind::SetWireLoadModel => {
+                list.push(self)
+            }
+            Command::SetWireLoadSelectionGroup(_)
+                if kind == CommandKind::SetWireLoadSelectionGroup =>
+            {
+                list.push(self)
+            }
+            Command::Unknown(_) if kind == CommandKind::Unknown => list.push(self),
+            _ => {
+                match_command!(self, |x| { x.extract_mut(kind, list) })
+            }
         }
     }
 }
@@ -421,7 +555,7 @@ impl TryFrom<&grammar::Command<'_>> for Command {
         let loc = if args.is_empty() {
             start
         } else {
-            Location::from_to(&start, args.last().unwrap().location())
+            Location::from_to(&start, &args.last().unwrap().location())
         };
 
         match command {
@@ -530,10 +664,12 @@ impl Validate for AllClocks {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
     }
 }
+
+impl Extract for AllClocks {}
 
 fn all_clocks(args: Vec<Argument>, location: Location) -> Result<Command, SemanticError> {
     if !args.is_empty() {
@@ -577,8 +713,18 @@ impl Validate for AllInputs {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for AllInputs {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_opt(kind, list, &self.clock);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_opt(kind, list, &mut self.clock);
     }
 }
 
@@ -643,8 +789,18 @@ impl Validate for AllOutputs {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for AllOutputs {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_opt(kind, list, &self.clock);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_opt(kind, list, &mut self.clock);
     }
 }
 
@@ -723,8 +879,22 @@ impl Validate for AllRegisters {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for AllRegisters {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_opt(kind, list, &self.clock);
+        Self::extract_opt(kind, list, &self.rise_clock);
+        Self::extract_opt(kind, list, &self.fall_clock);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_opt(kind, list, &mut self.clock);
+        Self::extract_mut_opt(kind, list, &mut self.rise_clock);
+        Self::extract_mut_opt(kind, list, &mut self.fall_clock);
     }
 }
 
@@ -851,8 +1021,26 @@ impl Validate for CreateClock {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for CreateClock {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.period);
+        Self::extract_opt(kind, list, &self.name);
+        Self::extract_opt(kind, list, &self.waveform);
+        Self::extract_opt(kind, list, &self.comment);
+        Self::extract_opt(kind, list, &self.source_objects);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.period);
+        Self::extract_mut_opt(kind, list, &mut self.name);
+        Self::extract_mut_opt(kind, list, &mut self.waveform);
+        Self::extract_mut_opt(kind, list, &mut self.comment);
+        Self::extract_mut_opt(kind, list, &mut self.source_objects);
     }
 }
 
@@ -977,8 +1165,36 @@ impl Validate for CreateGeneratedClock {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for CreateGeneratedClock {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_opt(kind, list, &self.name);
+        Self::extract_arg(kind, list, &self.source);
+        Self::extract_opt(kind, list, &self.edges);
+        Self::extract_opt(kind, list, &self.divide_by);
+        Self::extract_opt(kind, list, &self.multiply_by);
+        Self::extract_opt(kind, list, &self.duty_cycle);
+        Self::extract_opt(kind, list, &self.edge_shift);
+        Self::extract_opt(kind, list, &self.master_clock);
+        Self::extract_opt(kind, list, &self.comment);
+        Self::extract_arg(kind, list, &self.source_objects);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_opt(kind, list, &mut self.name);
+        Self::extract_mut_arg(kind, list, &mut self.source);
+        Self::extract_mut_opt(kind, list, &mut self.edges);
+        Self::extract_mut_opt(kind, list, &mut self.divide_by);
+        Self::extract_mut_opt(kind, list, &mut self.multiply_by);
+        Self::extract_mut_opt(kind, list, &mut self.duty_cycle);
+        Self::extract_mut_opt(kind, list, &mut self.edge_shift);
+        Self::extract_mut_opt(kind, list, &mut self.master_clock);
+        Self::extract_mut_opt(kind, list, &mut self.comment);
+        Self::extract_mut_arg(kind, list, &mut self.source_objects);
     }
 }
 
@@ -1093,8 +1309,26 @@ impl Validate for CreateVoltageArea {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for CreateVoltageArea {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.name);
+        Self::extract_opt(kind, list, &self.coordinate);
+        Self::extract_opt(kind, list, &self.guard_band_x);
+        Self::extract_opt(kind, list, &self.guard_band_y);
+        Self::extract_arg(kind, list, &self.cell_list);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.name);
+        Self::extract_mut_opt(kind, list, &mut self.coordinate);
+        Self::extract_mut_opt(kind, list, &mut self.guard_band_x);
+        Self::extract_mut_opt(kind, list, &mut self.guard_band_y);
+        Self::extract_mut_arg(kind, list, &mut self.cell_list);
     }
 }
 
@@ -1153,10 +1387,12 @@ impl Validate for CurrentDesign {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
     }
 }
+
+impl Extract for CurrentDesign {}
 
 fn current_design(args: Vec<Argument>, location: Location) -> Result<Command, SemanticError> {
     if !args.is_empty() {
@@ -1189,8 +1425,18 @@ impl Validate for CurrentInstance {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for CurrentInstance {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_opt(kind, list, &self.instance);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_opt(kind, list, &mut self.instance);
     }
 }
 
@@ -1233,8 +1479,18 @@ impl Validate for Expr {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for Expr {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_vec(kind, list, &self.args);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_vec(kind, list, &mut self.args);
     }
 }
 
@@ -1324,8 +1580,22 @@ impl Validate for GetCells {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for GetCells {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_opt(kind, list, &self.hsc);
+        Self::extract_opt(kind, list, &self.of_objects);
+        Self::extract_opt(kind, list, &self.patterns);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_opt(kind, list, &mut self.hsc);
+        Self::extract_mut_opt(kind, list, &mut self.of_objects);
+        Self::extract_mut_opt(kind, list, &mut self.patterns);
     }
 }
 
@@ -1415,8 +1685,18 @@ impl Validate for GetClocks {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for GetClocks {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_opt(kind, list, &self.patterns);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_opt(kind, list, &mut self.patterns);
     }
 }
 
@@ -1490,8 +1770,20 @@ impl Validate for GetLibCells {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for GetLibCells {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_opt(kind, list, &self.hsc);
+        Self::extract_arg(kind, list, &self.patterns);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_opt(kind, list, &mut self.hsc);
+        Self::extract_mut_arg(kind, list, &mut self.patterns);
     }
 }
 
@@ -1574,8 +1866,18 @@ impl Validate for GetLibPins {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for GetLibPins {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.patterns);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.patterns);
     }
 }
 
@@ -1659,8 +1961,18 @@ impl Validate for GetLibs {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for GetLibs {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_opt(kind, list, &self.patterns);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_opt(kind, list, &mut self.patterns);
     }
 }
 
@@ -1758,8 +2070,22 @@ impl Validate for GetNets {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for GetNets {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_opt(kind, list, &self.hsc);
+        Self::extract_opt(kind, list, &self.of_objects);
+        Self::extract_opt(kind, list, &self.patterns);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_opt(kind, list, &mut self.hsc);
+        Self::extract_mut_opt(kind, list, &mut self.of_objects);
+        Self::extract_mut_opt(kind, list, &mut self.patterns);
     }
 }
 
@@ -1857,8 +2183,20 @@ impl Validate for GetPins {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for GetPins {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_opt(kind, list, &self.hsc);
+        Self::extract_opt(kind, list, &self.patterns);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_opt(kind, list, &mut self.hsc);
+        Self::extract_mut_opt(kind, list, &mut self.patterns);
     }
 }
 
@@ -1945,8 +2283,18 @@ impl Validate for GetPorts {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for GetPorts {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_opt(kind, list, &self.patterns);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_opt(kind, list, &mut self.patterns);
     }
 }
 
@@ -2054,8 +2402,40 @@ impl Validate for GroupPath {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for GroupPath {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_opt(kind, list, &self.name);
+        Self::extract_opt(kind, list, &self.weight);
+        Self::extract_opt(kind, list, &self.from);
+        Self::extract_opt(kind, list, &self.rise_from);
+        Self::extract_opt(kind, list, &self.fall_from);
+        Self::extract_opt(kind, list, &self.to);
+        Self::extract_opt(kind, list, &self.rise_to);
+        Self::extract_opt(kind, list, &self.fall_to);
+        Self::extract_vec(kind, list, &self.through);
+        Self::extract_vec(kind, list, &self.rise_through);
+        Self::extract_vec(kind, list, &self.fall_through);
+        Self::extract_opt(kind, list, &self.comment);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_opt(kind, list, &mut self.name);
+        Self::extract_mut_opt(kind, list, &mut self.weight);
+        Self::extract_mut_opt(kind, list, &mut self.from);
+        Self::extract_mut_opt(kind, list, &mut self.rise_from);
+        Self::extract_mut_opt(kind, list, &mut self.fall_from);
+        Self::extract_mut_opt(kind, list, &mut self.to);
+        Self::extract_mut_opt(kind, list, &mut self.rise_to);
+        Self::extract_mut_opt(kind, list, &mut self.fall_to);
+        Self::extract_mut_vec(kind, list, &mut self.through);
+        Self::extract_mut_vec(kind, list, &mut self.rise_through);
+        Self::extract_mut_vec(kind, list, &mut self.fall_through);
+        Self::extract_mut_opt(kind, list, &mut self.comment);
     }
 }
 
@@ -2156,8 +2536,18 @@ impl Validate for List {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for List {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_vec(kind, list, &self.args);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_vec(kind, list, &mut self.args);
     }
 }
 
@@ -2201,8 +2591,20 @@ impl Validate for Set {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for Set {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.variable_name);
+        Self::extract_arg(kind, list, &self.value);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.variable_name);
+        Self::extract_mut_arg(kind, list, &mut self.value);
     }
 }
 
@@ -2252,8 +2654,20 @@ impl Validate for SetCaseAnalysis {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetCaseAnalysis {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_opt(kind, list, &self.value);
+        Self::extract_arg(kind, list, &self.port_or_pin_list);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_opt(kind, list, &mut self.value);
+        Self::extract_mut_arg(kind, list, &mut self.port_or_pin_list);
     }
 }
 
@@ -2321,8 +2735,22 @@ impl Validate for SetClockGatingCheck {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetClockGatingCheck {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_opt(kind, list, &self.setup);
+        Self::extract_opt(kind, list, &self.hold);
+        Self::extract_opt(kind, list, &self.object_list);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_opt(kind, list, &mut self.setup);
+        Self::extract_mut_opt(kind, list, &mut self.hold);
+        Self::extract_mut_opt(kind, list, &mut self.object_list);
     }
 }
 
@@ -2427,8 +2855,22 @@ impl Validate for SetClockGroups {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetClockGroups {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_vec(kind, list, &self.group);
+        Self::extract_opt(kind, list, &self.name);
+        Self::extract_opt(kind, list, &self.comment);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_vec(kind, list, &mut self.group);
+        Self::extract_mut_opt(kind, list, &mut self.name);
+        Self::extract_mut_opt(kind, list, &mut self.comment);
     }
 }
 
@@ -2553,8 +2995,22 @@ impl Validate for SetClockLatency {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetClockLatency {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_opt(kind, list, &self.clock);
+        Self::extract_arg(kind, list, &self.delay);
+        Self::extract_arg(kind, list, &self.object_list);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_opt(kind, list, &mut self.clock);
+        Self::extract_mut_arg(kind, list, &mut self.delay);
+        Self::extract_mut_arg(kind, list, &mut self.object_list);
     }
 }
 
@@ -2657,8 +3113,22 @@ impl Validate for SetClockSense {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetClockSense {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_opt(kind, list, &self.clocks);
+        Self::extract_opt(kind, list, &self.pulse);
+        Self::extract_opt(kind, list, &self.pins);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_opt(kind, list, &mut self.clocks);
+        Self::extract_mut_opt(kind, list, &mut self.pulse);
+        Self::extract_mut_opt(kind, list, &mut self.pins);
     }
 }
 
@@ -2745,8 +3215,20 @@ impl Validate for SetClockTransition {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetClockTransition {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.transition);
+        Self::extract_arg(kind, list, &self.clock_list);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.transition);
+        Self::extract_mut_arg(kind, list, &mut self.clock_list);
     }
 }
 
@@ -2893,8 +3375,32 @@ impl Validate for SetClockUncertainty {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetClockUncertainty {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_opt(kind, list, &self.from);
+        Self::extract_opt(kind, list, &self.rise_from);
+        Self::extract_opt(kind, list, &self.fall_from);
+        Self::extract_opt(kind, list, &self.to);
+        Self::extract_opt(kind, list, &self.rise_to);
+        Self::extract_opt(kind, list, &self.fall_to);
+        Self::extract_arg(kind, list, &self.uncertainty);
+        Self::extract_opt(kind, list, &self.object_list);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_opt(kind, list, &mut self.from);
+        Self::extract_mut_opt(kind, list, &mut self.rise_from);
+        Self::extract_mut_opt(kind, list, &mut self.fall_from);
+        Self::extract_mut_opt(kind, list, &mut self.to);
+        Self::extract_mut_opt(kind, list, &mut self.rise_to);
+        Self::extract_mut_opt(kind, list, &mut self.fall_to);
+        Self::extract_mut_arg(kind, list, &mut self.uncertainty);
+        Self::extract_mut_opt(kind, list, &mut self.object_list);
     }
 }
 
@@ -3029,8 +3535,32 @@ impl Validate for SetDataCheck {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetDataCheck {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_opt(kind, list, &self.from);
+        Self::extract_opt(kind, list, &self.to);
+        Self::extract_opt(kind, list, &self.rise_from);
+        Self::extract_opt(kind, list, &self.fall_from);
+        Self::extract_opt(kind, list, &self.rise_to);
+        Self::extract_opt(kind, list, &self.fall_to);
+        Self::extract_opt(kind, list, &self.clock);
+        Self::extract_arg(kind, list, &self.value);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_opt(kind, list, &mut self.from);
+        Self::extract_mut_opt(kind, list, &mut self.to);
+        Self::extract_mut_opt(kind, list, &mut self.rise_from);
+        Self::extract_mut_opt(kind, list, &mut self.fall_from);
+        Self::extract_mut_opt(kind, list, &mut self.rise_to);
+        Self::extract_mut_opt(kind, list, &mut self.fall_to);
+        Self::extract_mut_opt(kind, list, &mut self.clock);
+        Self::extract_mut_arg(kind, list, &mut self.value);
     }
 }
 
@@ -3130,8 +3660,22 @@ impl Validate for SetDisableTiming {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetDisableTiming {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_opt(kind, list, &self.from);
+        Self::extract_opt(kind, list, &self.to);
+        Self::extract_arg(kind, list, &self.cell_pin_list);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_opt(kind, list, &mut self.from);
+        Self::extract_mut_opt(kind, list, &mut self.to);
+        Self::extract_mut_arg(kind, list, &mut self.cell_pin_list);
     }
 }
 
@@ -3196,8 +3740,20 @@ impl Validate for SetDrive {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetDrive {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.resistance);
+        Self::extract_arg(kind, list, &self.port_list);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.resistance);
+        Self::extract_mut_arg(kind, list, &mut self.port_list);
     }
 }
 
@@ -3326,8 +3882,34 @@ impl Validate for SetDrivingCell {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetDrivingCell {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.lib_cell);
+        Self::extract_opt(kind, list, &self.library);
+        Self::extract_opt(kind, list, &self.pin);
+        Self::extract_opt(kind, list, &self.from_pin);
+        Self::extract_opt(kind, list, &self.multiply_by);
+        Self::extract_opt(kind, list, &self.clock);
+        Self::extract_opt(kind, list, &self.input_transition_rise);
+        Self::extract_opt(kind, list, &self.input_transition_fall);
+        Self::extract_arg(kind, list, &self.port_list);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.lib_cell);
+        Self::extract_mut_opt(kind, list, &mut self.library);
+        Self::extract_mut_opt(kind, list, &mut self.pin);
+        Self::extract_mut_opt(kind, list, &mut self.from_pin);
+        Self::extract_mut_opt(kind, list, &mut self.multiply_by);
+        Self::extract_mut_opt(kind, list, &mut self.clock);
+        Self::extract_mut_opt(kind, list, &mut self.input_transition_rise);
+        Self::extract_mut_opt(kind, list, &mut self.input_transition_fall);
+        Self::extract_mut_arg(kind, list, &mut self.port_list);
     }
 }
 
@@ -3540,8 +4122,36 @@ impl Validate for SetFalsePath {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetFalsePath {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_opt(kind, list, &self.from);
+        Self::extract_opt(kind, list, &self.to);
+        Self::extract_vec(kind, list, &self.through);
+        Self::extract_opt(kind, list, &self.rise_from);
+        Self::extract_opt(kind, list, &self.rise_to);
+        Self::extract_vec(kind, list, &self.rise_through);
+        Self::extract_opt(kind, list, &self.fall_from);
+        Self::extract_opt(kind, list, &self.fall_to);
+        Self::extract_vec(kind, list, &self.fall_through);
+        Self::extract_opt(kind, list, &self.comment);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_opt(kind, list, &mut self.from);
+        Self::extract_mut_opt(kind, list, &mut self.to);
+        Self::extract_mut_vec(kind, list, &mut self.through);
+        Self::extract_mut_opt(kind, list, &mut self.rise_from);
+        Self::extract_mut_opt(kind, list, &mut self.rise_to);
+        Self::extract_mut_vec(kind, list, &mut self.rise_through);
+        Self::extract_mut_opt(kind, list, &mut self.fall_from);
+        Self::extract_mut_opt(kind, list, &mut self.fall_to);
+        Self::extract_mut_vec(kind, list, &mut self.fall_through);
+        Self::extract_mut_opt(kind, list, &mut self.comment);
     }
 }
 
@@ -3647,8 +4257,20 @@ impl Validate for SetFanoutLoad {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetFanoutLoad {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.value);
+        Self::extract_arg(kind, list, &self.port_list);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.value);
+        Self::extract_mut_arg(kind, list, &mut self.port_list);
     }
 }
 
@@ -3694,8 +4316,18 @@ impl Validate for SetHierarchySeparator {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetHierarchySeparator {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.separator);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.separator);
     }
 }
 
@@ -3752,8 +4384,20 @@ impl Validate for SetIdealLatency {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetIdealLatency {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.delay);
+        Self::extract_arg(kind, list, &self.object_list);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.delay);
+        Self::extract_mut_arg(kind, list, &mut self.object_list);
     }
 }
 
@@ -3818,8 +4462,18 @@ impl Validate for SetIdealNetwork {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetIdealNetwork {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.object_list);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.object_list);
     }
 }
 
@@ -3881,8 +4535,20 @@ impl Validate for SetIdealTransition {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetIdealTransition {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.transition_time);
+        Self::extract_arg(kind, list, &self.object_list);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.transition_time);
+        Self::extract_mut_arg(kind, list, &mut self.object_list);
     }
 }
 
@@ -4007,8 +4673,24 @@ impl Validate for SetInputDelay {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetInputDelay {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_opt(kind, list, &self.clock);
+        Self::extract_opt(kind, list, &self.reference_pin);
+        Self::extract_arg(kind, list, &self.delay_value);
+        Self::extract_arg(kind, list, &self.port_pin_list);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_opt(kind, list, &mut self.clock);
+        Self::extract_mut_opt(kind, list, &mut self.reference_pin);
+        Self::extract_mut_arg(kind, list, &mut self.delay_value);
+        Self::extract_mut_arg(kind, list, &mut self.port_pin_list);
     }
 }
 
@@ -4141,8 +4823,22 @@ impl Validate for SetInputTransition {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetInputTransition {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_opt(kind, list, &self.clock);
+        Self::extract_arg(kind, list, &self.transition);
+        Self::extract_arg(kind, list, &self.port_list);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_opt(kind, list, &mut self.clock);
+        Self::extract_mut_arg(kind, list, &mut self.transition);
+        Self::extract_mut_arg(kind, list, &mut self.port_list);
     }
 }
 
@@ -4215,8 +4911,18 @@ impl Validate for SetLevelShifterStrategy {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetLevelShifterStrategy {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.rule);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.rule);
     }
 }
 
@@ -4271,8 +4977,20 @@ impl Validate for SetLevelShifterThreshold {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetLevelShifterThreshold {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.voltage);
+        Self::extract_opt(kind, list, &self.percent);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.voltage);
+        Self::extract_mut_opt(kind, list, &mut self.percent);
     }
 }
 
@@ -4342,8 +5060,20 @@ impl Validate for SetLoad {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetLoad {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.value);
+        Self::extract_arg(kind, list, &self.objects);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.value);
+        Self::extract_mut_arg(kind, list, &mut self.objects);
     }
 }
 
@@ -4417,8 +5147,18 @@ impl Validate for SetLogicDc {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetLogicDc {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.port_list);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.port_list);
     }
 }
 
@@ -4461,8 +5201,18 @@ impl Validate for SetLogicOne {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetLogicOne {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.port_list);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.port_list);
     }
 }
 
@@ -4505,8 +5255,18 @@ impl Validate for SetLogicZero {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetLogicZero {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.port_list);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.port_list);
     }
 }
 
@@ -4549,8 +5309,18 @@ impl Validate for SetMaxArea {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetMaxArea {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.area_value);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.area_value);
     }
 }
 
@@ -4596,8 +5366,20 @@ impl Validate for SetMaxCapacitance {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetMaxCapacitance {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.value);
+        Self::extract_arg(kind, list, &self.object_list);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.value);
+        Self::extract_mut_arg(kind, list, &mut self.object_list);
     }
 }
 
@@ -4737,8 +5519,38 @@ impl Validate for SetMaxDelay {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetMaxDelay {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_opt(kind, list, &self.from);
+        Self::extract_opt(kind, list, &self.to);
+        Self::extract_vec(kind, list, &self.through);
+        Self::extract_opt(kind, list, &self.rise_from);
+        Self::extract_opt(kind, list, &self.rise_to);
+        Self::extract_vec(kind, list, &self.rise_through);
+        Self::extract_opt(kind, list, &self.fall_from);
+        Self::extract_opt(kind, list, &self.fall_to);
+        Self::extract_vec(kind, list, &self.fall_through);
+        Self::extract_opt(kind, list, &self.comment);
+        Self::extract_arg(kind, list, &self.delay_value);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_opt(kind, list, &mut self.from);
+        Self::extract_mut_opt(kind, list, &mut self.to);
+        Self::extract_mut_vec(kind, list, &mut self.through);
+        Self::extract_mut_opt(kind, list, &mut self.rise_from);
+        Self::extract_mut_opt(kind, list, &mut self.rise_to);
+        Self::extract_mut_vec(kind, list, &mut self.rise_through);
+        Self::extract_mut_opt(kind, list, &mut self.fall_from);
+        Self::extract_mut_opt(kind, list, &mut self.fall_to);
+        Self::extract_mut_vec(kind, list, &mut self.fall_through);
+        Self::extract_mut_opt(kind, list, &mut self.comment);
+        Self::extract_mut_arg(kind, list, &mut self.delay_value);
     }
 }
 
@@ -4846,8 +5658,20 @@ impl Validate for SetMaxDynamicPower {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetMaxDynamicPower {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.power);
+        Self::extract_opt(kind, list, &self.unit);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.power);
+        Self::extract_mut_opt(kind, list, &mut self.unit);
     }
 }
 
@@ -4898,8 +5722,20 @@ impl Validate for SetMaxFanout {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetMaxFanout {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.value);
+        Self::extract_arg(kind, list, &self.object_list);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.value);
+        Self::extract_mut_arg(kind, list, &mut self.object_list);
     }
 }
 
@@ -4948,8 +5784,20 @@ impl Validate for SetMaxLeakagePower {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetMaxLeakagePower {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.power);
+        Self::extract_opt(kind, list, &self.unit);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.power);
+        Self::extract_mut_opt(kind, list, &mut self.unit);
     }
 }
 
@@ -5000,8 +5848,20 @@ impl Validate for SetMaxTimeBorrow {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetMaxTimeBorrow {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.delay_value);
+        Self::extract_arg(kind, list, &self.object_list);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.delay_value);
+        Self::extract_mut_arg(kind, list, &mut self.object_list);
     }
 }
 
@@ -5064,8 +5924,20 @@ impl Validate for SetMaxTransition {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetMaxTransition {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.value);
+        Self::extract_arg(kind, list, &self.object_list);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.value);
+        Self::extract_mut_arg(kind, list, &mut self.object_list);
     }
 }
 
@@ -5128,8 +6000,20 @@ impl Validate for SetMinCapacitance {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetMinCapacitance {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.value);
+        Self::extract_arg(kind, list, &self.object_list);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.value);
+        Self::extract_mut_arg(kind, list, &mut self.object_list);
     }
 }
 
@@ -5269,8 +6153,38 @@ impl Validate for SetMinDelay {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetMinDelay {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_opt(kind, list, &self.from);
+        Self::extract_opt(kind, list, &self.to);
+        Self::extract_vec(kind, list, &self.through);
+        Self::extract_opt(kind, list, &self.rise_from);
+        Self::extract_opt(kind, list, &self.rise_to);
+        Self::extract_vec(kind, list, &self.rise_through);
+        Self::extract_opt(kind, list, &self.fall_from);
+        Self::extract_opt(kind, list, &self.fall_to);
+        Self::extract_vec(kind, list, &self.fall_through);
+        Self::extract_opt(kind, list, &self.comment);
+        Self::extract_arg(kind, list, &self.delay_value);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_opt(kind, list, &mut self.from);
+        Self::extract_mut_opt(kind, list, &mut self.to);
+        Self::extract_mut_vec(kind, list, &mut self.through);
+        Self::extract_mut_opt(kind, list, &mut self.rise_from);
+        Self::extract_mut_opt(kind, list, &mut self.rise_to);
+        Self::extract_mut_vec(kind, list, &mut self.rise_through);
+        Self::extract_mut_opt(kind, list, &mut self.fall_from);
+        Self::extract_mut_opt(kind, list, &mut self.fall_to);
+        Self::extract_mut_vec(kind, list, &mut self.fall_through);
+        Self::extract_mut_opt(kind, list, &mut self.comment);
+        Self::extract_mut_arg(kind, list, &mut self.delay_value);
     }
 }
 
@@ -5378,8 +6292,20 @@ impl Validate for SetMinPorosity {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetMinPorosity {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.porosity_value);
+        Self::extract_arg(kind, list, &self.object_list);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.porosity_value);
+        Self::extract_mut_arg(kind, list, &mut self.object_list);
     }
 }
 
@@ -5433,8 +6359,20 @@ impl Validate for SetMinPulseWidth {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetMinPulseWidth {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.value);
+        Self::extract_opt(kind, list, &self.object_list);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.value);
+        Self::extract_mut_opt(kind, list, &mut self.object_list);
     }
 }
 
@@ -5574,8 +6512,38 @@ impl Validate for SetMulticyclePath {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetMulticyclePath {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_opt(kind, list, &self.from);
+        Self::extract_opt(kind, list, &self.to);
+        Self::extract_vec(kind, list, &self.through);
+        Self::extract_opt(kind, list, &self.rise_from);
+        Self::extract_opt(kind, list, &self.rise_to);
+        Self::extract_vec(kind, list, &self.rise_through);
+        Self::extract_opt(kind, list, &self.fall_from);
+        Self::extract_opt(kind, list, &self.fall_to);
+        Self::extract_vec(kind, list, &self.fall_through);
+        Self::extract_opt(kind, list, &self.comment);
+        Self::extract_arg(kind, list, &self.path_multiplier);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_opt(kind, list, &mut self.from);
+        Self::extract_mut_opt(kind, list, &mut self.to);
+        Self::extract_mut_vec(kind, list, &mut self.through);
+        Self::extract_mut_opt(kind, list, &mut self.rise_from);
+        Self::extract_mut_opt(kind, list, &mut self.rise_to);
+        Self::extract_mut_vec(kind, list, &mut self.rise_through);
+        Self::extract_mut_opt(kind, list, &mut self.fall_from);
+        Self::extract_mut_opt(kind, list, &mut self.fall_to);
+        Self::extract_mut_vec(kind, list, &mut self.fall_through);
+        Self::extract_mut_opt(kind, list, &mut self.comment);
+        Self::extract_mut_arg(kind, list, &mut self.path_multiplier);
     }
 }
 
@@ -5717,8 +6685,32 @@ impl Validate for SetOperatingConditions {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetOperatingConditions {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_opt(kind, list, &self.library);
+        Self::extract_opt(kind, list, &self.analysis_type);
+        Self::extract_opt(kind, list, &self.max);
+        Self::extract_opt(kind, list, &self.min);
+        Self::extract_opt(kind, list, &self.max_library);
+        Self::extract_opt(kind, list, &self.min_library);
+        Self::extract_opt(kind, list, &self.object_list);
+        Self::extract_opt(kind, list, &self.condition);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_opt(kind, list, &mut self.library);
+        Self::extract_mut_opt(kind, list, &mut self.analysis_type);
+        Self::extract_mut_opt(kind, list, &mut self.max);
+        Self::extract_mut_opt(kind, list, &mut self.min);
+        Self::extract_mut_opt(kind, list, &mut self.max_library);
+        Self::extract_mut_opt(kind, list, &mut self.min_library);
+        Self::extract_mut_opt(kind, list, &mut self.object_list);
+        Self::extract_mut_opt(kind, list, &mut self.condition);
     }
 }
 
@@ -5857,8 +6849,24 @@ impl Validate for SetOutputDelay {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetOutputDelay {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_opt(kind, list, &self.clock);
+        Self::extract_opt(kind, list, &self.reference_pin);
+        Self::extract_arg(kind, list, &self.delay_value);
+        Self::extract_arg(kind, list, &self.port_pin_list);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_opt(kind, list, &mut self.clock);
+        Self::extract_mut_opt(kind, list, &mut self.reference_pin);
+        Self::extract_mut_arg(kind, list, &mut self.delay_value);
+        Self::extract_mut_arg(kind, list, &mut self.port_pin_list);
     }
 }
 
@@ -5966,8 +6974,20 @@ impl Validate for SetPortFanoutNumber {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetPortFanoutNumber {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.value);
+        Self::extract_arg(kind, list, &self.port_list);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.value);
+        Self::extract_mut_arg(kind, list, &mut self.port_list);
     }
 }
 
@@ -6016,8 +7036,18 @@ impl Validate for SetPropagatedClock {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetPropagatedClock {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.object_list);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.object_list);
     }
 }
 
@@ -6067,8 +7097,20 @@ impl Validate for SetResistance {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetResistance {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.value);
+        Self::extract_arg(kind, list, &self.net_list);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.value);
+        Self::extract_mut_arg(kind, list, &mut self.net_list);
     }
 }
 
@@ -6155,8 +7197,24 @@ impl Validate for SetSense {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetSense {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_opt(kind, list, &self.r#type);
+        Self::extract_opt(kind, list, &self.pulse);
+        Self::extract_opt(kind, list, &self.clocks);
+        Self::extract_arg(kind, list, &self.pin_list);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_opt(kind, list, &mut self.r#type);
+        Self::extract_mut_opt(kind, list, &mut self.pulse);
+        Self::extract_mut_opt(kind, list, &mut self.clocks);
+        Self::extract_mut_arg(kind, list, &mut self.pin_list);
     }
 }
 
@@ -6293,8 +7351,20 @@ impl Validate for SetTimingDerate {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetTimingDerate {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.derate_value);
+        Self::extract_opt(kind, list, &self.object_list);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.derate_value);
+        Self::extract_mut_opt(kind, list, &mut self.object_list);
     }
 }
 
@@ -6415,8 +7485,28 @@ impl Validate for SetUnits {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetUnits {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_opt(kind, list, &self.capacitance);
+        Self::extract_opt(kind, list, &self.resistance);
+        Self::extract_opt(kind, list, &self.time);
+        Self::extract_opt(kind, list, &self.voltage);
+        Self::extract_opt(kind, list, &self.current);
+        Self::extract_opt(kind, list, &self.power);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_opt(kind, list, &mut self.capacitance);
+        Self::extract_mut_opt(kind, list, &mut self.resistance);
+        Self::extract_mut_opt(kind, list, &mut self.time);
+        Self::extract_mut_opt(kind, list, &mut self.voltage);
+        Self::extract_mut_opt(kind, list, &mut self.current);
+        Self::extract_mut_opt(kind, list, &mut self.power);
     }
 }
 
@@ -6498,8 +7588,22 @@ impl Validate for SetVoltage {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetVoltage {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_opt(kind, list, &self.min);
+        Self::extract_opt(kind, list, &self.object_list);
+        Self::extract_arg(kind, list, &self.max_case_voltage);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_opt(kind, list, &mut self.min);
+        Self::extract_mut_opt(kind, list, &mut self.object_list);
+        Self::extract_mut_arg(kind, list, &mut self.max_case_voltage);
     }
 }
 
@@ -6553,8 +7657,18 @@ impl Validate for SetWireLoadMinBlockSize {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetWireLoadMinBlockSize {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.size);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.size);
     }
 }
 
@@ -6600,8 +7714,18 @@ impl Validate for SetWireLoadMode {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetWireLoadMode {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.mode_name);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.mode_name);
     }
 }
 
@@ -6654,8 +7778,22 @@ impl Validate for SetWireLoadModel {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetWireLoadModel {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_arg(kind, list, &self.name);
+        Self::extract_opt(kind, list, &self.library);
+        Self::extract_opt(kind, list, &self.object_list);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_arg(kind, list, &mut self.name);
+        Self::extract_mut_opt(kind, list, &mut self.library);
+        Self::extract_mut_opt(kind, list, &mut self.object_list);
     }
 }
 
@@ -6726,8 +7864,22 @@ impl Validate for SetWireLoadSelectionGroup {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for SetWireLoadSelectionGroup {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_opt(kind, list, &self.library);
+        Self::extract_arg(kind, list, &self.group_name);
+        Self::extract_opt(kind, list, &self.object_list);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_opt(kind, list, &mut self.library);
+        Self::extract_mut_arg(kind, list, &mut self.group_name);
+        Self::extract_mut_opt(kind, list, &mut self.object_list);
     }
 }
 
@@ -6799,8 +7951,18 @@ impl Validate for Unknown {
         ret
     }
 
-    fn location(&self) -> &Location {
-        &self.location
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+}
+
+impl Extract for Unknown {
+    fn extract<'a>(&'a self, kind: CommandKind, list: &mut Vec<&'a Command>) {
+        Self::extract_vec(kind, list, &self.args);
+    }
+
+    fn extract_mut<'a>(&'a mut self, kind: CommandKind, list: &mut Vec<&'a mut Command>) {
+        Self::extract_mut_vec(kind, list, &mut self.args);
     }
 }
 
