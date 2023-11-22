@@ -41,8 +41,8 @@
 /* 31 */ Argument: TokenWord;
 /* 32 */ Argument: TokenStringGroup;
 /* 33 */ Argument: TokenBraceGroup;
-/* 34 */ Argument: CommandReplacement;
-/* 35 */ CommandReplacement: TokenLBracket Command TokenRBracket;
+/* 34 */ Argument: CommandSubstitution;
+/* 35 */ CommandSubstitution: TokenLBracket Command TokenRBracket;
 /* 36 */ Command: TokenWord CommandList /* Vec */;
 /* 37 */ CommandList /* Vec<T>::Push */: Argument CommandList;
 /* 38 */ CommandList /* Vec<T>::New */: ;

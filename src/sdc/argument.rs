@@ -11,7 +11,7 @@ pub enum Argument {
     Word(ArgumentWord),
     StringGroup(ArgumentStringGroup),
     BraceGroup(ArgumentBraceGroup),
-    CommandReplacement(Box<Command>, Location),
+    CommandSubstitution(Box<Command>, Location),
 }
 
 impl Argument {
@@ -20,7 +20,7 @@ impl Argument {
             Argument::Word(x) => x.text.as_str(),
             Argument::StringGroup(x) => x.text.as_str(),
             Argument::BraceGroup(x) => x.text.as_str(),
-            Argument::CommandReplacement(_, _) => "",
+            Argument::CommandSubstitution(_, _) => "",
         }
     }
 
@@ -29,7 +29,7 @@ impl Argument {
             Argument::Word(x) => x.location.clone(),
             Argument::StringGroup(x) => x.location.clone(),
             Argument::BraceGroup(x) => x.location.clone(),
-            Argument::CommandReplacement(_, x) => x.clone(),
+            Argument::CommandSubstitution(_, x) => x.clone(),
         }
     }
 }
@@ -40,7 +40,7 @@ impl Validate for Argument {
             Argument::Word(_) => vec![],
             Argument::StringGroup(_) => vec![],
             Argument::BraceGroup(_) => vec![],
-            Argument::CommandReplacement(x, _) => x.validate(version),
+            Argument::CommandSubstitution(x, _) => x.validate(version),
         }
     }
 
@@ -55,7 +55,7 @@ impl fmt::Display for Argument {
             Argument::Word(x) => x.text.fmt(f),
             Argument::StringGroup(x) => x.text.fmt(f),
             Argument::BraceGroup(x) => x.text.fmt(f),
-            Argument::CommandReplacement(x, _) => format!("[{}]", x).fmt(f),
+            Argument::CommandSubstitution(x, _) => format!("[{}]", x).fmt(f),
         }
     }
 }
@@ -114,18 +114,18 @@ impl TryFrom<&grammar::Argument<'_>> for Argument {
                     .into();
                 let location = Location::from_to(&start, &end);
 
-                Ok(Self::StringGroup(ArgumentStringGroup { text, location }))
+                Ok(Self::BraceGroup(ArgumentBraceGroup { text, location }))
             }
-            grammar::Argument::CommandReplacement(x) => {
+            grammar::Argument::CommandSubstitution(x) => {
                 let start: Location = (&x
-                    .command_replacement
+                    .command_substitution
                     .token_l_bracket
                     .term_l_bracket
                     .term_l_bracket
                     .location)
                     .into();
                 let end: Location = (&x
-                    .command_replacement
+                    .command_substitution
                     .token_r_bracket
                     .term_r_bracket
                     .term_r_bracket
@@ -133,8 +133,8 @@ impl TryFrom<&grammar::Argument<'_>> for Argument {
                     .into();
                 let location = Location::from_to(&start, &end);
 
-                Ok(Self::CommandReplacement(
-                    Box::new(x.command_replacement.command.as_ref().try_into()?),
+                Ok(Self::CommandSubstitution(
+                    Box::new(x.command_substitution.command.as_ref().try_into()?),
                     location,
                 ))
             }
@@ -164,6 +164,15 @@ impl ToString for grammar::TermBraceGroup<'_> {
 pub struct ArgumentWord {
     pub text: String,
     location: Location,
+}
+
+impl ArgumentWord {
+    pub(crate) fn new(text: &str, location: &Location) -> Self {
+        Self {
+            text: text.to_string(),
+            location: location.clone(),
+        }
+    }
 }
 
 /// ArgumentStringGroup

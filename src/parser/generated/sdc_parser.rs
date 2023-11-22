@@ -102,7 +102,7 @@ pub const NON_TERMINALS: &[&str; 32] = &[
     /*  1 */ "Command",
     /*  2 */ "CommandLine",
     /*  3 */ "CommandList",
-    /*  4 */ "CommandReplacement",
+    /*  4 */ "CommandSubstitution",
     /*  5 */ "Source",
     /*  6 */ "SourceList",
     /*  7 */ "SourceListGroup",
@@ -170,7 +170,7 @@ pub const LOOKAHEAD_AUTOMATA: &[LookaheadDFA; 32] = &[
         ],
         k: 1,
     },
-    /* 4 - "CommandReplacement" */
+    /* 4 - "CommandSubstitution" */
     LookaheadDFA {
         prod0: 35,
         transitions: &[],
@@ -564,12 +564,12 @@ pub const PRODUCTIONS: &[Production; 46] = &[
         lhs: 0,
         production: &[ParseType::N(21)],
     },
-    // 34 - Argument: CommandReplacement;
+    // 34 - Argument: CommandSubstitution;
     Production {
         lhs: 0,
         production: &[ParseType::N(4)],
     },
-    // 35 - CommandReplacement: TokenLBracket Command TokenRBracket;
+    // 35 - CommandSubstitution: TokenLBracket Command TokenRBracket;
     Production {
         lhs: 4,
         production: &[ParseType::N(26), ParseType::N(1), ParseType::N(24)],

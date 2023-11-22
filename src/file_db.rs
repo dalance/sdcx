@@ -105,6 +105,14 @@ impl Location {
         let file_id = files.get_id(&self.file_name.display().to_string()).unwrap();
         (range, file_id)
     }
+
+    pub(crate) fn is_adjacent(&self, x: &Location) -> bool {
+        if self.start_byte > x.start_byte {
+            self.start_byte == (x.start_byte + x.length)
+        } else {
+            x.start_byte == (self.start_byte + self.length)
+        }
+    }
 }
 
 impl From<&Location> for Range<usize> {

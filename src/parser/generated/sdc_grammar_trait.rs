@@ -114,8 +114,8 @@ pub trait SdcGrammarTrait<'t> {
         Ok(())
     }
 
-    /// Semantic action for non-terminal 'CommandReplacement'
-    fn command_replacement(&mut self, _arg: &CommandReplacement<'t>) -> Result<()> {
+    /// Semantic action for non-terminal 'CommandSubstitution'
+    fn command_substitution(&mut self, _arg: &CommandSubstitution<'t>) -> Result<()> {
         Ok(())
     }
 
@@ -231,13 +231,13 @@ pub struct ArgumentTokenBraceGroup<'t> {
 ///
 /// Type derived for production 34
 ///
-/// `Argument: CommandReplacement;`
+/// `Argument: CommandSubstitution;`
 ///
 #[allow(dead_code)]
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
-pub struct ArgumentCommandReplacement<'t> {
-    pub command_replacement: Box<CommandReplacement<'t>>,
+pub struct ArgumentCommandSubstitution<'t> {
+    pub command_substitution: Box<CommandSubstitution<'t>>,
 }
 
 ///
@@ -290,7 +290,7 @@ pub enum Argument<'t> {
     TokenWord(ArgumentTokenWord<'t>),
     TokenStringGroup(ArgumentTokenStringGroup<'t>),
     TokenBraceGroup(ArgumentTokenBraceGroup<'t>),
-    CommandReplacement(ArgumentCommandReplacement<'t>),
+    CommandSubstitution(ArgumentCommandSubstitution<'t>),
 }
 
 ///
@@ -326,12 +326,12 @@ pub struct CommandList<'t> {
 }
 
 ///
-/// Type derived for non-terminal CommandReplacement
+/// Type derived for non-terminal CommandSubstitution
 ///
 #[allow(dead_code)]
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
-pub struct CommandReplacement<'t> {
+pub struct CommandSubstitution<'t> {
     pub token_l_bracket: Box<TokenLBracket<'t>>,
     pub command: Box<Command<'t>>,
     pub token_r_bracket: Box<TokenRBracket<'t>>,
@@ -627,7 +627,7 @@ pub enum ASTType<'t> {
     Command(Command<'t>),
     CommandLine(CommandLine<'t>),
     CommandList(Vec<CommandList<'t>>),
-    CommandReplacement(CommandReplacement<'t>),
+    CommandSubstitution(CommandSubstitution<'t>),
     Source(Source<'t>),
     SourceList(Vec<SourceList<'t>>),
     SourceListGroup(SourceListGroup<'t>),
@@ -1403,17 +1403,18 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
 
     /// Semantic action for production 34:
     ///
-    /// `Argument: CommandReplacement;`
+    /// `Argument: CommandSubstitution;`
     ///
     #[parol_runtime::function_name::named]
-    fn argument_3(&mut self, _command_replacement: &ParseTreeType<'t>) -> Result<()> {
+    fn argument_3(&mut self, _command_substitution: &ParseTreeType<'t>) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let command_replacement = pop_item!(self, command_replacement, CommandReplacement, context);
-        let argument_3_built = ArgumentCommandReplacement {
-            command_replacement: Box::new(command_replacement),
+        let command_substitution =
+            pop_item!(self, command_substitution, CommandSubstitution, context);
+        let argument_3_built = ArgumentCommandSubstitution {
+            command_substitution: Box::new(command_substitution),
         };
-        let argument_3_built = Argument::CommandReplacement(argument_3_built);
+        let argument_3_built = Argument::CommandSubstitution(argument_3_built);
         // Calling user action here
         self.user_grammar.argument(&argument_3_built)?;
         self.push(ASTType::Argument(argument_3_built), context);
@@ -1422,10 +1423,10 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
 
     /// Semantic action for production 35:
     ///
-    /// `CommandReplacement: TokenLBracket Command TokenRBracket;`
+    /// `CommandSubstitution: TokenLBracket Command TokenRBracket;`
     ///
     #[parol_runtime::function_name::named]
-    fn command_replacement(
+    fn command_substitution(
         &mut self,
         _token_l_bracket: &ParseTreeType<'t>,
         _command: &ParseTreeType<'t>,
@@ -1436,16 +1437,16 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         let token_r_bracket = pop_item!(self, token_r_bracket, TokenRBracket, context);
         let command = pop_item!(self, command, Command, context);
         let token_l_bracket = pop_item!(self, token_l_bracket, TokenLBracket, context);
-        let command_replacement_built = CommandReplacement {
+        let command_substitution_built = CommandSubstitution {
             token_l_bracket: Box::new(token_l_bracket),
             command: Box::new(command),
             token_r_bracket: Box::new(token_r_bracket),
         };
         // Calling user action here
         self.user_grammar
-            .command_replacement(&command_replacement_built)?;
+            .command_substitution(&command_substitution_built)?;
         self.push(
-            ASTType::CommandReplacement(command_replacement_built),
+            ASTType::CommandSubstitution(command_substitution_built),
             context,
         );
         Ok(())
@@ -1684,7 +1685,7 @@ impl<'t> UserActionsTrait<'t> for SdcGrammarAuto<'t, '_> {
             32 => self.argument_1(&children[0]),
             33 => self.argument_2(&children[0]),
             34 => self.argument_3(&children[0]),
-            35 => self.command_replacement(&children[0], &children[1], &children[2]),
+            35 => self.command_substitution(&children[0], &children[1], &children[2]),
             36 => self.command(&children[0], &children[1]),
             37 => self.command_list_0(&children[0], &children[1]),
             38 => self.command_list_1(),

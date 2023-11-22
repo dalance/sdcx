@@ -16,13 +16,13 @@ impl TryFrom<&Argument> for Object {
 
     fn try_from(value: &Argument) -> Result<Self, Self::Error> {
         let location = value.location();
-        if let Argument::CommandReplacement(value, _) = value {
+        if let Argument::CommandSubstitution(value, _) = value {
             match **value {
                 Command::GetPins(ref x) if x.patterns.is_some() => {
                     match x.patterns.clone().unwrap() {
                         Argument::Word(x) => return Ok(Object::Pin(x.text.clone())),
                         Argument::BraceGroup(x) => {
-                            let name = x.text[0..x.text.len() - 1].to_string();
+                            let name = x.text[1..x.text.len() - 1].to_string();
                             if name.contains(char::is_whitespace) {
                                 return Err(SemanticError::Interpret(location));
                             }
@@ -35,7 +35,7 @@ impl TryFrom<&Argument> for Object {
                     match x.patterns.clone().unwrap() {
                         Argument::Word(x) => return Ok(Object::Port(x.text.clone())),
                         Argument::BraceGroup(x) => {
-                            let name = x.text[0..x.text.len() - 1].to_string();
+                            let name = x.text[1..x.text.len() - 1].to_string();
                             if name.contains(char::is_whitespace) {
                                 return Err(SemanticError::Interpret(location));
                             }
@@ -48,7 +48,7 @@ impl TryFrom<&Argument> for Object {
                     match x.patterns.clone().unwrap() {
                         Argument::Word(x) => return Ok(Object::Net(x.text.clone())),
                         Argument::BraceGroup(x) => {
-                            let name = x.text[0..x.text.len() - 1].to_string();
+                            let name = x.text[1..x.text.len() - 1].to_string();
                             if name.contains(char::is_whitespace) {
                                 return Err(SemanticError::Interpret(location));
                             }
@@ -61,7 +61,7 @@ impl TryFrom<&Argument> for Object {
                     match x.patterns.clone().unwrap() {
                         Argument::Word(x) => return Ok(Object::Cell(x.text.clone())),
                         Argument::BraceGroup(x) => {
-                            let name = x.text[0..x.text.len() - 1].to_string();
+                            let name = x.text[1..x.text.len() - 1].to_string();
                             if name.contains(char::is_whitespace) {
                                 return Err(SemanticError::Interpret(location));
                             }

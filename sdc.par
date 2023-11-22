@@ -50,9 +50,9 @@ TokenWord       : TermWord        [ TermBackslashLineBreak ];
 // Source
 // ----------------------------------------------------------------------------
 
-Argument: TokenWord | TokenStringGroup | TokenBraceGroup | CommandReplacement;
+Argument: TokenWord | TokenStringGroup | TokenBraceGroup | CommandSubstitution;
 
-CommandReplacement: TokenLBracket Command TokenRBracket;
+CommandSubstitution: TokenLBracket Command TokenRBracket;
 
 Command: TokenWord { Argument };
 

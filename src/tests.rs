@@ -103,6 +103,10 @@ fn format() {
     check_format("list A B C ", "list A B C");
     check_format("set A B", "set A B");
     check_format("set A B", "set A B");
+    check_format("get_pins   a[10]", "get_pins a[10]");
+    check_format("get_pins   a[0x10]", "get_pins a[0x10]");
+    check_format("get_pins   a[*]", "get_pins a[*]");
+    check_format("get_pins   a[3:2]", "get_pins a[3:2]");
 }
 
 #[test]

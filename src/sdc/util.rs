@@ -437,20 +437,20 @@ impl<'a, 'b> Matcher for LazyMatcher<'a, 'b> {
 
 pub(crate) trait Extract {
     fn extract_arg<'a>(kind: CommandKind, list: &mut Vec<&'a Command>, arg: &'a Argument) {
-        if let Argument::CommandReplacement(c, _) = arg {
+        if let Argument::CommandSubstitution(c, _) = arg {
             c.extract(kind, list);
         }
     }
 
     fn extract_opt<'a>(kind: CommandKind, list: &mut Vec<&'a Command>, arg: &'a Option<Argument>) {
-        if let Some(Argument::CommandReplacement(c, _)) = arg {
+        if let Some(Argument::CommandSubstitution(c, _)) = arg {
             c.extract(kind, list);
         }
     }
 
     fn extract_vec<'a>(kind: CommandKind, list: &mut Vec<&'a Command>, args: &'a Vec<Argument>) {
         for arg in args {
-            if let Argument::CommandReplacement(c, _) = arg {
+            if let Argument::CommandSubstitution(c, _) = arg {
                 c.extract(kind, list);
             }
         }
@@ -461,7 +461,7 @@ pub(crate) trait Extract {
         list: &mut Vec<&'a mut Command>,
         arg: &'a mut Argument,
     ) {
-        if let Argument::CommandReplacement(c, _) = arg {
+        if let Argument::CommandSubstitution(c, _) = arg {
             c.extract_mut(kind, list);
         }
     }
@@ -471,7 +471,7 @@ pub(crate) trait Extract {
         list: &mut Vec<&'a mut Command>,
         arg: &'a mut Option<Argument>,
     ) {
-        if let Some(Argument::CommandReplacement(c, _)) = arg {
+        if let Some(Argument::CommandSubstitution(c, _)) = arg {
             c.extract_mut(kind, list);
         }
     }
@@ -482,7 +482,7 @@ pub(crate) trait Extract {
         args: &'a mut Vec<Argument>,
     ) {
         for arg in args {
-            if let Argument::CommandReplacement(c, _) = arg {
+            if let Argument::CommandSubstitution(c, _) = arg {
                 c.extract_mut(kind, list);
             }
         }

@@ -4,9 +4,11 @@ use crate::errors::SemanticError;
 use crate::errors::ValidateError;
 use crate::file_db::Location;
 use crate::parser::sdc_grammar_trait as grammar;
+use crate::sdc::argument::ArgumentWord;
 use crate::sdc::util::*;
 use crate::sdc::SdcVersion::*;
 use crate::sdc::{Argument, SdcVersion};
+use regex::Regex;
 use std::fmt;
 use std::sync::OnceLock;
 
@@ -540,6 +542,79 @@ impl Extract for Command {
     }
 }
 
+// Bus notation support
+fn adjust_bus_notation(args: Vec<Argument>) -> Vec<Argument> {
+    let mut ret = vec![];
+
+    let mut buf = "".to_string();
+    let mut last_loc: Option<Location> = None;
+
+    // The following pattern will be treated as bus notation instead of command substitution
+    // [0] [0xff] [1:3] [*]
+    static BUS_NOTATION: OnceLock<Regex> = OnceLock::new();
+    let bus_notation = BUS_NOTATION
+        .get_or_init(|| Regex::new(r"^(\*|[0-9]+|0x[0-9a-fA-F]+|[0-9]+:[0-9]+)$").unwrap());
+
+    for arg in args {
+        let loc = arg.location();
+        match arg {
+            Argument::Word(x) => {
+                if let Some(ref last) = last_loc {
+                    if last.is_adjacent(&loc) {
+                        buf.push_str(&x.text);
+                        last_loc = Some(Location::from_to(last, &loc));
+                    } else {
+                        ret.push(Argument::Word(ArgumentWord::new(&buf, last)));
+                        buf = x.text.clone();
+                        last_loc = Some(loc);
+                    }
+                } else {
+                    buf.push_str(&x.text);
+                    last_loc = Some(loc);
+                }
+            }
+            Argument::StringGroup(x) => {
+                if let Some(ref last) = last_loc {
+                    ret.push(Argument::Word(ArgumentWord::new(&buf, last)));
+                    buf = "".to_string();
+                    last_loc = None;
+                }
+                ret.push(Argument::StringGroup(x));
+            }
+            Argument::BraceGroup(x) => {
+                if let Some(ref last) = last_loc {
+                    ret.push(Argument::Word(ArgumentWord::new(&buf, last)));
+                    buf = "".to_string();
+                    last_loc = None;
+                }
+                ret.push(Argument::BraceGroup(x));
+            }
+            Argument::CommandSubstitution(x, y) => {
+                if let Some(ref last) = last_loc {
+                    let cmd = format!("{}", x);
+                    if last.is_adjacent(&loc) && bus_notation.is_match(&cmd) {
+                        buf.push_str(&format!("[{}]", cmd));
+                        last_loc = Some(Location::from_to(last, &loc));
+                    } else {
+                        ret.push(Argument::Word(ArgumentWord::new(&buf, last)));
+                        buf = "".to_string();
+                        last_loc = None;
+                        ret.push(Argument::CommandSubstitution(x, y));
+                    }
+                } else {
+                    ret.push(Argument::CommandSubstitution(x, y));
+                }
+            }
+        }
+    }
+
+    if let Some(ref last) = last_loc {
+        ret.push(Argument::Word(ArgumentWord::new(&buf, last)));
+    }
+
+    ret
+}
+
 impl TryFrom<&grammar::Command<'_>> for Command {
     type Error = SemanticError;
 
@@ -551,6 +626,8 @@ impl TryFrom<&grammar::Command<'_>> for Command {
         for arg in &value.command_list {
             args.push(arg.argument.as_ref().try_into()?);
         }
+
+        let args = adjust_bus_notation(args);
 
         let loc = if args.is_empty() {
             start

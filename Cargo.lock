@@ -1100,6 +1100,7 @@ dependencies = [
  "parol",
  "parol_runtime",
  "pprof",
+ "regex",
  "thiserror",
  "walkdir",
 ]
