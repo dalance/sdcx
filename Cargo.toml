@@ -27,7 +27,7 @@ thiserror          = "1.0"
 [build-dependencies]
 parol         =  "0.26.1"
 parol_runtime = {version = "0.20.1", features = ["auto_generation"]}
-walkdir       = "2.4.0"
+walkdir       = "2.5.0"
 
 [dev-dependencies]
 criterion = "0.5.1"
