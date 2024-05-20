@@ -149,8 +149,8 @@ impl TryFrom<&grammar::Argument<'_>> for Argument {
     }
 }
 
-impl ToString for grammar::TermBraceGroup<'_> {
-    fn to_string(&self) -> String {
+impl fmt::Display for grammar::TermBraceGroup<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut ret = String::new();
         ret.push_str(self.term_l_brace.term_l_brace.text());
         match self.term_brace_group_group.as_ref() {
@@ -162,7 +162,7 @@ impl ToString for grammar::TermBraceGroup<'_> {
             }
         }
         ret.push_str(self.term_r_brace.term_r_brace.text());
-        ret
+        ret.fmt(f)
     }
 }
 

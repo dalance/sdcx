@@ -566,7 +566,7 @@ fn adjust_bus_notation(args: Vec<Argument>) -> Vec<Argument> {
                         last_loc = Some(Location::from_to(last, &loc));
                     } else {
                         ret.push(Argument::Word(ArgumentWord::new(&buf, last)));
-                        buf = x.text.clone();
+                        buf.clone_from(&x.text);
                         last_loc = Some(loc);
                     }
                 } else {

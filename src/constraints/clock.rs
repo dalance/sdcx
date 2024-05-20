@@ -114,13 +114,13 @@ impl fmt::Display for Clock {
             text.push_str(&format!(" source={source}"));
         }
         if !self.waveform.is_empty() {
-            text.push_str(&format!(" waveform=\""));
+            text.push_str(" waveform=\"");
         }
         for w in &self.waveform {
             text.push_str(&format!("{w} "));
         }
         if !self.waveform.is_empty() {
-            text.push_str(&format!("\""));
+            text.push('"');
         }
         text.fmt(f)
     }
@@ -146,19 +146,19 @@ impl<'a> TryFrom<&'a mut CreateClock> for ClockMut<'a> {
 
 impl<'a> ClockMut<'a> {
     pub fn name(&self) -> &str {
-        &self.inner.name()
+        self.inner.name()
     }
 
     pub fn source(&self) -> &Option<Object> {
-        &self.inner.source()
+        self.inner.source()
     }
 
     pub fn period(&self) -> &f32 {
-        &self.inner.period()
+        self.inner.period()
     }
 
     pub fn waveform(&self) -> &[f32] {
-        &self.inner.waveform()
+        self.inner.waveform()
     }
 
     pub fn rename(&mut self, name: &str) {
