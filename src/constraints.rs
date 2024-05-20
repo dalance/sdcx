@@ -1,6 +1,7 @@
 pub mod clock;
 pub mod object;
 
+use crate::errors::InterpretError;
 use crate::sdc::{Command, CommandKind, Sdc};
 pub use clock::*;
 pub use object::*;
@@ -11,14 +12,24 @@ pub struct Constraints {
 }
 
 impl Constraints {
-    pub fn clocks(&mut self) -> Vec<Clock> {
+    pub fn clocks_mut(&mut self) -> Result<Vec<ClockMut>, InterpretError> {
         let mut ret = vec![];
         for clock in self.sdc.extract_mut(CommandKind::CreateClock) {
             if let Command::CreateClock(x) = clock {
-                ret.push(Clock::from(x));
+                ret.push(ClockMut::try_from(x)?);
             }
         }
-        ret
+        Ok(ret)
+    }
+
+    pub fn clocks(&mut self) -> Result<Vec<Clock>, InterpretError> {
+        let mut ret = vec![];
+        for clock in self.sdc.extract(CommandKind::CreateClock) {
+            if let Command::CreateClock(x) = clock {
+                ret.push(Clock::try_from(x)?);
+            }
+        }
+        Ok(ret)
     }
 }
 
@@ -53,29 +64,29 @@ create_clock -period 1 [get_pins i_clk2] -waveform {1.0 2.0 3.0 4.0}
         "##;
 
         let mut constraints = parse(code);
-        let clocks = constraints.clocks();
+        let clocks = constraints.clocks().unwrap();
 
-        let name = clocks[0].name().unwrap();
-        let source = clocks[0].source().unwrap();
-        let period = clocks[0].period().unwrap();
+        let name = clocks[0].name();
+        let source = clocks[0].source();
+        let period = clocks[0].period();
         assert_eq!(name, "CLK");
-        assert_eq!(source, Some(Object::Port("i_clk0".into())));
-        assert_eq!(period, 10.0);
+        assert_eq!(source, &Some(Object::Port("i_clk0".into())));
+        assert_eq!(period, &10.0);
 
-        let name = clocks[1].name().unwrap();
-        let source = clocks[1].source().unwrap();
-        let period = clocks[1].period().unwrap();
+        let name = clocks[1].name();
+        let source = clocks[1].source();
+        let period = clocks[1].period();
         assert_eq!(name, "i_clk1");
-        assert_eq!(source, Some(Object::Port("i_clk1".into())));
-        assert_eq!(period, 3.3);
+        assert_eq!(source, &Some(Object::Port("i_clk1".into())));
+        assert_eq!(period, &3.3);
 
-        let name = clocks[2].name().unwrap();
-        let source = clocks[2].source().unwrap();
-        let period = clocks[2].period().unwrap();
-        let waveform = clocks[2].waveform().unwrap();
+        let name = clocks[2].name();
+        let source = clocks[2].source();
+        let period = clocks[2].period();
+        let waveform = clocks[2].waveform();
         assert_eq!(name, "i_clk2");
-        assert_eq!(source, Some(Object::Pin("i_clk2".into())));
-        assert_eq!(period, 1.0);
+        assert_eq!(source, &Some(Object::Pin("i_clk2".into())));
+        assert_eq!(period, &1.0);
         assert_eq!(waveform[0], 1.0);
         assert_eq!(waveform[1], 2.0);
         assert_eq!(waveform[2], 3.0);

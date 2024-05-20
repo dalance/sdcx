@@ -1,4 +1,4 @@
-use crate::errors::SemanticError;
+use crate::errors::InterpretError;
 use crate::sdc::{Argument, Command};
 use std::fmt;
 
@@ -12,7 +12,7 @@ pub enum Object {
 }
 
 impl TryFrom<&Argument> for Object {
-    type Error = SemanticError;
+    type Error = InterpretError;
 
     fn try_from(value: &Argument) -> Result<Self, Self::Error> {
         let location = value.location();
@@ -24,7 +24,7 @@ impl TryFrom<&Argument> for Object {
                         Argument::BraceGroup(x) => {
                             let name = x.text[1..x.text.len() - 1].to_string();
                             if name.contains(char::is_whitespace) {
-                                return Err(SemanticError::Interpret(location));
+                                return Err(InterpretError::Something(location));
                             }
                             return Ok(Object::Pin(name));
                         }
@@ -37,7 +37,7 @@ impl TryFrom<&Argument> for Object {
                         Argument::BraceGroup(x) => {
                             let name = x.text[1..x.text.len() - 1].to_string();
                             if name.contains(char::is_whitespace) {
-                                return Err(SemanticError::Interpret(location));
+                                return Err(InterpretError::Something(location));
                             }
                             return Ok(Object::Port(name));
                         }
@@ -50,7 +50,7 @@ impl TryFrom<&Argument> for Object {
                         Argument::BraceGroup(x) => {
                             let name = x.text[1..x.text.len() - 1].to_string();
                             if name.contains(char::is_whitespace) {
-                                return Err(SemanticError::Interpret(location));
+                                return Err(InterpretError::Something(location));
                             }
                             return Ok(Object::Net(name));
                         }
@@ -63,7 +63,7 @@ impl TryFrom<&Argument> for Object {
                         Argument::BraceGroup(x) => {
                             let name = x.text[1..x.text.len() - 1].to_string();
                             if name.contains(char::is_whitespace) {
-                                return Err(SemanticError::Interpret(location));
+                                return Err(InterpretError::Something(location));
                             }
                             return Ok(Object::Cell(name));
                         }
@@ -74,7 +74,7 @@ impl TryFrom<&Argument> for Object {
             }
         }
 
-        Err(SemanticError::Interpret(location))
+        Err(InterpretError::Something(location))
     }
 }
 

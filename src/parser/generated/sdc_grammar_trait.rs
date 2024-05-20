@@ -508,7 +508,7 @@ pub struct TermWord<'t> {
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct TokenBraceGroup<'t> {
     pub term_brace_group: Box<TermBraceGroup<'t>>,
-    pub token_brace_group_opt: Option<Box<TokenBraceGroupOpt<'t>>>,
+    pub token_brace_group_opt: Option<TokenBraceGroupOpt<'t>>,
 }
 
 ///
@@ -539,7 +539,7 @@ pub enum TokenEnd<'t> {
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct TokenLBracket<'t> {
     pub term_l_bracket: Box<TermLBracket<'t>>,
-    pub token_l_bracket_opt: Option<Box<TokenLBracketOpt<'t>>>,
+    pub token_l_bracket_opt: Option<TokenLBracketOpt<'t>>,
 }
 
 ///
@@ -560,7 +560,7 @@ pub struct TokenLBracketOpt<'t> {
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct TokenRBracket<'t> {
     pub term_r_bracket: Box<TermRBracket<'t>>,
-    pub token_r_bracket_opt: Option<Box<TokenRBracketOpt<'t>>>,
+    pub token_r_bracket_opt: Option<TokenRBracketOpt<'t>>,
 }
 
 ///
@@ -581,7 +581,7 @@ pub struct TokenRBracketOpt<'t> {
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct TokenStringGroup<'t> {
     pub term_string_group: Box<TermStringGroup<'t>>,
-    pub token_string_group_opt: Option<Box<TokenStringGroupOpt<'t>>>,
+    pub token_string_group_opt: Option<TokenStringGroupOpt<'t>>,
 }
 
 ///
@@ -602,7 +602,7 @@ pub struct TokenStringGroupOpt<'t> {
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct TokenWord<'t> {
     pub term_word: Box<TermWord<'t>>,
-    pub token_word_opt: Option<Box<TokenWordOpt<'t>>>,
+    pub token_word_opt: Option<TokenWordOpt<'t>>,
 }
 
 ///
@@ -645,16 +645,16 @@ pub enum ASTType<'t> {
     TermStringGroup(TermStringGroup<'t>),
     TermWord(TermWord<'t>),
     TokenBraceGroup(TokenBraceGroup<'t>),
-    TokenBraceGroupOpt(Option<Box<TokenBraceGroupOpt<'t>>>),
+    TokenBraceGroupOpt(Option<TokenBraceGroupOpt<'t>>),
     TokenEnd(TokenEnd<'t>),
     TokenLBracket(TokenLBracket<'t>),
-    TokenLBracketOpt(Option<Box<TokenLBracketOpt<'t>>>),
+    TokenLBracketOpt(Option<TokenLBracketOpt<'t>>),
     TokenRBracket(TokenRBracket<'t>),
-    TokenRBracketOpt(Option<Box<TokenRBracketOpt<'t>>>),
+    TokenRBracketOpt(Option<TokenRBracketOpt<'t>>),
     TokenStringGroup(TokenStringGroup<'t>),
-    TokenStringGroupOpt(Option<Box<TokenStringGroupOpt<'t>>>),
+    TokenStringGroupOpt(Option<TokenStringGroupOpt<'t>>),
     TokenWord(TokenWord<'t>),
-    TokenWordOpt(Option<Box<TokenWordOpt<'t>>>),
+    TokenWordOpt(Option<TokenWordOpt<'t>>),
 }
 
 /// Auto-implemented adapter grammar
@@ -1075,7 +1075,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
             term_backslash_line_break: Box::new(term_backslash_line_break),
         };
         self.push(
-            ASTType::TokenBraceGroupOpt(Some(Box::new(token_brace_group_opt_0_built))),
+            ASTType::TokenBraceGroupOpt(Some(token_brace_group_opt_0_built)),
             context,
         );
         Ok(())
@@ -1140,7 +1140,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
             term_backslash_line_break: Box::new(term_backslash_line_break),
         };
         self.push(
-            ASTType::TokenStringGroupOpt(Some(Box::new(token_string_group_opt_0_built))),
+            ASTType::TokenStringGroupOpt(Some(token_string_group_opt_0_built)),
             context,
         );
         Ok(())
@@ -1203,7 +1203,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
             term_backslash_line_break: Box::new(term_backslash_line_break),
         };
         self.push(
-            ASTType::TokenLBracketOpt(Some(Box::new(token_l_bracket_opt_0_built))),
+            ASTType::TokenLBracketOpt(Some(token_l_bracket_opt_0_built)),
             context,
         );
         Ok(())
@@ -1266,7 +1266,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
             term_backslash_line_break: Box::new(term_backslash_line_break),
         };
         self.push(
-            ASTType::TokenRBracketOpt(Some(Box::new(token_r_bracket_opt_0_built))),
+            ASTType::TokenRBracketOpt(Some(token_r_bracket_opt_0_built)),
             context,
         );
         Ok(())
@@ -1325,10 +1325,7 @@ impl<'t, 'u> SdcGrammarAuto<'t, 'u> {
         let token_word_opt_0_built = TokenWordOpt {
             term_backslash_line_break: Box::new(term_backslash_line_break),
         };
-        self.push(
-            ASTType::TokenWordOpt(Some(Box::new(token_word_opt_0_built))),
-            context,
-        );
+        self.push(ASTType::TokenWordOpt(Some(token_word_opt_0_built)), context);
         Ok(())
     }
 

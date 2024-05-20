@@ -117,6 +117,12 @@ pub(crate) fn fmt_named_flg(x: bool, name: &str) -> String {
     }
 }
 
+pub(crate) trait CommandExt {
+    fn location(&self) -> Location;
+
+    fn kind(&self) -> CommandKind;
+}
+
 pub(crate) trait Exist {
     fn exist(&self) -> bool;
 }
@@ -159,7 +165,7 @@ pub(crate) fn validate_vec(ret: &mut Vec<ValidateError>, version: SdcVersion, x:
     }
 }
 
-pub(crate) trait Validate {
+pub(crate) trait Validate: CommandExt {
     fn cmd_supported_version(&self, ret: &mut Vec<ValidateError>, cond: (bool, SdcVersion)) {
         if !cond.0 {
             ret.push(ValidateError::CmdUnsupportedVersion(
@@ -350,8 +356,6 @@ pub(crate) trait Validate {
             ret.push(ValidateError::ArgumentCombination(self.location()));
         }
     }
-
-    fn location(&self) -> Location;
 
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError>;
 }

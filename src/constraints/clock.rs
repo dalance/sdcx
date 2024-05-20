@@ -1,64 +1,68 @@
 use crate::constraints::Object;
-use crate::errors::SemanticError;
-use crate::sdc::util::Validate;
+use crate::errors::InterpretError;
+use crate::sdc::util::CommandExt;
 use crate::sdc::CreateClock;
 use std::fmt;
 
 /// Clock definition
 #[derive(Debug)]
-pub struct Clock<'a> {
-    command: &'a mut CreateClock,
+pub struct Clock {
+    name: String,
+    source: Option<Object>,
+    period: f32,
+    waveform: Vec<f32>,
 }
 
-impl<'a> Clock<'a> {
-    pub fn name(&self) -> Result<String, SemanticError> {
-        let location = self.command.location();
-        if let Some(name) = &self.command.name {
+impl Clock {
+    fn interpret_name(command: &CreateClock) -> Result<String, InterpretError> {
+        let location = command.location();
+        if let Some(name) = &command.name {
             Ok(format!("{name}"))
-        } else if let Some(source) = self.source()? {
+        } else if let Some(source) = Self::interpret_source(command)? {
             match source {
                 Object::Pin(x) => Ok(x),
                 Object::Port(x) => Ok(x),
-                _ => Err(SemanticError::Interpret(location)),
+                Object::Net(x) => Ok(x),
+                _ => Err(InterpretError::Something(location)),
             }
         } else {
-            Err(SemanticError::Interpret(location))
+            Err(InterpretError::Something(location))
         }
     }
 
-    pub fn source(&self) -> Result<Option<Object>, SemanticError> {
-        if let Some(ref source) = self.command.source_objects {
+    fn interpret_source(command: &CreateClock) -> Result<Option<Object>, InterpretError> {
+        if let Some(ref source) = command.source_objects {
             Ok(Some(source.try_into()?))
         } else {
             Ok(None)
         }
     }
 
-    pub fn period(&self) -> Result<f32, SemanticError> {
-        let period = format!("{}", self.command.period);
-        let location = self.command.period.location();
+    fn interpret_period(command: &CreateClock) -> Result<f32, InterpretError> {
+        let period = format!("{}", command.period);
+        let location = command.period.location();
         let period = match period.parse::<f32>() {
             Ok(x) => x,
             Err(_) => {
-                return Err(SemanticError::Interpret(location));
+                return Err(InterpretError::Something(location));
             }
         };
         Ok(period)
     }
 
-    pub fn waveform(&self) -> Result<Vec<f32>, SemanticError> {
+    fn interpret_waveform(command: &CreateClock) -> Result<Vec<f32>, InterpretError> {
         let mut ret = vec![];
-        if let Some(ref waveform) = self.command.waveform {
+        if let Some(ref waveform) = command.waveform {
             let waveform = format!("{}", waveform);
             let waveform = &waveform[1..waveform.len() - 1];
             let waveform = waveform.split_whitespace();
-            let location = self.command.period.location();
+            let location = command.period.location();
 
             for w in waveform {
                 let w = match w.parse::<f32>() {
                     Ok(x) => x,
                     Err(_) => {
-                        return Err(SemanticError::Interpret(location));
+                        return Err(InterpretError::Something(location));
                     }
                 };
                 ret.push(w);
@@ -67,22 +71,104 @@ impl<'a> Clock<'a> {
         Ok(ret)
     }
 
-    pub(crate) fn from(value: &'a mut CreateClock) -> Self {
-        Clock { command: value }
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
+    pub fn source(&self) -> &Option<Object> {
+        &self.source
+    }
+
+    pub fn period(&self) -> &f32 {
+        &self.period
+    }
+
+    pub fn waveform(&self) -> &[f32] {
+        &self.waveform
     }
 }
 
-impl<'a> fmt::Display for Clock<'a> {
+impl TryFrom<&CreateClock> for Clock {
+    type Error = InterpretError;
+
+    fn try_from(value: &CreateClock) -> Result<Self, InterpretError> {
+        let name = Self::interpret_name(value)?;
+        let source = Self::interpret_source(value)?;
+        let period = Self::interpret_period(value)?;
+        let waveform = Self::interpret_waveform(value)?;
+        Ok(Clock {
+            name,
+            source,
+            period,
+            waveform,
+        })
+    }
+}
+
+impl fmt::Display for Clock {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let name = self.name().map_err(|_| fmt::Error)?;
-        let source = self.source().map_err(|_| fmt::Error)?;
-        let period = self.period().map_err(|_| fmt::Error)?;
-        let text = if let Some(source) = source {
-            format!("Clock: name={name}, period={period}, source={source}")
-        } else {
-            format!("Clock: name={name}, period={period}")
-        };
+        let mut text = "Clock:".to_string();
+        text.push_str(&format!(" name={}", self.name));
+        text.push_str(&format!(" period={}", self.period));
+        if let Some(source) = &self.source {
+            text.push_str(&format!(" source={source}"));
+        }
+        if !self.waveform.is_empty() {
+            text.push_str(&format!(" waveform=\""));
+        }
+        for w in &self.waveform {
+            text.push_str(&format!("{w} "));
+        }
+        if !self.waveform.is_empty() {
+            text.push_str(&format!("\""));
+        }
         text.fmt(f)
+    }
+}
+
+#[derive(Debug)]
+pub struct ClockMut<'a> {
+    command: &'a mut CreateClock,
+    inner: Clock,
+}
+
+impl<'a> TryFrom<&'a mut CreateClock> for ClockMut<'a> {
+    type Error = InterpretError;
+
+    fn try_from(value: &'a mut CreateClock) -> Result<Self, InterpretError> {
+        let inner = (value as &CreateClock).try_into()?;
+        Ok(ClockMut {
+            command: value,
+            inner,
+        })
+    }
+}
+
+impl<'a> ClockMut<'a> {
+    pub fn name(&self) -> &str {
+        &self.inner.name()
+    }
+
+    pub fn source(&self) -> &Option<Object> {
+        &self.inner.source()
+    }
+
+    pub fn period(&self) -> &f32 {
+        &self.inner.period()
+    }
+
+    pub fn waveform(&self) -> &[f32] {
+        &self.inner.waveform()
+    }
+
+    pub fn rename(&mut self, name: &str) {
+        self.command.name = Some(name.into());
+    }
+}
+
+impl<'a> fmt::Display for ClockMut<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.inner.fmt(f)
     }
 }
 

@@ -19,6 +19,7 @@ pub enum CommandKind {
     AllInputs,
     AllOutputs,
     AllRegisters,
+    Argument,
     CreateClock,
     CreateGeneratedClock,
     CreateVoltageArea,
@@ -248,25 +249,25 @@ macro_rules! match_command {
     }
 }
 
-impl Command {
-    pub fn location(&self) -> Location {
-        match_command!(self, |x| { x.location() })
-    }
-}
-
 impl fmt::Display for Command {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match_command!(self, |x| { x.fmt(f) })
     }
 }
 
+impl CommandExt for Command {
+    fn location(&self) -> Location {
+        match_command!(self, |x| { x.location() })
+    }
+
+    fn kind(&self) -> CommandKind {
+        match_command!(self, |x| { x.kind() })
+    }
+}
+
 impl Validate for Command {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         match_command!(self, |x| { x.validate(version) })
-    }
-
-    fn location(&self) -> Location {
-        self.location()
     }
 }
 
@@ -734,15 +735,21 @@ impl fmt::Display for AllClocks {
     }
 }
 
+impl CommandExt for AllClocks {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::AllClocks
+    }
+}
+
 impl Validate for AllClocks {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
         self.cmd_supported_version(&mut ret, version.within(SDC1_1, SDC2_1));
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -775,6 +782,16 @@ impl fmt::Display for AllInputs {
     }
 }
 
+impl CommandExt for AllInputs {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::AllInputs
+    }
+}
+
 impl Validate for AllInputs {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -788,10 +805,6 @@ impl Validate for AllInputs {
         );
         validate_opt(&mut ret, version, &self.clock);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -851,6 +864,16 @@ impl fmt::Display for AllOutputs {
     }
 }
 
+impl CommandExt for AllOutputs {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::AllOutputs
+    }
+}
+
 impl Validate for AllOutputs {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -864,10 +887,6 @@ impl Validate for AllOutputs {
         );
         validate_opt(&mut ret, version, &self.clock);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -946,6 +965,16 @@ impl fmt::Display for AllRegisters {
     }
 }
 
+impl CommandExt for AllRegisters {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::AllRegisters
+    }
+}
+
 impl Validate for AllRegisters {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -954,10 +983,6 @@ impl Validate for AllRegisters {
         validate_opt(&mut ret, version, &self.rise_clock);
         validate_opt(&mut ret, version, &self.fall_clock);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -1072,6 +1097,16 @@ impl fmt::Display for CreateClock {
     }
 }
 
+impl CommandExt for CreateClock {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::CreateClock
+    }
+}
+
 impl Validate for CreateClock {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -1096,10 +1131,6 @@ impl Validate for CreateClock {
         validate_opt(&mut ret, version, &self.comment);
         validate_opt(&mut ret, version, &self.source_objects);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -1197,6 +1228,16 @@ impl fmt::Display for CreateGeneratedClock {
     }
 }
 
+impl CommandExt for CreateGeneratedClock {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::CreateGeneratedClock
+    }
+}
+
 impl Validate for CreateGeneratedClock {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -1240,10 +1281,6 @@ impl Validate for CreateGeneratedClock {
         validate_opt(&mut ret, version, &self.comment);
         validate_arg(&mut ret, version, &self.source_objects);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -1374,6 +1411,16 @@ impl fmt::Display for CreateVoltageArea {
     }
 }
 
+impl CommandExt for CreateVoltageArea {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::CreateVoltageArea
+    }
+}
+
 impl Validate for CreateVoltageArea {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -1384,10 +1431,6 @@ impl Validate for CreateVoltageArea {
         validate_opt(&mut ret, version, &self.guard_band_y);
         validate_arg(&mut ret, version, &self.cell_list);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -1457,15 +1500,21 @@ impl fmt::Display for CurrentDesign {
     }
 }
 
+impl CommandExt for CurrentDesign {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::CurrentDesign
+    }
+}
+
 impl Validate for CurrentDesign {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
         self.cmd_supported_version(&mut ret, version.within(SDC1_1, SDC2_1));
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -1494,16 +1543,22 @@ impl fmt::Display for CurrentInstance {
     }
 }
 
+impl CommandExt for CurrentInstance {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::CurrentInstance
+    }
+}
+
 impl Validate for CurrentInstance {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
         self.cmd_supported_version(&mut ret, version.within(SDC1_1, SDC2_1));
         validate_opt(&mut ret, version, &self.instance);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -1548,16 +1603,22 @@ impl fmt::Display for Expr {
     }
 }
 
+impl CommandExt for Expr {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::Expr
+    }
+}
+
 impl Validate for Expr {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
         self.cmd_supported_version(&mut ret, version.within(SDC1_1, SDC2_1));
         validate_vec(&mut ret, version, &self.args);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -1611,6 +1672,16 @@ impl fmt::Display for GetCells {
     }
 }
 
+impl CommandExt for GetCells {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::GetCells
+    }
+}
+
 impl Validate for GetCells {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -1655,10 +1726,6 @@ impl Validate for GetCells {
         validate_opt(&mut ret, version, &self.of_objects);
         validate_opt(&mut ret, version, &self.patterns);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -1736,6 +1803,16 @@ impl fmt::Display for GetClocks {
     }
 }
 
+impl CommandExt for GetClocks {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::GetClocks
+    }
+}
+
 impl Validate for GetClocks {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -1760,10 +1837,6 @@ impl Validate for GetClocks {
         );
         validate_opt(&mut ret, version, &self.patterns);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -1824,6 +1897,16 @@ impl fmt::Display for GetLibCells {
     }
 }
 
+impl CommandExt for GetLibCells {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::GetLibCells
+    }
+}
+
 impl Validate for GetLibCells {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -1845,10 +1928,6 @@ impl Validate for GetLibCells {
         validate_opt(&mut ret, version, &self.hsc);
         validate_arg(&mut ret, version, &self.patterns);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -1921,6 +2000,16 @@ impl fmt::Display for GetLibPins {
     }
 }
 
+impl CommandExt for GetLibPins {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::GetLibPins
+    }
+}
+
 impl Validate for GetLibPins {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -1941,10 +2030,6 @@ impl Validate for GetLibPins {
         );
         validate_arg(&mut ret, version, &self.patterns);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -2012,6 +2097,16 @@ impl fmt::Display for GetLibs {
     }
 }
 
+impl CommandExt for GetLibs {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::GetLibs
+    }
+}
+
 impl Validate for GetLibs {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -2036,10 +2131,6 @@ impl Validate for GetLibs {
         );
         validate_opt(&mut ret, version, &self.patterns);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -2104,6 +2195,16 @@ impl fmt::Display for GetNets {
     }
 }
 
+impl CommandExt for GetNets {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::GetNets
+    }
+}
+
 impl Validate for GetNets {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -2145,10 +2246,6 @@ impl Validate for GetNets {
         validate_opt(&mut ret, version, &self.of_objects);
         validate_opt(&mut ret, version, &self.patterns);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -2231,6 +2328,16 @@ impl fmt::Display for GetPins {
     }
 }
 
+impl CommandExt for GetPins {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::GetPins
+    }
+}
+
 impl Validate for GetPins {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -2258,10 +2365,6 @@ impl Validate for GetPins {
         validate_opt(&mut ret, version, &self.hsc);
         validate_opt(&mut ret, version, &self.patterns);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -2333,6 +2436,16 @@ impl fmt::Display for GetPorts {
     }
 }
 
+impl CommandExt for GetPorts {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::GetPorts
+    }
+}
+
 impl Validate for GetPorts {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -2358,10 +2471,6 @@ impl Validate for GetPorts {
         );
         validate_opt(&mut ret, version, &self.patterns);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -2444,6 +2553,16 @@ impl fmt::Display for GroupPath {
     }
 }
 
+impl CommandExt for GroupPath {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::GroupPath
+    }
+}
+
 impl Validate for GroupPath {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -2477,10 +2596,6 @@ impl Validate for GroupPath {
         validate_vec(&mut ret, version, &self.fall_through);
         validate_opt(&mut ret, version, &self.comment);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -2605,16 +2720,22 @@ impl fmt::Display for List {
     }
 }
 
+impl CommandExt for List {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::List
+    }
+}
+
 impl Validate for List {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
         self.cmd_supported_version(&mut ret, version.within(SDC1_1, SDC2_1));
         validate_vec(&mut ret, version, &self.args);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -2659,6 +2780,16 @@ impl fmt::Display for Set {
     }
 }
 
+impl CommandExt for Set {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::Set
+    }
+}
+
 impl Validate for Set {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -2666,10 +2797,6 @@ impl Validate for Set {
         validate_arg(&mut ret, version, &self.variable_name);
         validate_arg(&mut ret, version, &self.value);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -2721,6 +2848,16 @@ impl fmt::Display for SetCaseAnalysis {
     }
 }
 
+impl CommandExt for SetCaseAnalysis {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetCaseAnalysis
+    }
+}
+
 impl Validate for SetCaseAnalysis {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -2729,10 +2866,6 @@ impl Validate for SetCaseAnalysis {
         validate_opt(&mut ret, version, &self.value);
         validate_arg(&mut ret, version, &self.port_or_pin_list);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -2793,6 +2926,16 @@ impl fmt::Display for SetClockGatingCheck {
     }
 }
 
+impl CommandExt for SetClockGatingCheck {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetClockGatingCheck
+    }
+}
+
 impl Validate for SetClockGatingCheck {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -2810,10 +2953,6 @@ impl Validate for SetClockGatingCheck {
         validate_opt(&mut ret, version, &self.hold);
         validate_opt(&mut ret, version, &self.object_list);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -2906,6 +3045,16 @@ impl fmt::Display for SetClockGroups {
     }
 }
 
+impl CommandExt for SetClockGroups {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetClockGroups
+    }
+}
+
 impl Validate for SetClockGroups {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -2930,10 +3079,6 @@ impl Validate for SetClockGroups {
         validate_opt(&mut ret, version, &self.name);
         validate_opt(&mut ret, version, &self.comment);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -3043,6 +3188,16 @@ impl fmt::Display for SetClockLatency {
     }
 }
 
+impl CommandExt for SetClockLatency {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetClockLatency
+    }
+}
+
 impl Validate for SetClockLatency {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -3070,10 +3225,6 @@ impl Validate for SetClockLatency {
         validate_arg(&mut ret, version, &self.delay);
         validate_arg(&mut ret, version, &self.object_list);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -3171,6 +3322,16 @@ impl fmt::Display for SetClockSense {
     }
 }
 
+impl CommandExt for SetClockSense {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetClockSense
+    }
+}
+
 impl Validate for SetClockSense {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -3188,10 +3349,6 @@ impl Validate for SetClockSense {
         validate_opt(&mut ret, version, &self.pulse);
         validate_opt(&mut ret, version, &self.pins);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -3276,6 +3433,16 @@ impl fmt::Display for SetClockTransition {
     }
 }
 
+impl CommandExt for SetClockTransition {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetClockTransition
+    }
+}
+
 impl Validate for SetClockTransition {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -3290,10 +3457,6 @@ impl Validate for SetClockTransition {
         validate_arg(&mut ret, version, &self.transition);
         validate_arg(&mut ret, version, &self.clock_list);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -3385,6 +3548,16 @@ impl fmt::Display for SetClockUncertainty {
     }
 }
 
+impl CommandExt for SetClockUncertainty {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetClockUncertainty
+    }
+}
+
 impl Validate for SetClockUncertainty {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -3450,10 +3623,6 @@ impl Validate for SetClockUncertainty {
         validate_arg(&mut ret, version, &self.uncertainty);
         validate_opt(&mut ret, version, &self.object_list);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -3586,6 +3755,16 @@ impl fmt::Display for SetDataCheck {
     }
 }
 
+impl CommandExt for SetDataCheck {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetDataCheck
+    }
+}
+
 impl Validate for SetDataCheck {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -3610,10 +3789,6 @@ impl Validate for SetDataCheck {
         validate_opt(&mut ret, version, &self.clock);
         validate_arg(&mut ret, version, &self.value);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -3720,6 +3895,16 @@ impl fmt::Display for SetDisableTiming {
     }
 }
 
+impl CommandExt for SetDisableTiming {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetDisableTiming
+    }
+}
+
 impl Validate for SetDisableTiming {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -3735,10 +3920,6 @@ impl Validate for SetDisableTiming {
         validate_opt(&mut ret, version, &self.to);
         validate_arg(&mut ret, version, &self.cell_pin_list);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -3808,6 +3989,16 @@ impl fmt::Display for SetDrive {
     }
 }
 
+impl CommandExt for SetDrive {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetDrive
+    }
+}
+
 impl Validate for SetDrive {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -3815,10 +4006,6 @@ impl Validate for SetDrive {
         validate_arg(&mut ret, version, &self.resistance);
         validate_arg(&mut ret, version, &self.port_list);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -3923,6 +4110,16 @@ impl fmt::Display for SetDrivingCell {
     }
 }
 
+impl CommandExt for SetDrivingCell {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetDrivingCell
+    }
+}
+
 impl Validate for SetDrivingCell {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -3957,10 +4154,6 @@ impl Validate for SetDrivingCell {
         validate_opt(&mut ret, version, &self.input_transition_fall);
         validate_arg(&mut ret, version, &self.port_list);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -4120,6 +4313,16 @@ impl fmt::Display for SetFalsePath {
     }
 }
 
+impl CommandExt for SetFalsePath {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetFalsePath
+    }
+}
+
 impl Validate for SetFalsePath {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -4197,10 +4400,6 @@ impl Validate for SetFalsePath {
         validate_vec(&mut ret, version, &self.fall_through);
         validate_opt(&mut ret, version, &self.comment);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -4325,6 +4524,16 @@ impl fmt::Display for SetFanoutLoad {
     }
 }
 
+impl CommandExt for SetFanoutLoad {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetFanoutLoad
+    }
+}
+
 impl Validate for SetFanoutLoad {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -4332,10 +4541,6 @@ impl Validate for SetFanoutLoad {
         validate_arg(&mut ret, version, &self.value);
         validate_arg(&mut ret, version, &self.port_list);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -4385,16 +4590,22 @@ impl fmt::Display for SetHierarchySeparator {
     }
 }
 
+impl CommandExt for SetHierarchySeparator {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetHierarchySeparator
+    }
+}
+
 impl Validate for SetHierarchySeparator {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
         self.cmd_supported_version(&mut ret, version.within(SDC1_2, SDC2_1));
         validate_arg(&mut ret, version, &self.separator);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -4452,6 +4663,16 @@ impl fmt::Display for SetIdealLatency {
     }
 }
 
+impl CommandExt for SetIdealLatency {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetIdealLatency
+    }
+}
+
 impl Validate for SetIdealLatency {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -4459,10 +4680,6 @@ impl Validate for SetIdealLatency {
         validate_arg(&mut ret, version, &self.delay);
         validate_arg(&mut ret, version, &self.object_list);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -4531,16 +4748,22 @@ impl fmt::Display for SetIdealNetwork {
     }
 }
 
+impl CommandExt for SetIdealNetwork {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetIdealNetwork
+    }
+}
+
 impl Validate for SetIdealNetwork {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
         self.cmd_supported_version(&mut ret, version.within(SDC1_7, SDC2_1));
         validate_arg(&mut ret, version, &self.object_list);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -4603,6 +4826,16 @@ impl fmt::Display for SetIdealTransition {
     }
 }
 
+impl CommandExt for SetIdealTransition {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetIdealTransition
+    }
+}
+
 impl Validate for SetIdealTransition {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -4610,10 +4843,6 @@ impl Validate for SetIdealTransition {
         validate_arg(&mut ret, version, &self.transition_time);
         validate_arg(&mut ret, version, &self.object_list);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -4713,6 +4942,16 @@ impl fmt::Display for SetInputDelay {
     }
 }
 
+impl CommandExt for SetInputDelay {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetInputDelay
+    }
+}
+
 impl Validate for SetInputDelay {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -4748,10 +4987,6 @@ impl Validate for SetInputDelay {
         validate_arg(&mut ret, version, &self.delay_value);
         validate_arg(&mut ret, version, &self.port_pin_list);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -4878,6 +5113,16 @@ impl fmt::Display for SetInputTransition {
     }
 }
 
+impl CommandExt for SetInputTransition {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetInputTransition
+    }
+}
+
 impl Validate for SetInputTransition {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -4898,10 +5143,6 @@ impl Validate for SetInputTransition {
         validate_arg(&mut ret, version, &self.transition);
         validate_arg(&mut ret, version, &self.port_list);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -4980,16 +5221,22 @@ impl fmt::Display for SetLevelShifterStrategy {
     }
 }
 
+impl CommandExt for SetLevelShifterStrategy {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetLevelShifterStrategy
+    }
+}
+
 impl Validate for SetLevelShifterStrategy {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
         self.cmd_supported_version(&mut ret, version.within(SDC1_6, SDC2_1));
         validate_arg(&mut ret, version, &self.rule);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -5045,6 +5292,16 @@ impl fmt::Display for SetLevelShifterThreshold {
     }
 }
 
+impl CommandExt for SetLevelShifterThreshold {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetLevelShifterThreshold
+    }
+}
+
 impl Validate for SetLevelShifterThreshold {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -5052,10 +5309,6 @@ impl Validate for SetLevelShifterThreshold {
         validate_arg(&mut ret, version, &self.voltage);
         validate_opt(&mut ret, version, &self.percent);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -5128,6 +5381,16 @@ impl fmt::Display for SetLoad {
     }
 }
 
+impl CommandExt for SetLoad {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetLoad
+    }
+}
+
 impl Validate for SetLoad {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -5135,10 +5398,6 @@ impl Validate for SetLoad {
         validate_arg(&mut ret, version, &self.value);
         validate_arg(&mut ret, version, &self.objects);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -5216,16 +5475,22 @@ impl fmt::Display for SetLogicDc {
     }
 }
 
+impl CommandExt for SetLogicDc {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetLogicDc
+    }
+}
+
 impl Validate for SetLogicDc {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
         self.cmd_supported_version(&mut ret, version.within(SDC1_1, SDC2_1));
         validate_arg(&mut ret, version, &self.port_list);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -5270,16 +5535,22 @@ impl fmt::Display for SetLogicOne {
     }
 }
 
+impl CommandExt for SetLogicOne {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetLogicOne
+    }
+}
+
 impl Validate for SetLogicOne {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
         self.cmd_supported_version(&mut ret, version.within(SDC1_1, SDC2_1));
         validate_arg(&mut ret, version, &self.port_list);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -5324,16 +5595,22 @@ impl fmt::Display for SetLogicZero {
     }
 }
 
+impl CommandExt for SetLogicZero {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetLogicZero
+    }
+}
+
 impl Validate for SetLogicZero {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
         self.cmd_supported_version(&mut ret, version.within(SDC1_1, SDC2_1));
         validate_arg(&mut ret, version, &self.port_list);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -5378,16 +5655,22 @@ impl fmt::Display for SetMaxArea {
     }
 }
 
+impl CommandExt for SetMaxArea {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetMaxArea
+    }
+}
+
 impl Validate for SetMaxArea {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
         self.cmd_supported_version(&mut ret, version.within(SDC1_1, SDC2_1));
         validate_arg(&mut ret, version, &self.area_value);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -5434,6 +5717,16 @@ impl fmt::Display for SetMaxCapacitance {
     }
 }
 
+impl CommandExt for SetMaxCapacitance {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetMaxCapacitance
+    }
+}
+
 impl Validate for SetMaxCapacitance {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -5441,10 +5734,6 @@ impl Validate for SetMaxCapacitance {
         validate_arg(&mut ret, version, &self.value);
         validate_arg(&mut ret, version, &self.object_list);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -5523,6 +5812,16 @@ impl fmt::Display for SetMaxDelay {
     }
 }
 
+impl CommandExt for SetMaxDelay {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetMaxDelay
+    }
+}
+
 impl Validate for SetMaxDelay {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -5594,10 +5893,6 @@ impl Validate for SetMaxDelay {
         validate_opt(&mut ret, version, &self.comment);
         validate_arg(&mut ret, version, &self.delay_value);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -5726,6 +6021,16 @@ impl fmt::Display for SetMaxDynamicPower {
     }
 }
 
+impl CommandExt for SetMaxDynamicPower {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetMaxDynamicPower
+    }
+}
+
 impl Validate for SetMaxDynamicPower {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -5733,10 +6038,6 @@ impl Validate for SetMaxDynamicPower {
         validate_arg(&mut ret, version, &self.power);
         validate_opt(&mut ret, version, &self.unit);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -5790,6 +6091,16 @@ impl fmt::Display for SetMaxFanout {
     }
 }
 
+impl CommandExt for SetMaxFanout {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetMaxFanout
+    }
+}
+
 impl Validate for SetMaxFanout {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -5797,10 +6108,6 @@ impl Validate for SetMaxFanout {
         validate_arg(&mut ret, version, &self.value);
         validate_arg(&mut ret, version, &self.object_list);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -5852,6 +6159,16 @@ impl fmt::Display for SetMaxLeakagePower {
     }
 }
 
+impl CommandExt for SetMaxLeakagePower {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetMaxLeakagePower
+    }
+}
+
 impl Validate for SetMaxLeakagePower {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -5859,10 +6176,6 @@ impl Validate for SetMaxLeakagePower {
         validate_arg(&mut ret, version, &self.power);
         validate_opt(&mut ret, version, &self.unit);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -5916,6 +6229,16 @@ impl fmt::Display for SetMaxTimeBorrow {
     }
 }
 
+impl CommandExt for SetMaxTimeBorrow {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetMaxTimeBorrow
+    }
+}
+
 impl Validate for SetMaxTimeBorrow {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -5923,10 +6246,6 @@ impl Validate for SetMaxTimeBorrow {
         validate_arg(&mut ret, version, &self.delay_value);
         validate_arg(&mut ret, version, &self.object_list);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -5984,6 +6303,16 @@ impl fmt::Display for SetMaxTransition {
     }
 }
 
+impl CommandExt for SetMaxTransition {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetMaxTransition
+    }
+}
+
 impl Validate for SetMaxTransition {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -5999,10 +6328,6 @@ impl Validate for SetMaxTransition {
         validate_arg(&mut ret, version, &self.value);
         validate_arg(&mut ret, version, &self.object_list);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -6068,6 +6393,16 @@ impl fmt::Display for SetMinCapacitance {
     }
 }
 
+impl CommandExt for SetMinCapacitance {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetMinCapacitance
+    }
+}
+
 impl Validate for SetMinCapacitance {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -6075,10 +6410,6 @@ impl Validate for SetMinCapacitance {
         validate_arg(&mut ret, version, &self.value);
         validate_arg(&mut ret, version, &self.object_list);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -6157,6 +6488,16 @@ impl fmt::Display for SetMinDelay {
     }
 }
 
+impl CommandExt for SetMinDelay {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetMinDelay
+    }
+}
+
 impl Validate for SetMinDelay {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -6228,10 +6569,6 @@ impl Validate for SetMinDelay {
         validate_opt(&mut ret, version, &self.comment);
         validate_arg(&mut ret, version, &self.delay_value);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -6360,6 +6697,16 @@ impl fmt::Display for SetMinPorosity {
     }
 }
 
+impl CommandExt for SetMinPorosity {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetMinPorosity
+    }
+}
+
 impl Validate for SetMinPorosity {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -6367,10 +6714,6 @@ impl Validate for SetMinPorosity {
         validate_arg(&mut ret, version, &self.porosity_value);
         validate_arg(&mut ret, version, &self.object_list);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -6427,6 +6770,16 @@ impl fmt::Display for SetMinPulseWidth {
     }
 }
 
+impl CommandExt for SetMinPulseWidth {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetMinPulseWidth
+    }
+}
+
 impl Validate for SetMinPulseWidth {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -6434,10 +6787,6 @@ impl Validate for SetMinPulseWidth {
         validate_arg(&mut ret, version, &self.value);
         validate_opt(&mut ret, version, &self.object_list);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -6529,6 +6878,16 @@ impl fmt::Display for SetMulticyclePath {
     }
 }
 
+impl CommandExt for SetMulticyclePath {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetMulticyclePath
+    }
+}
+
 impl Validate for SetMulticyclePath {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -6587,10 +6946,6 @@ impl Validate for SetMulticyclePath {
         validate_opt(&mut ret, version, &self.comment);
         validate_arg(&mut ret, version, &self.path_multiplier);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -6741,6 +7096,16 @@ impl fmt::Display for SetOperatingConditions {
     }
 }
 
+impl CommandExt for SetOperatingConditions {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetOperatingConditions
+    }
+}
+
 impl Validate for SetOperatingConditions {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -6760,10 +7125,6 @@ impl Validate for SetOperatingConditions {
         validate_opt(&mut ret, version, &self.object_list);
         validate_opt(&mut ret, version, &self.condition);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -6889,6 +7250,16 @@ impl fmt::Display for SetOutputDelay {
     }
 }
 
+impl CommandExt for SetOutputDelay {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetOutputDelay
+    }
+}
+
 impl Validate for SetOutputDelay {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -6924,10 +7295,6 @@ impl Validate for SetOutputDelay {
         validate_arg(&mut ret, version, &self.delay_value);
         validate_arg(&mut ret, version, &self.port_pin_list);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -7042,6 +7409,16 @@ impl fmt::Display for SetPortFanoutNumber {
     }
 }
 
+impl CommandExt for SetPortFanoutNumber {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetPortFanoutNumber
+    }
+}
+
 impl Validate for SetPortFanoutNumber {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -7049,10 +7426,6 @@ impl Validate for SetPortFanoutNumber {
         validate_arg(&mut ret, version, &self.value);
         validate_arg(&mut ret, version, &self.port_list);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -7105,16 +7478,22 @@ impl fmt::Display for SetPropagatedClock {
     }
 }
 
+impl CommandExt for SetPropagatedClock {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetPropagatedClock
+    }
+}
+
 impl Validate for SetPropagatedClock {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
         self.cmd_supported_version(&mut ret, version.within(SDC1_1, SDC2_1));
         validate_arg(&mut ret, version, &self.object_list);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -7165,6 +7544,16 @@ impl fmt::Display for SetResistance {
     }
 }
 
+impl CommandExt for SetResistance {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetResistance
+    }
+}
+
 impl Validate for SetResistance {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -7172,10 +7561,6 @@ impl Validate for SetResistance {
         validate_arg(&mut ret, version, &self.value);
         validate_arg(&mut ret, version, &self.net_list);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -7252,6 +7637,16 @@ impl fmt::Display for SetSense {
     }
 }
 
+impl CommandExt for SetSense {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetSense
+    }
+}
+
 impl Validate for SetSense {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -7272,10 +7667,6 @@ impl Validate for SetSense {
         validate_opt(&mut ret, version, &self.clocks);
         validate_arg(&mut ret, version, &self.pin_list);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -7392,6 +7783,16 @@ impl fmt::Display for SetTimingDerate {
     }
 }
 
+impl CommandExt for SetTimingDerate {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetTimingDerate
+    }
+}
+
 impl Validate for SetTimingDerate {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -7426,10 +7827,6 @@ impl Validate for SetTimingDerate {
         validate_arg(&mut ret, version, &self.derate_value);
         validate_opt(&mut ret, version, &self.object_list);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -7548,6 +7945,16 @@ impl fmt::Display for SetUnits {
     }
 }
 
+impl CommandExt for SetUnits {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetUnits
+    }
+}
+
 impl Validate for SetUnits {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -7560,10 +7967,6 @@ impl Validate for SetUnits {
         validate_opt(&mut ret, version, &self.current);
         validate_opt(&mut ret, version, &self.power);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -7655,6 +8058,16 @@ impl fmt::Display for SetVoltage {
     }
 }
 
+impl CommandExt for SetVoltage {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetVoltage
+    }
+}
+
 impl Validate for SetVoltage {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -7663,10 +8076,6 @@ impl Validate for SetVoltage {
         validate_opt(&mut ret, version, &self.object_list);
         validate_arg(&mut ret, version, &self.max_case_voltage);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -7726,16 +8135,22 @@ impl fmt::Display for SetWireLoadMinBlockSize {
     }
 }
 
+impl CommandExt for SetWireLoadMinBlockSize {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetWireLoadMinBlockSize
+    }
+}
+
 impl Validate for SetWireLoadMinBlockSize {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
         self.cmd_supported_version(&mut ret, version.within(SDC1_1, SDC2_1));
         validate_arg(&mut ret, version, &self.size);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -7783,16 +8198,22 @@ impl fmt::Display for SetWireLoadMode {
     }
 }
 
+impl CommandExt for SetWireLoadMode {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetWireLoadMode
+    }
+}
+
 impl Validate for SetWireLoadMode {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
         self.cmd_supported_version(&mut ret, version.within(SDC1_1, SDC2_1));
         validate_arg(&mut ret, version, &self.mode_name);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -7845,6 +8266,16 @@ impl fmt::Display for SetWireLoadModel {
     }
 }
 
+impl CommandExt for SetWireLoadModel {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetWireLoadModel
+    }
+}
+
 impl Validate for SetWireLoadModel {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -7853,10 +8284,6 @@ impl Validate for SetWireLoadModel {
         validate_opt(&mut ret, version, &self.library);
         validate_opt(&mut ret, version, &self.object_list);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -7930,6 +8357,16 @@ impl fmt::Display for SetWireLoadSelectionGroup {
     }
 }
 
+impl CommandExt for SetWireLoadSelectionGroup {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::SetWireLoadSelectionGroup
+    }
+}
+
 impl Validate for SetWireLoadSelectionGroup {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![];
@@ -7939,10 +8376,6 @@ impl Validate for SetWireLoadSelectionGroup {
         validate_arg(&mut ret, version, &self.group_name);
         validate_opt(&mut ret, version, &self.object_list);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 
@@ -8018,6 +8451,16 @@ impl fmt::Display for Unknown {
     }
 }
 
+impl CommandExt for Unknown {
+    fn location(&self) -> Location {
+        self.location.clone()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::Unknown
+    }
+}
+
 impl Validate for Unknown {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         let mut ret = vec![ValidateError::UnknownCommand(
@@ -8026,10 +8469,6 @@ impl Validate for Unknown {
         )];
         validate_vec(&mut ret, version, &self.args);
         ret
-    }
-
-    fn location(&self) -> Location {
-        self.location.clone()
     }
 }
 

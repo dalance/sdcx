@@ -4,7 +4,7 @@ pub(crate) mod util;
 
 use crate::errors::{SemanticError, ValidateError};
 use crate::parser::sdc_grammar_trait as grammar;
-use crate::sdc::util::{Extract, Validate};
+use crate::sdc::util::{CommandExt, Extract, Validate};
 pub use argument::Argument;
 pub use command::*;
 use std::fmt;
@@ -29,7 +29,25 @@ impl Sdc {
     }
 
     pub fn normalize(&mut self) {
-        self.commands.sort()
+        let mut buf = vec![];
+        let mut ret = vec![];
+        let mut kind = None;
+
+        for command in self.commands.drain(0..) {
+            if Some(command.kind()) == kind {
+                buf.push(command);
+            } else {
+                buf.sort();
+                ret.append(&mut buf);
+                kind = Some(command.kind());
+                buf.push(command);
+            }
+        }
+        ret.append(&mut buf);
+        self.commands.append(&mut ret);
+
+        // TODO keep command kind order
+        //self.commands.sort()
     }
 
     pub fn extract(&self, kind: CommandKind) -> Vec<&Command> {

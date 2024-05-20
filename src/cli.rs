@@ -23,34 +23,43 @@ struct Opt {
 #[derive(Debug, Subcommand)]
 enum SubCommands {
     /// Format input file
-    Fmt {
-        /// SDC file
-        file: PathBuf,
-
-        /// Output file
-        #[arg(short, long)]
-        output: Option<PathBuf>,
-    },
+    Fmt(Fmt),
 
     /// Check input file
-    Check {
-        /// SDC file
-        file: PathBuf,
-
-        /// Force SDC version
-        #[arg(long)]
-        force_version: Option<String>,
-    },
+    Check(Check),
 
     /// Dump elements of input file
-    Dump {
-        /// SDC file
-        file: PathBuf,
+    Dump(Dump),
+}
 
-        /// Show clock
-        #[arg(long)]
-        clock: bool,
-    },
+#[derive(Debug, Parser)]
+struct Fmt {
+    /// SDC file
+    file: PathBuf,
+
+    /// Output file
+    #[arg(short, long)]
+    output: Option<PathBuf>,
+}
+
+#[derive(Debug, Parser)]
+struct Check {
+    /// SDC file
+    file: PathBuf,
+
+    /// Force SDC version
+    #[arg(long)]
+    force_version: Option<String>,
+}
+
+#[derive(Debug, Parser)]
+struct Dump {
+    /// SDC file
+    file: PathBuf,
+
+    /// Show clock
+    #[arg(long)]
+    clock: bool,
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -110,28 +119,20 @@ fn with_report<T, U: Report>(
     }
 }
 
-fn format(opt: &Opt) -> Result<()> {
-    let SubCommands::Fmt {
-        ref file,
-        ref output,
-    } = opt.subcommand
-    else {
-        return Ok(());
-    };
-
-    let s = read_file(file)?;
+fn format(opt: &Fmt) -> Result<()> {
+    let s = read_file(&opt.file)?;
 
     let mut files = FileDb::new();
-    files.add(file.display().to_string(), s.as_str());
+    files.add(opt.file.display().to_string(), s.as_str());
 
     let mut sdc = with_report(
-        sdcx::Parser::parse(&s, &file),
+        sdcx::Parser::parse(&s, &opt.file),
         &files,
-        &format!("could not parse file: {}", file.display()),
+        &format!("could not parse file: {}", opt.file.display()),
     )?;
     sdc.normalize();
 
-    if let Some(output) = output {
+    if let Some(output) = &opt.output {
         write_file(output, &format!("{}", sdc))?;
     } else {
         println!("{}", sdc);
@@ -139,22 +140,14 @@ fn format(opt: &Opt) -> Result<()> {
     Ok(())
 }
 
-fn check(opt: &Opt) -> Result<()> {
-    let SubCommands::Check {
-        ref file,
-        ref force_version,
-    } = opt.subcommand
-    else {
-        return Ok(());
-    };
-
-    let s = read_file(file)?;
+fn check(opt: &Check) -> Result<()> {
+    let s = read_file(&opt.file)?;
 
     let mut files = FileDb::new();
-    files.add(file.display().to_string(), s.as_str());
+    files.add(opt.file.display().to_string(), s.as_str());
 
     let mut version = None;
-    if let Some(force_version) = force_version {
+    if let Some(force_version) = &opt.force_version {
         if let Ok(x) = force_version.as_str().try_into() {
             version = Some(x);
         } else {
@@ -163,9 +156,9 @@ fn check(opt: &Opt) -> Result<()> {
     }
 
     let sdc = with_report(
-        sdcx::Parser::parse(&s, &file),
+        sdcx::Parser::parse(&s, &opt.file),
         &files,
-        &format!("could not parse file: {}", file.display()),
+        &format!("could not parse file: {}", opt.file.display()),
     )?;
 
     for err in sdc.validate(version) {
@@ -175,30 +168,27 @@ fn check(opt: &Opt) -> Result<()> {
     Ok(())
 }
 
-fn dump(opt: &Opt) -> Result<()> {
-    let SubCommands::Dump {
-        ref file,
-        ref clock,
-    } = opt.subcommand
-    else {
-        return Ok(());
-    };
-
-    let s = read_file(file)?;
+fn dump(opt: &Dump) -> Result<()> {
+    let s = read_file(&opt.file)?;
 
     let mut files = FileDb::new();
-    files.add(file.display().to_string(), s.as_str());
+    files.add(opt.file.display().to_string(), s.as_str());
 
     let sdc = with_report(
-        sdcx::Parser::parse(&s, &file),
+        sdcx::Parser::parse(&s, &opt.file),
         &files,
-        &format!("could not parse file: {}", file.display()),
+        &format!("could not parse file: {}", opt.file.display()),
     )?;
 
     let mut constraints: Constraints = sdc.into();
 
-    if *clock {
-        for clock in constraints.clocks() {
+    if opt.clock {
+        let clocks = with_report(
+            constraints.clocks(),
+            &files,
+            &format!("could not interpret file: {}", opt.file.display()),
+        )?;
+        for clock in clocks {
             println!("{clock}");
         }
     }
@@ -214,9 +204,9 @@ fn main() -> Result<()> {
     let opt: Opt = Parser::parse();
 
     match opt.subcommand {
-        SubCommands::Fmt { .. } => format(&opt)?,
-        SubCommands::Check { .. } => check(&opt)?,
-        SubCommands::Dump { .. } => dump(&opt)?,
+        SubCommands::Fmt(x) => format(&x)?,
+        SubCommands::Check(x) => check(&x)?,
+        SubCommands::Dump(x) => dump(&x)?,
     }
 
     Ok(())

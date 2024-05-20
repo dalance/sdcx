@@ -2,7 +2,8 @@ use crate::errors::SemanticError;
 use crate::errors::ValidateError;
 use crate::file_db::Location;
 use crate::parser::sdc_grammar_trait as grammar;
-use crate::sdc::{Command, SdcVersion, Validate};
+use crate::sdc::util::CommandExt;
+use crate::sdc::{Command, CommandKind, SdcVersion, Validate};
 use std::fmt;
 
 /// Argument
@@ -34,6 +35,16 @@ impl Argument {
     }
 }
 
+impl CommandExt for Argument {
+    fn location(&self) -> Location {
+        self.location()
+    }
+
+    fn kind(&self) -> CommandKind {
+        CommandKind::Argument
+    }
+}
+
 impl Validate for Argument {
     fn validate(&self, version: SdcVersion) -> Vec<ValidateError> {
         match self {
@@ -42,10 +53,6 @@ impl Validate for Argument {
             Argument::BraceGroup(_) => vec![],
             Argument::CommandSubstitution(x, _) => x.validate(version),
         }
-    }
-
-    fn location(&self) -> Location {
-        self.location()
     }
 }
 

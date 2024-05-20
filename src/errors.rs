@@ -440,3 +440,28 @@ impl ValidateError {
         }
     }
 }
+
+/// Interpret Error
+#[derive(Debug, Error)]
+pub enum InterpretError {
+    #[error("Something")]
+    Something(Location),
+}
+
+impl Report for InterpretError {
+    fn report(self, files: &FileDb<String, &str>) -> anyhow::Result<()> {
+        let writer = StandardStream::stderr(term::termcolor::ColorChoice::Auto);
+        let config = term::Config::default();
+
+        match self {
+            InterpretError::Something(x) => {
+                let (range, file_id) = x.range_file(files);
+                let diag = Diagnostic::error()
+                    .with_message("TODO")
+                    .with_code("sdcx::errors::InterpretError")
+                    .with_labels(vec![Label::primary(file_id, range).with_message("Found")]);
+                Ok(term::emit(&mut writer.lock(), &config, files, &diag)?)
+            }
+        }
+    }
+}
