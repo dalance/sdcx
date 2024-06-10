@@ -701,10 +701,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "lalr"
-version = "0.0.2"
+name = "lalry"
+version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "106d7548f95adbe3019b4fc4954554d7b72535867aa9ce326d2f766b68958de7"
+checksum = "82b5cf5d262f1b646b4b4fc864c6026753dab5ba0ea9d94ec1589509d12175ea"
 
 [[package]]
 name = "lazy_static"
@@ -865,9 +865,9 @@ dependencies = [
 
 [[package]]
 name = "parol"
-version = "0.29.0"
+version = "0.30.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e2b7342387d6b789343150d0d29f4cf604c31a5a4dea83c352aae79df236b79"
+checksum = "5fbf2f6c296a20fe2cfeb8de0d9cea3cf519297f026a6a0cac3d6a228befcb1b"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -878,11 +878,11 @@ dependencies = [
  "env_logger",
  "function_name",
  "graph-cycles",
- "lalr",
+ "lalry",
  "num_cpus",
  "owo-colors",
  "parol-macros",
- "parol_runtime",
+ "parol_runtime 0.23.0",
  "petgraph",
  "rand",
  "rand_regex",
@@ -915,6 +915,26 @@ dependencies = [
  "anyhow",
  "codespan-reporting",
  "collection_literals",
+ "derive_builder",
+ "function_name",
+ "log",
+ "once_cell",
+ "parol-macros",
+ "petgraph",
+ "regex-automata",
+ "syntree",
+ "syntree_layout",
+ "thiserror",
+]
+
+[[package]]
+name = "parol_runtime"
+version = "0.23.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0f563d0adf0ffb93e5c58856edd3ec8c87e61e97666207b9097ff05bf68c43da"
+dependencies = [
+ "anyhow",
+ "codespan-reporting",
  "derive_builder",
  "function_name",
  "log",
@@ -1203,7 +1223,7 @@ dependencies = [
  "criterion",
  "flate2",
  "parol",
- "parol_runtime",
+ "parol_runtime 0.22.0",
  "pprof",
  "regex",
  "thiserror",

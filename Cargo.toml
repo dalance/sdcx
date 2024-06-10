@@ -25,7 +25,7 @@ regex              = "1.10"
 thiserror          = "1.0"
 
 [build-dependencies]
-parol         =  "0.29.0"
+parol         =  "0.30.0"
 parol_runtime = {version = "0.22.0", features = ["auto_generation"]}
 walkdir       = "2.5.0"
 
