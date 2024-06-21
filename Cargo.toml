@@ -20,13 +20,13 @@ anyhow             = "1.0"
 clap               = {version = "4.5", features = ["derive"]}
 codespan-reporting = "0.11.1"
 flate2             = "1.0"
-parol_runtime      = {version = "0.23.0", features = ["auto_generation"]}
+parol_runtime      = {version = "0.24.0", features = ["auto_generation"]}
 regex              = "1.10"
 thiserror          = "1.0"
 
 [build-dependencies]
 parol         =  "0.30.0"
-parol_runtime = {version = "0.23.0", features = ["auto_generation"]}
+parol_runtime = {version = "0.24.0", features = ["auto_generation"]}
 walkdir       = "2.5.0"
 
 [dev-dependencies]
