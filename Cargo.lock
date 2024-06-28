@@ -3,12 +3,6 @@
 version = 3
 
 [[package]]
-name = "Inflector"
-version = "0.11.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fe438c63458706e03479442743baae6c88256498e6431708f6dfc520a26515d3"
-
-[[package]]
 name = "addr2line"
 version = "0.21.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -859,9 +853,9 @@ dependencies = [
 
 [[package]]
 name = "parol"
-version = "0.30.0"
+version = "0.31.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5fbf2f6c296a20fe2cfeb8de0d9cea3cf519297f026a6a0cac3d6a228befcb1b"
+checksum = "4035f08652ee59c6fdfb8a30788a90e55b6af9341a2e2d009126b9ae9846df54"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -876,7 +870,7 @@ dependencies = [
  "num_cpus",
  "owo-colors",
  "parol-macros",
- "parol_runtime",
+ "parol_runtime 0.24.1",
  "petgraph",
  "rand",
  "rand_regex",
@@ -905,6 +899,26 @@ name = "parol_runtime"
 version = "0.23.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0f563d0adf0ffb93e5c58856edd3ec8c87e61e97666207b9097ff05bf68c43da"
+dependencies = [
+ "anyhow",
+ "codespan-reporting",
+ "derive_builder",
+ "function_name",
+ "log",
+ "once_cell",
+ "parol-macros",
+ "petgraph",
+ "regex-automata",
+ "syntree",
+ "syntree_layout",
+ "thiserror",
+]
+
+[[package]]
+name = "parol_runtime"
+version = "0.24.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "954cb83830f6f09d54c556d4b7cc0b2da0d5cca59c41f2c7eb240287e4f836d2"
 dependencies = [
  "anyhow",
  "codespan-reporting",
@@ -1122,9 +1136,9 @@ dependencies = [
 
 [[package]]
 name = "regex-automata"
-version = "0.4.6"
+version = "0.4.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "86b83b8b9847f9bf95ef68afb0b8e6cdb80f498442f5179a29fad448fcc1eaea"
+checksum = "38caf58cc5ef2fed281f89292ef23f6365465ed9a41b7a7754eb4e26496c92df"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -1196,7 +1210,7 @@ dependencies = [
  "criterion",
  "flate2",
  "parol",
- "parol_runtime",
+ "parol_runtime 0.23.0",
  "pprof",
  "regex",
  "thiserror",
@@ -1376,9 +1390,9 @@ dependencies = [
 
 [[package]]
 name = "ts-rs"
-version = "8.1.0"
+version = "9.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "09d3fa4606cdab1e9b668cc65ce2545941d01f52bc27536a195c66c55b91cb84"
+checksum = "b44017f9f875786e543595076374b9ef7d13465a518dd93d6ccdbf5b432dde8c"
 dependencies = [
  "thiserror",
  "ts-rs-macros",
@@ -1386,11 +1400,10 @@ dependencies = [
 
 [[package]]
 name = "ts-rs-macros"
-version = "8.1.0"
+version = "9.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f86ae36cbb2d58b86677ad413054feeb0712e382e822131cf9a4a1e580c419b5"
+checksum = "c88cc88fd23b5a04528f3a8436024f20010a16ec18eb23c164b1242f65860130"
 dependencies = [
- "Inflector",
  "proc-macro2",
  "quote",
  "syn",
