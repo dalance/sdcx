@@ -21,7 +21,7 @@ clap               = {version = "4.5", features = ["derive"]}
 codespan-reporting = "0.11.1"
 flate2             = "1.0"
 parol_runtime      = {version = "0.23.0", features = ["auto_generation"]}
-regex              = "1.10"
+regex              = "1.11"
 thiserror          = "1.0"
 
 [build-dependencies]
