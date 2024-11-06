@@ -592,7 +592,7 @@ checksum = "3a6ad932c6dd3cfaf16b66754a42f87bbeefd591530c4b6a8334270a7df3e853"
 dependencies = [
  "ahash",
  "petgraph",
- "thiserror",
+ "thiserror 1.0.68",
 ]
 
 [[package]]
@@ -904,7 +904,7 @@ dependencies = [
  "syntree",
  "syntree_layout",
  "tempfile",
- "thiserror",
+ "thiserror 1.0.68",
  "ts-rs",
  "ume",
 ]
@@ -932,7 +932,7 @@ dependencies = [
  "regex-automata",
  "syntree",
  "syntree_layout",
- "thiserror",
+ "thiserror 1.0.68",
 ]
 
 [[package]]
@@ -991,7 +991,7 @@ dependencies = [
  "smallvec",
  "symbolic-demangle",
  "tempfile",
- "thiserror",
+ "thiserror 1.0.68",
 ]
 
 [[package]]
@@ -1214,7 +1214,7 @@ dependencies = [
  "parol_runtime",
  "pprof",
  "regex",
- "thiserror",
+ "thiserror 2.0.0",
  "walkdir",
 ]
 
@@ -1327,7 +1327,7 @@ checksum = "6c4dcc044568a0f9708c87b9dd79f1d8e5fb2086a831ead7ef044c9a48bd756b"
 dependencies = [
  "anyhow",
  "syntree",
- "thiserror",
+ "thiserror 1.0.68",
  "xml_writer",
 ]
 
@@ -1365,7 +1365,16 @@ version = "1.0.68"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "02dd99dc800bbb97186339685293e1cc5d9df1f8fae2d0aecd9ff1c77efea892"
 dependencies = [
- "thiserror-impl",
+ "thiserror-impl 1.0.68",
+]
+
+[[package]]
+name = "thiserror"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "15291287e9bff1bc6f9ff3409ed9af665bec7a5fc8ac079ea96be07bca0e2668"
+dependencies = [
+ "thiserror-impl 2.0.0",
 ]
 
 [[package]]
@@ -1373,6 +1382,17 @@ name = "thiserror-impl"
 version = "1.0.68"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a7c61ec9a6f64d2793d8a45faba21efbe3ced62a886d44c36a009b2b519b4c7e"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "thiserror-impl"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "22efd00f33f93fa62848a7cab956c3d38c8d43095efda1decfc2b3a5dc0b8972"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1395,7 +1415,7 @@ version = "8.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "09d3fa4606cdab1e9b668cc65ce2545941d01f52bc27536a195c66c55b91cb84"
 dependencies = [
- "thiserror",
+ "thiserror 1.0.68",
  "ts-rs-macros",
 ]
 
