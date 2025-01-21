@@ -96,6 +96,14 @@ impl ParseError {
                     .with_message(format!("Lexer recovery error: {e}"))
                     .with_code("parol_runtime::lexer::recovery"),
             )?),
+            LexerError::RegexError(scnr_error) => Ok(term::emit(
+                &mut writer.lock(),
+                config,
+                files,
+                &Diagnostic::bug()
+                    .with_message(format!("Regex error: {scnr_error}"))
+                    .with_code("parol_runtime::lexer::regex_error"),
+            )?),
         }
     }
 
@@ -248,6 +256,28 @@ impl ParseError {
                     .with_message(format!("Internal parser error: {e}"))
                     .with_code("parol_runtime::parser::internal_error")
                     .with_notes(vec!["This may be a bug. Please report it!".to_string()]),
+            )?),
+            ParserError::TooManyErrors { count } => Ok(term::emit(
+                &mut writer.lock(),
+                config,
+                files,
+                &Diagnostic::error()
+                    .with_message(format!("Too many errors: {count}"))
+                    .with_code("parol_runtime::parser::too_many_errors")
+                    .with_notes(vec![
+                        "The parser has stopped after too many errors.".to_string()
+                    ]),
+            )?),
+            ParserError::RecoveryFailed => Ok(term::emit(
+                &mut writer.lock(),
+                config,
+                files,
+                &Diagnostic::error()
+                    .with_message("Recovery failed")
+                    .with_code("parol_runtime::parser::recovery_failed")
+                    .with_notes(vec![
+                        "The parser has tried to recover from an error but failed.".to_string(),
+                    ]),
             )?),
         }
     }

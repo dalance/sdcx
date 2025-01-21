@@ -31,7 +31,7 @@ fn check_format(code: &str, format: &str) {
 }
 
 fn check_testcase(path: &str, validatable: bool) {
-    let mut f = File::open(&path).unwrap();
+    let mut f = File::open(path).unwrap();
     let mut code = String::new();
     let _ = f.read_to_string(&mut code);
     let sdc = Parser::parse(&code, &"");

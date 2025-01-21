@@ -144,7 +144,7 @@ impl<'a> TryFrom<&'a mut CreateClock> for ClockMut<'a> {
     }
 }
 
-impl<'a> ClockMut<'a> {
+impl ClockMut<'_> {
     pub fn name(&self) -> &str {
         self.inner.name()
     }
@@ -166,7 +166,7 @@ impl<'a> ClockMut<'a> {
     }
 }
 
-impl<'a> fmt::Display for ClockMut<'a> {
+impl fmt::Display for ClockMut<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.inner.fmt(f)
     }
