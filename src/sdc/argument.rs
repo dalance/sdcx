@@ -158,7 +158,17 @@ impl fmt::Display for grammar::TermBraceGroup<'_> {
                 ret.push_str(&x.term_brace_group.to_string());
             }
             grammar::TermBraceGroupGroup::TermBraceGroupContent(x) => {
-                ret.push_str(x.term_brace_group_content.term_brace_group_content.text());
+                if let Some(x) = x
+                    .term_brace_group_content
+                    .term_brace_group_content_opt
+                    .as_ref()
+                {
+                    ret.push_str(
+                        x.term_brace_group_non_empty
+                            .term_brace_group_non_empty
+                            .text(),
+                    );
+                }
             }
         }
         ret.push_str(self.term_r_brace.term_r_brace.text());

@@ -126,14 +126,13 @@ impl From<&Location> for Range<usize> {
 
 impl From<&parol_runtime::Location> for Location {
     fn from(value: &parol_runtime::Location) -> Self {
-        let start_byte = value.scanner_switch_pos as u32 + value.offset as u32 - value.length;
         Location {
-            start_byte,
+            start_byte: value.start,
             start_line: value.start_line,
             start_column: value.start_column,
             end_line: value.end_line,
             end_column: value.end_column,
-            length: value.length,
+            length: value.len() as u32,
             file_name: value.file_name.clone(),
         }
     }
