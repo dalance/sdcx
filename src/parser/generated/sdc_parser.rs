@@ -16,24 +16,28 @@ use crate::parser::sdc_grammar_trait::SdcGrammarAuto;
 
 use parol_runtime::lexer::tokenizer::{ERROR_TOKEN, UNMATCHABLE_TOKEN, WHITESPACE_TOKEN};
 
-pub const TERMINALS: &[&str; 17] = &[
-    /*  0 */ UNMATCHABLE_TOKEN,
-    /*  1 */ UNMATCHABLE_TOKEN,
-    /*  2 */ UNMATCHABLE_TOKEN,
-    /*  3 */ UNMATCHABLE_TOKEN,
-    /*  4 */ UNMATCHABLE_TOKEN,
-    /*  5 */ r"\[",
-    /*  6 */ r"\]",
-    /*  7 */ r"\{",
-    /*  8 */ r"\}",
-    /*  9 */ r"\u{0022}(?:\\[\u{0022}\\/bfnrt]|u[0-9a-fA-F]{4}|[^\u{0022}\\]|\\\n)*\u{0022}",
-    /* 10 */ r"#.*(\r\n|\r|\n|$)",
-    /* 11 */ r";",
-    /* 12 */ r"\\(\r\n|\r|\n)",
-    /* 13 */ r"(\r\n|\r|\n|$)",
-    /* 14 */ r"[^\s\[\]\\;]+",
-    /* 15 */ r"[^}]*",
-    /* 16 */ ERROR_TOKEN,
+pub const TERMINALS: &[(&str, Option<(bool, &str)>); 17] = &[
+    /*  0 */ (UNMATCHABLE_TOKEN, None),
+    /*  1 */ (UNMATCHABLE_TOKEN, None),
+    /*  2 */ (UNMATCHABLE_TOKEN, None),
+    /*  3 */ (UNMATCHABLE_TOKEN, None),
+    /*  4 */ (UNMATCHABLE_TOKEN, None),
+    /*  5 */ (r"\[", None),
+    /*  6 */ (r"\]", None),
+    /*  7 */ (r"\{", None),
+    /*  8 */ (r"\}", None),
+    /*  9 */
+    (
+        r"\u{0022}(\\[\u{0022}\\/bfnrt]|u[0-9a-fA-F]{4}|[^\u{0022}\\]|\\\n)*\u{0022}",
+        None,
+    ),
+    /* 10 */ (r"#.*(\r\n|\r|\n)?", None),
+    /* 11 */ (r";", None),
+    /* 12 */ (r"\\(\r\n|\r|\n)", None),
+    /* 13 */ (r"(\r\n|\r|\n)", None),
+    /* 14 */ (r"[^\s\[\]\\;\{]+", None),
+    /* 15 */ (r"[^{}]+", None),
+    /* 16 */ (ERROR_TOKEN, None),
 ];
 
 pub const TERMINAL_NAMES: &[&str; 17] = &[
@@ -52,7 +56,7 @@ pub const TERMINAL_NAMES: &[&str; 17] = &[
     /* 12 */ "TermBackslashLineBreak",
     /* 13 */ "TermLineBreak",
     /* 14 */ "TermWord",
-    /* 15 */ "TermBraceGroupContent",
+    /* 15 */ "TermBraceGroupNonEmpty",
     /* 16 */ "Error",
 ];
 
@@ -91,13 +95,13 @@ const SCANNER_1: (&[&str; 5], &[TerminalIndex; 3]) = (
     &[
         7,  /* TermLBrace */
         8,  /* TermRBrace */
-        15, /* TermBraceGroupContent */
+        15, /* TermBraceGroupNonEmpty */
     ],
 );
 
 const MAX_K: usize = 1;
 
-pub const NON_TERMINALS: &[&str; 32] = &[
+pub const NON_TERMINALS: &[&str; 34] = &[
     /*  0 */ "Argument",
     /*  1 */ "Command",
     /*  2 */ "CommandLine",
@@ -109,50 +113,52 @@ pub const NON_TERMINALS: &[&str; 32] = &[
     /*  8 */ "TermBackslashLineBreak",
     /*  9 */ "TermBraceGroup",
     /* 10 */ "TermBraceGroupContent",
-    /* 11 */ "TermBraceGroupGroup",
-    /* 12 */ "TermComment",
-    /* 13 */ "TermLBrace",
-    /* 14 */ "TermLBracket",
-    /* 15 */ "TermLineBreak",
-    /* 16 */ "TermRBrace",
-    /* 17 */ "TermRBracket",
-    /* 18 */ "TermSemiColon",
-    /* 19 */ "TermStringGroup",
-    /* 20 */ "TermWord",
-    /* 21 */ "TokenBraceGroup",
-    /* 22 */ "TokenBraceGroupOpt",
-    /* 23 */ "TokenEnd",
-    /* 24 */ "TokenLBracket",
-    /* 25 */ "TokenLBracketOpt",
-    /* 26 */ "TokenRBracket",
-    /* 27 */ "TokenRBracketOpt",
-    /* 28 */ "TokenStringGroup",
-    /* 29 */ "TokenStringGroupOpt",
-    /* 30 */ "TokenWord",
-    /* 31 */ "TokenWordOpt",
+    /* 11 */ "TermBraceGroupContentOpt",
+    /* 12 */ "TermBraceGroupGroup",
+    /* 13 */ "TermBraceGroupNonEmpty",
+    /* 14 */ "TermComment",
+    /* 15 */ "TermLBrace",
+    /* 16 */ "TermLBracket",
+    /* 17 */ "TermLineBreak",
+    /* 18 */ "TermRBrace",
+    /* 19 */ "TermRBracket",
+    /* 20 */ "TermSemiColon",
+    /* 21 */ "TermStringGroup",
+    /* 22 */ "TermWord",
+    /* 23 */ "TokenBraceGroup",
+    /* 24 */ "TokenBraceGroupOpt",
+    /* 25 */ "TokenEnd",
+    /* 26 */ "TokenLBracket",
+    /* 27 */ "TokenLBracketOpt",
+    /* 28 */ "TokenRBracket",
+    /* 29 */ "TokenRBracketOpt",
+    /* 30 */ "TokenStringGroup",
+    /* 31 */ "TokenStringGroupOpt",
+    /* 32 */ "TokenWord",
+    /* 33 */ "TokenWordOpt",
 ];
 
-pub const LOOKAHEAD_AUTOMATA: &[LookaheadDFA; 32] = &[
+pub const LOOKAHEAD_AUTOMATA: &[LookaheadDFA; 34] = &[
     /* 0 - "Argument" */
     LookaheadDFA {
         prod0: -1,
         transitions: &[
-            Trans(0, 5, 4, 34),
-            Trans(0, 7, 3, 33),
-            Trans(0, 9, 2, 32),
-            Trans(0, 14, 1, 31),
+            Trans(0, 5, 4, 37),
+            Trans(0, 7, 3, 36),
+            Trans(0, 9, 2, 35),
+            Trans(0, 14, 1, 34),
         ],
         k: 1,
     },
     /* 1 - "Command" */
     LookaheadDFA {
-        prod0: 36,
+        prod0: 39,
         transitions: &[],
         k: 0,
     },
     /* 2 - "CommandLine" */
     LookaheadDFA {
-        prod0: 39,
+        prod0: 42,
         transitions: &[],
         k: 0,
     },
@@ -160,25 +166,25 @@ pub const LOOKAHEAD_AUTOMATA: &[LookaheadDFA; 32] = &[
     LookaheadDFA {
         prod0: -1,
         transitions: &[
-            Trans(0, 5, 1, 37),
-            Trans(0, 6, 2, 38),
-            Trans(0, 7, 1, 37),
-            Trans(0, 9, 1, 37),
-            Trans(0, 11, 2, 38),
-            Trans(0, 13, 2, 38),
-            Trans(0, 14, 1, 37),
+            Trans(0, 5, 1, 40),
+            Trans(0, 6, 2, 41),
+            Trans(0, 7, 1, 40),
+            Trans(0, 9, 1, 40),
+            Trans(0, 11, 2, 41),
+            Trans(0, 13, 2, 41),
+            Trans(0, 14, 1, 40),
         ],
         k: 1,
     },
     /* 4 - "CommandSubstitution" */
     LookaheadDFA {
-        prod0: 35,
+        prod0: 38,
         transitions: &[],
         k: 0,
     },
     /* 5 - "Source" */
     LookaheadDFA {
-        prod0: 40,
+        prod0: 43,
         transitions: &[],
         k: 0,
     },
@@ -186,11 +192,11 @@ pub const LOOKAHEAD_AUTOMATA: &[LookaheadDFA; 32] = &[
     LookaheadDFA {
         prod0: -1,
         transitions: &[
-            Trans(0, 0, 2, 45),
-            Trans(0, 10, 1, 41),
-            Trans(0, 11, 1, 41),
-            Trans(0, 13, 1, 41),
-            Trans(0, 14, 1, 41),
+            Trans(0, 0, 2, 48),
+            Trans(0, 10, 1, 44),
+            Trans(0, 11, 1, 44),
+            Trans(0, 13, 1, 44),
+            Trans(0, 14, 1, 44),
         ],
         k: 1,
     },
@@ -198,10 +204,10 @@ pub const LOOKAHEAD_AUTOMATA: &[LookaheadDFA; 32] = &[
     LookaheadDFA {
         prod0: -1,
         transitions: &[
-            Trans(0, 10, 3, 44),
-            Trans(0, 11, 2, 43),
-            Trans(0, 13, 2, 43),
-            Trans(0, 14, 1, 42),
+            Trans(0, 10, 3, 47),
+            Trans(0, 11, 2, 46),
+            Trans(0, 13, 2, 46),
+            Trans(0, 14, 1, 45),
         ],
         k: 1,
     },
@@ -213,143 +219,95 @@ pub const LOOKAHEAD_AUTOMATA: &[LookaheadDFA; 32] = &[
     },
     /* 9 - "TermBraceGroup" */
     LookaheadDFA {
-        prod0: 11,
+        prod0: 14,
         transitions: &[],
         k: 0,
     },
     /* 10 - "TermBraceGroupContent" */
     LookaheadDFA {
+        prod0: 11,
+        transitions: &[],
+        k: 0,
+    },
+    /* 11 - "TermBraceGroupContentOpt" */
+    LookaheadDFA {
+        prod0: -1,
+        transitions: &[Trans(0, 8, 2, 13), Trans(0, 15, 1, 12)],
+        k: 1,
+    },
+    /* 12 - "TermBraceGroupGroup" */
+    LookaheadDFA {
+        prod0: -1,
+        transitions: &[Trans(0, 7, 1, 15), Trans(0, 8, 2, 16), Trans(0, 15, 2, 16)],
+        k: 1,
+    },
+    /* 13 - "TermBraceGroupNonEmpty" */
+    LookaheadDFA {
         prod0: 10,
         transitions: &[],
         k: 0,
     },
-    /* 11 - "TermBraceGroupGroup" */
-    LookaheadDFA {
-        prod0: -1,
-        transitions: &[Trans(0, 7, 1, 12), Trans(0, 15, 2, 13)],
-        k: 1,
-    },
-    /* 12 - "TermComment" */
+    /* 14 - "TermComment" */
     LookaheadDFA {
         prod0: 5,
         transitions: &[],
         k: 0,
     },
-    /* 13 - "TermLBrace" */
+    /* 15 - "TermLBrace" */
     LookaheadDFA {
         prod0: 2,
         transitions: &[],
         k: 0,
     },
-    /* 14 - "TermLBracket" */
+    /* 16 - "TermLBracket" */
     LookaheadDFA {
         prod0: 0,
         transitions: &[],
         k: 0,
     },
-    /* 15 - "TermLineBreak" */
+    /* 17 - "TermLineBreak" */
     LookaheadDFA {
         prod0: 8,
         transitions: &[],
         k: 0,
     },
-    /* 16 - "TermRBrace" */
+    /* 18 - "TermRBrace" */
     LookaheadDFA {
         prod0: 3,
         transitions: &[],
         k: 0,
     },
-    /* 17 - "TermRBracket" */
+    /* 19 - "TermRBracket" */
     LookaheadDFA {
         prod0: 1,
         transitions: &[],
         k: 0,
     },
-    /* 18 - "TermSemiColon" */
+    /* 20 - "TermSemiColon" */
     LookaheadDFA {
         prod0: 6,
         transitions: &[],
         k: 0,
     },
-    /* 19 - "TermStringGroup" */
+    /* 21 - "TermStringGroup" */
     LookaheadDFA {
         prod0: 4,
         transitions: &[],
         k: 0,
     },
-    /* 20 - "TermWord" */
+    /* 22 - "TermWord" */
     LookaheadDFA {
         prod0: 9,
         transitions: &[],
         k: 0,
     },
-    /* 21 - "TokenBraceGroup" */
-    LookaheadDFA {
-        prod0: 16,
-        transitions: &[],
-        k: 0,
-    },
-    /* 22 - "TokenBraceGroupOpt" */
-    LookaheadDFA {
-        prod0: -1,
-        transitions: &[
-            Trans(0, 5, 2, 18),
-            Trans(0, 6, 2, 18),
-            Trans(0, 7, 2, 18),
-            Trans(0, 9, 2, 18),
-            Trans(0, 11, 2, 18),
-            Trans(0, 12, 1, 17),
-            Trans(0, 13, 2, 18),
-            Trans(0, 14, 2, 18),
-        ],
-        k: 1,
-    },
-    /* 23 - "TokenEnd" */
-    LookaheadDFA {
-        prod0: -1,
-        transitions: &[Trans(0, 11, 2, 15), Trans(0, 13, 1, 14)],
-        k: 1,
-    },
-    /* 24 - "TokenLBracket" */
-    LookaheadDFA {
-        prod0: 22,
-        transitions: &[],
-        k: 0,
-    },
-    /* 25 - "TokenLBracketOpt" */
-    LookaheadDFA {
-        prod0: -1,
-        transitions: &[Trans(0, 12, 1, 23), Trans(0, 14, 2, 24)],
-        k: 1,
-    },
-    /* 26 - "TokenRBracket" */
-    LookaheadDFA {
-        prod0: 25,
-        transitions: &[],
-        k: 0,
-    },
-    /* 27 - "TokenRBracketOpt" */
-    LookaheadDFA {
-        prod0: -1,
-        transitions: &[
-            Trans(0, 5, 2, 27),
-            Trans(0, 6, 2, 27),
-            Trans(0, 7, 2, 27),
-            Trans(0, 9, 2, 27),
-            Trans(0, 11, 2, 27),
-            Trans(0, 12, 1, 26),
-            Trans(0, 13, 2, 27),
-            Trans(0, 14, 2, 27),
-        ],
-        k: 1,
-    },
-    /* 28 - "TokenStringGroup" */
+    /* 23 - "TokenBraceGroup" */
     LookaheadDFA {
         prod0: 19,
         transitions: &[],
         k: 0,
     },
-    /* 29 - "TokenStringGroupOpt" */
+    /* 24 - "TokenBraceGroupOpt" */
     LookaheadDFA {
         prod0: -1,
         transitions: &[
@@ -364,13 +322,31 @@ pub const LOOKAHEAD_AUTOMATA: &[LookaheadDFA; 32] = &[
         ],
         k: 1,
     },
-    /* 30 - "TokenWord" */
+    /* 25 - "TokenEnd" */
+    LookaheadDFA {
+        prod0: -1,
+        transitions: &[Trans(0, 11, 2, 18), Trans(0, 13, 1, 17)],
+        k: 1,
+    },
+    /* 26 - "TokenLBracket" */
+    LookaheadDFA {
+        prod0: 25,
+        transitions: &[],
+        k: 0,
+    },
+    /* 27 - "TokenLBracketOpt" */
+    LookaheadDFA {
+        prod0: -1,
+        transitions: &[Trans(0, 12, 1, 26), Trans(0, 14, 2, 27)],
+        k: 1,
+    },
+    /* 28 - "TokenRBracket" */
     LookaheadDFA {
         prod0: 28,
         transitions: &[],
         k: 0,
     },
-    /* 31 - "TokenWordOpt" */
+    /* 29 - "TokenRBracketOpt" */
     LookaheadDFA {
         prod0: -1,
         transitions: &[
@@ -385,42 +361,84 @@ pub const LOOKAHEAD_AUTOMATA: &[LookaheadDFA; 32] = &[
         ],
         k: 1,
     },
+    /* 30 - "TokenStringGroup" */
+    LookaheadDFA {
+        prod0: 22,
+        transitions: &[],
+        k: 0,
+    },
+    /* 31 - "TokenStringGroupOpt" */
+    LookaheadDFA {
+        prod0: -1,
+        transitions: &[
+            Trans(0, 5, 2, 24),
+            Trans(0, 6, 2, 24),
+            Trans(0, 7, 2, 24),
+            Trans(0, 9, 2, 24),
+            Trans(0, 11, 2, 24),
+            Trans(0, 12, 1, 23),
+            Trans(0, 13, 2, 24),
+            Trans(0, 14, 2, 24),
+        ],
+        k: 1,
+    },
+    /* 32 - "TokenWord" */
+    LookaheadDFA {
+        prod0: 31,
+        transitions: &[],
+        k: 0,
+    },
+    /* 33 - "TokenWordOpt" */
+    LookaheadDFA {
+        prod0: -1,
+        transitions: &[
+            Trans(0, 5, 2, 33),
+            Trans(0, 6, 2, 33),
+            Trans(0, 7, 2, 33),
+            Trans(0, 9, 2, 33),
+            Trans(0, 11, 2, 33),
+            Trans(0, 12, 1, 32),
+            Trans(0, 13, 2, 33),
+            Trans(0, 14, 2, 33),
+        ],
+        k: 1,
+    },
 ];
 
-pub const PRODUCTIONS: &[Production; 46] = &[
+pub const PRODUCTIONS: &[Production; 49] = &[
     // 0 - TermLBracket: '[';
     Production {
-        lhs: 14,
+        lhs: 16,
         production: &[ParseType::T(5)],
     },
     // 1 - TermRBracket: ']';
     Production {
-        lhs: 17,
+        lhs: 19,
         production: &[ParseType::T(6)],
     },
     // 2 - TermLBrace: '{';
     Production {
-        lhs: 13,
+        lhs: 15,
         production: &[ParseType::T(7)],
     },
     // 3 - TermRBrace: '}';
     Production {
-        lhs: 16,
+        lhs: 18,
         production: &[ParseType::T(8)],
     },
-    // 4 - TermStringGroup: "\u{0022}(?:\\[\u{0022}\\/bfnrt]|u[0-9a-fA-F]{4}|[^\u{0022}\\]|\\\n)*\u{0022}";
+    // 4 - TermStringGroup: "\u{0022}(\\[\u{0022}\\/bfnrt]|u[0-9a-fA-F]{4}|[^\u{0022}\\]|\\\n)*\u{0022}";
     Production {
-        lhs: 19,
+        lhs: 21,
         production: &[ParseType::T(9)],
     },
-    // 5 - TermComment: /#.*(\r\n|\r|\n|$)/;
+    // 5 - TermComment: /#.*(\r\n|\r|\n)?/;
     Production {
-        lhs: 12,
+        lhs: 14,
         production: &[ParseType::T(10)],
     },
     // 6 - TermSemiColon: ';';
     Production {
-        lhs: 18,
+        lhs: 20,
         production: &[ParseType::T(11)],
     },
     // 7 - TermBackslashLineBreak: /\\(\r\n|\r|\n)/;
@@ -428,198 +446,213 @@ pub const PRODUCTIONS: &[Production; 46] = &[
         lhs: 8,
         production: &[ParseType::T(12)],
     },
-    // 8 - TermLineBreak: /(\r\n|\r|\n|$)/;
+    // 8 - TermLineBreak: /(\r\n|\r|\n)/;
     Production {
-        lhs: 15,
+        lhs: 17,
         production: &[ParseType::T(13)],
     },
-    // 9 - TermWord: /[^\s\[\]\\;]+/;
+    // 9 - TermWord: /[^\s\[\]\\;\{]+/;
     Production {
-        lhs: 20,
+        lhs: 22,
         production: &[ParseType::T(14)],
     },
-    // 10 - TermBraceGroupContent: /[^}]*/;
+    // 10 - TermBraceGroupNonEmpty: /[^{}]+/;
     Production {
-        lhs: 10,
+        lhs: 13,
         production: &[ParseType::T(15)],
     },
-    // 11 - TermBraceGroup: TermLBrace Push(1) TermBraceGroupGroup TermRBrace Pop;
+    // 11 - TermBraceGroupContent: TermBraceGroupContentOpt /* Option */;
+    Production {
+        lhs: 10,
+        production: &[ParseType::N(11)],
+    },
+    // 12 - TermBraceGroupContentOpt: TermBraceGroupNonEmpty;
+    Production {
+        lhs: 11,
+        production: &[ParseType::N(13)],
+    },
+    // 13 - TermBraceGroupContentOpt: ;
+    Production {
+        lhs: 11,
+        production: &[],
+    },
+    // 14 - TermBraceGroup: TermLBrace Push(1) TermBraceGroupGroup TermRBrace Pop;
     Production {
         lhs: 9,
         production: &[
             ParseType::Pop,
-            ParseType::N(16),
-            ParseType::N(11),
+            ParseType::N(18),
+            ParseType::N(12),
             ParseType::Push(1),
-            ParseType::N(13),
+            ParseType::N(15),
         ],
     },
-    // 12 - TermBraceGroupGroup: TermBraceGroup;
+    // 15 - TermBraceGroupGroup: TermBraceGroup;
     Production {
-        lhs: 11,
+        lhs: 12,
         production: &[ParseType::N(9)],
     },
-    // 13 - TermBraceGroupGroup: TermBraceGroupContent;
+    // 16 - TermBraceGroupGroup: TermBraceGroupContent;
     Production {
-        lhs: 11,
+        lhs: 12,
         production: &[ParseType::N(10)],
     },
-    // 14 - TokenEnd: TermLineBreak;
+    // 17 - TokenEnd: TermLineBreak;
+    Production {
+        lhs: 25,
+        production: &[ParseType::N(17)],
+    },
+    // 18 - TokenEnd: TermSemiColon;
+    Production {
+        lhs: 25,
+        production: &[ParseType::N(20)],
+    },
+    // 19 - TokenBraceGroup: TermBraceGroup TokenBraceGroupOpt /* Option */;
     Production {
         lhs: 23,
-        production: &[ParseType::N(15)],
+        production: &[ParseType::N(24), ParseType::N(9)],
     },
-    // 15 - TokenEnd: TermSemiColon;
+    // 20 - TokenBraceGroupOpt: TermBackslashLineBreak;
     Production {
-        lhs: 23,
-        production: &[ParseType::N(18)],
-    },
-    // 16 - TokenBraceGroup: TermBraceGroup TokenBraceGroupOpt /* Option */;
-    Production {
-        lhs: 21,
-        production: &[ParseType::N(22), ParseType::N(9)],
-    },
-    // 17 - TokenBraceGroupOpt: TermBackslashLineBreak;
-    Production {
-        lhs: 22,
+        lhs: 24,
         production: &[ParseType::N(8)],
     },
-    // 18 - TokenBraceGroupOpt: ;
+    // 21 - TokenBraceGroupOpt: ;
     Production {
-        lhs: 22,
+        lhs: 24,
         production: &[],
     },
-    // 19 - TokenStringGroup: TermStringGroup TokenStringGroupOpt /* Option */;
+    // 22 - TokenStringGroup: TermStringGroup TokenStringGroupOpt /* Option */;
+    Production {
+        lhs: 30,
+        production: &[ParseType::N(31), ParseType::N(21)],
+    },
+    // 23 - TokenStringGroupOpt: TermBackslashLineBreak;
+    Production {
+        lhs: 31,
+        production: &[ParseType::N(8)],
+    },
+    // 24 - TokenStringGroupOpt: ;
+    Production {
+        lhs: 31,
+        production: &[],
+    },
+    // 25 - TokenLBracket: TermLBracket TokenLBracketOpt /* Option */;
+    Production {
+        lhs: 26,
+        production: &[ParseType::N(27), ParseType::N(16)],
+    },
+    // 26 - TokenLBracketOpt: TermBackslashLineBreak;
+    Production {
+        lhs: 27,
+        production: &[ParseType::N(8)],
+    },
+    // 27 - TokenLBracketOpt: ;
+    Production {
+        lhs: 27,
+        production: &[],
+    },
+    // 28 - TokenRBracket: TermRBracket TokenRBracketOpt /* Option */;
     Production {
         lhs: 28,
         production: &[ParseType::N(29), ParseType::N(19)],
     },
-    // 20 - TokenStringGroupOpt: TermBackslashLineBreak;
+    // 29 - TokenRBracketOpt: TermBackslashLineBreak;
     Production {
         lhs: 29,
         production: &[ParseType::N(8)],
     },
-    // 21 - TokenStringGroupOpt: ;
+    // 30 - TokenRBracketOpt: ;
     Production {
         lhs: 29,
         production: &[],
     },
-    // 22 - TokenLBracket: TermLBracket TokenLBracketOpt /* Option */;
+    // 31 - TokenWord: TermWord TokenWordOpt /* Option */;
     Production {
-        lhs: 24,
-        production: &[ParseType::N(25), ParseType::N(14)],
+        lhs: 32,
+        production: &[ParseType::N(33), ParseType::N(22)],
     },
-    // 23 - TokenLBracketOpt: TermBackslashLineBreak;
+    // 32 - TokenWordOpt: TermBackslashLineBreak;
     Production {
-        lhs: 25,
+        lhs: 33,
         production: &[ParseType::N(8)],
     },
-    // 24 - TokenLBracketOpt: ;
+    // 33 - TokenWordOpt: ;
     Production {
-        lhs: 25,
+        lhs: 33,
         production: &[],
     },
-    // 25 - TokenRBracket: TermRBracket TokenRBracketOpt /* Option */;
+    // 34 - Argument: TokenWord;
     Production {
-        lhs: 26,
-        production: &[ParseType::N(27), ParseType::N(17)],
+        lhs: 0,
+        production: &[ParseType::N(32)],
     },
-    // 26 - TokenRBracketOpt: TermBackslashLineBreak;
-    Production {
-        lhs: 27,
-        production: &[ParseType::N(8)],
-    },
-    // 27 - TokenRBracketOpt: ;
-    Production {
-        lhs: 27,
-        production: &[],
-    },
-    // 28 - TokenWord: TermWord TokenWordOpt /* Option */;
-    Production {
-        lhs: 30,
-        production: &[ParseType::N(31), ParseType::N(20)],
-    },
-    // 29 - TokenWordOpt: TermBackslashLineBreak;
-    Production {
-        lhs: 31,
-        production: &[ParseType::N(8)],
-    },
-    // 30 - TokenWordOpt: ;
-    Production {
-        lhs: 31,
-        production: &[],
-    },
-    // 31 - Argument: TokenWord;
+    // 35 - Argument: TokenStringGroup;
     Production {
         lhs: 0,
         production: &[ParseType::N(30)],
     },
-    // 32 - Argument: TokenStringGroup;
+    // 36 - Argument: TokenBraceGroup;
     Production {
         lhs: 0,
-        production: &[ParseType::N(28)],
+        production: &[ParseType::N(23)],
     },
-    // 33 - Argument: TokenBraceGroup;
-    Production {
-        lhs: 0,
-        production: &[ParseType::N(21)],
-    },
-    // 34 - Argument: CommandSubstitution;
+    // 37 - Argument: CommandSubstitution;
     Production {
         lhs: 0,
         production: &[ParseType::N(4)],
     },
-    // 35 - CommandSubstitution: TokenLBracket Command TokenRBracket;
+    // 38 - CommandSubstitution: TokenLBracket Command TokenRBracket;
     Production {
         lhs: 4,
-        production: &[ParseType::N(26), ParseType::N(1), ParseType::N(24)],
+        production: &[ParseType::N(28), ParseType::N(1), ParseType::N(26)],
     },
-    // 36 - Command: TokenWord CommandList /* Vec */;
+    // 39 - Command: TokenWord CommandList /* Vec */;
     Production {
         lhs: 1,
-        production: &[ParseType::N(3), ParseType::N(30)],
+        production: &[ParseType::N(3), ParseType::N(32)],
     },
-    // 37 - CommandList: Argument CommandList;
+    // 40 - CommandList: Argument CommandList;
     Production {
         lhs: 3,
         production: &[ParseType::N(3), ParseType::N(0)],
     },
-    // 38 - CommandList: ;
+    // 41 - CommandList: ;
     Production {
         lhs: 3,
         production: &[],
     },
-    // 39 - CommandLine: Command TokenEnd;
+    // 42 - CommandLine: Command TokenEnd;
     Production {
         lhs: 2,
-        production: &[ParseType::N(23), ParseType::N(1)],
+        production: &[ParseType::N(25), ParseType::N(1)],
     },
-    // 40 - Source: SourceList /* Vec */;
+    // 43 - Source: SourceList /* Vec */;
     Production {
         lhs: 5,
         production: &[ParseType::N(6)],
     },
-    // 41 - SourceList: SourceListGroup SourceList;
+    // 44 - SourceList: SourceListGroup SourceList;
     Production {
         lhs: 6,
         production: &[ParseType::N(6), ParseType::N(7)],
     },
-    // 42 - SourceListGroup: CommandLine;
+    // 45 - SourceListGroup: CommandLine;
     Production {
         lhs: 7,
         production: &[ParseType::N(2)],
     },
-    // 43 - SourceListGroup: TokenEnd;
+    // 46 - SourceListGroup: TokenEnd;
     Production {
         lhs: 7,
-        production: &[ParseType::N(23)],
+        production: &[ParseType::N(25)],
     },
-    // 44 - SourceListGroup: TermComment;
+    // 47 - SourceListGroup: TermComment;
     Production {
         lhs: 7,
-        production: &[ParseType::N(12)],
+        production: &[ParseType::N(14)],
     },
-    // 45 - SourceList: ;
+    // 48 - SourceList: ;
     Production {
         lhs: 6,
         production: &[],
@@ -645,7 +678,7 @@ pub fn parse<'t, T>(
     input: &'t str,
     file_name: T,
     user_actions: &mut SdcGrammar<'t>,
-) -> Result<ParseTree<'t>, ParolError>
+) -> Result<ParseTree, ParolError>
 where
     T: AsRef<Path>,
 {
@@ -656,7 +689,7 @@ where
         TERMINAL_NAMES,
         NON_TERMINALS,
     );
-    llk_parser.trim_parse_tree();
+    llk_parser.disable_recovery();
 
     // Initialize wrapper
     let mut user_actions = SdcGrammarAuto::new(user_actions);

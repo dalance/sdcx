@@ -51,7 +51,7 @@ mod tests {
     use crate::Parser;
 
     fn parse(code: &str) -> Constraints {
-        let sdc = Parser::parse(&code, &"").unwrap();
+        let sdc = Parser::parse(code, &"").unwrap();
         sdc.into()
     }
 

@@ -375,7 +375,7 @@ impl<'a> StrictMatcher<'a> {
     }
 }
 
-impl<'a> Matcher for StrictMatcher<'a> {
+impl Matcher for StrictMatcher<'_> {
     fn m(&self, x: &str) -> bool {
         self.text == x
     }
@@ -427,7 +427,7 @@ impl<'a, 'b> LazyMatcher<'a, 'b> {
     }
 }
 
-impl<'a, 'b> Matcher for LazyMatcher<'a, 'b> {
+impl Matcher for LazyMatcher<'_, '_> {
     fn m(&self, x: &str) -> bool {
         if self.text == x {
             true
@@ -507,39 +507,39 @@ mod tests {
 
         // strict match
         let m = LazyMatcher::new("-rise", &dict, &location).unwrap();
-        assert_eq!(m.m("-rise"), true);
-        assert_eq!(m.m("-rise_from"), false);
-        assert_eq!(m.m("-rise_to"), false);
+        assert!(m.m("-rise"));
+        assert!(!m.m("-rise_from"));
+        assert!(!m.m("-rise_to"));
 
         // strict match
         let m = LazyMatcher::new("-rise_from", &dict, &location).unwrap();
-        assert_eq!(m.m("-rise"), false);
-        assert_eq!(m.m("-rise_from"), true);
-        assert_eq!(m.m("-rise_to"), false);
+        assert!(!m.m("-rise"));
+        assert!(m.m("-rise_from"));
+        assert!(!m.m("-rise_to"));
 
         // strict match
         let m = LazyMatcher::new("-rise_to", &dict, &location).unwrap();
-        assert_eq!(m.m("-rise"), false);
-        assert_eq!(m.m("-rise_from"), false);
-        assert_eq!(m.m("-rise_to"), true);
+        assert!(!m.m("-rise"));
+        assert!(!m.m("-rise_from"));
+        assert!(m.m("-rise_to"));
 
         // lazy match
         let m = LazyMatcher::new("-rise_fro", &dict, &location).unwrap();
-        assert_eq!(m.m("-rise"), false);
-        assert_eq!(m.m("-rise_from"), true);
-        assert_eq!(m.m("-rise_to"), false);
+        assert!(!m.m("-rise"));
+        assert!(m.m("-rise_from"));
+        assert!(!m.m("-rise_to"));
 
         // lazy match
         let m = LazyMatcher::new("-rise_t", &dict, &location).unwrap();
-        assert_eq!(m.m("-rise"), false);
-        assert_eq!(m.m("-rise_from"), false);
-        assert_eq!(m.m("-rise_to"), true);
+        assert!(!m.m("-rise"));
+        assert!(!m.m("-rise_from"));
+        assert!(m.m("-rise_to"));
 
         // no match
         let m = LazyMatcher::new("a", &dict, &location).unwrap();
-        assert_eq!(m.m("-rise"), false);
-        assert_eq!(m.m("-rise_from"), false);
-        assert_eq!(m.m("-rise_to"), false);
+        assert!(!m.m("-rise"));
+        assert!(!m.m("-rise_from"));
+        assert!(!m.m("-rise_to"));
 
         // ambiguous
         assert!(LazyMatcher::new("-rise_", &dict, &location).is_err());
@@ -557,18 +557,18 @@ mod tests {
 
         // strict match
         let m = LazyMatcher::new("-rise", &dict, &location).unwrap();
-        assert_eq!(m.m("-rise"), true);
+        assert!(m.m("-rise"));
 
         // lazy match
         let m = LazyMatcher::new("-r", &dict, &location).unwrap();
-        assert_eq!(m.m("-rise"), true);
+        assert!(m.m("-rise"));
 
         // lazy match
         let m = LazyMatcher::new("-", &dict, &location).unwrap();
-        assert_eq!(m.m("-rise"), true);
+        assert!(m.m("-rise"));
 
         // no match
         let m = LazyMatcher::new("a", &dict, &location).unwrap();
-        assert_eq!(m.m("-rise"), false);
+        assert!(!m.m("-rise"));
     }
 }
