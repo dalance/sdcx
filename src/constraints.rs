@@ -12,7 +12,7 @@ pub struct Constraints {
 }
 
 impl Constraints {
-    pub fn clocks_mut(&mut self) -> Result<Vec<ClockMut>, InterpretError> {
+    pub fn clocks_mut(&mut self) -> Result<Vec<ClockMut<'_>>, InterpretError> {
         let mut ret = vec![];
         for clock in self.sdc.extract_mut(CommandKind::CreateClock) {
             if let Command::CreateClock(x) = clock {
